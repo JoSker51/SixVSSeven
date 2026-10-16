@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78deb9e357dd78e41adc10bc9b0d6e1c, type: 3}
+  m_Name: AeroSkin
+  m_EditorClassIdentifier: Assembly-CSharp::AeroSkin
+  buttonGreen: {fileID: 21300000, guid: 691d05296a36bd244be8a102ee535192, type: 3}
+  buttonBlue: {fileID: 21300000, guid: 7910b357b7eacc24787af74c0e872665, type: 3}
+  buttonOrange: {fileID: 21300000, guid: 40e9c0a1133e1e84ab06c4f0a46d931d, type: 3}
+  buttonSilver: {fileID: 21300000, guid: ad03deea951893544a8363fce9f2da28, type: 3}
+  glassPanel: {fileID: 21300000, guid: cae7c3e0df977a741a16788847f58b41, type: 3}
+  bubble: {fileID: 21300000, guid: 37cae823cbbc5154486703972b6753c0, type: 3}
+  orb: {fileID: 21300000, guid: fc250ba39395c474495656b323c21acb, type: 3}
+  orbGloss: {fileID: 21300000, guid: a44d3377bf885924eafe35e825c004de, type: 3}
+  glow: {fileID: 21300000, guid: 16dadc1b461e1be46a171a6bd262c867, type: 3}
+  swoosh: {fileID: 21300000, guid: d1356b47f12309545a068caa1ef3c269, type: 3}
+  track: {fileID: 21300000, guid: 7923b6712b6af3d47aea73bc30894c7d, type: 3}
+  fill: {fileID: 21300000, guid: b063d8c136f240f42bc38fac69355a9b, type: 3}
+  navy: {r: 0.04, g: 0.24, b: 0.4, a: 1}
+  playerColors:
+  - {r: 0.17, g: 0.55, b: 1, a: 1}
+  - {r: 1, g: 0.55, b: 0.1, a: 1}
