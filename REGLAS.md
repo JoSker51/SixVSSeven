@@ -1,10 +1,10 @@
-# Reglas del juego: Catapultas y Castillos
+# Reglas del juego: Catapultas y burbujas
 
-Juego por turnos sobre una cuadrícula. Cada jugador tiene un **castillo** y una **catapulta**. En tu turno lanzas una roca: si cae en un **hueco** ganas monedas, y si cae en el hueco del castillo de un rival le **robas** monedas. Antes de tirar puedes colocar **obstáculos** que compraste en la **tienda** para ayudarte o complicarle la vida a los demás.
+Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jugador tiene un **castillo**, una **catapulta**, un **color** y su **sección** del mapa. En tu turno compras objetos, los colocas en la arena y lanzas una pelota para **reventar burbujas**: cada burbuja da monedas, y los objetos que toque la pelota pueden sumar, restar o duplicar lo que ganes.
 
-**Gana quien llegue primero a 100 monedas** (la meta se puede cambiar).
+**Gana quien llegue primero a 100 monedas** (la meta se puede cambiar en *Opciones*).
 
-> Este documento es la referencia de diseño del grupo. Si una regla cambia, se cambia aquí primero (con un pull request) y después en el código.
+> Este documento es la referencia de diseño del grupo. Si una regla cambia, se cambia aquí primero (con un pull request) y después en el código. Todos los números están en `Assets/Resources/GameBalance.asset`.
 
 ---
 
@@ -12,165 +12,203 @@ Juego por turnos sobre una cuadrícula. Cada jugador tiene un **castillo** y una
 
 | Tema | Regla |
 |---|---|
-| Jugadores | 2 al inicio, 4 más adelante. El turno avanza hacia la derecha |
-| Catapulta | Se mueve un poco a los lados, ajusta el ángulo, carga potencia y dispara. **Un tiro por turno** |
-| Huecos | Dan monedas: más pequeño = más monedas; más lejos de las esquinas = más monedas |
-| Castillos | No reciben daño |
-| Hueco del castillo | Si un rival encesta ahí, le quita monedas al dueño y se las queda. El dueño nunca baja de 0 |
-| Obstáculos | Buenos, malos o neutros. Multiplican lo que gana la roca y afectan los tiros de **todos** |
-| Activación | Caja: la roca debe **entrar**. Aro: debe **pasar por dentro**. Plataforma: debe tocar la **cara de arriba** |
-| Quitar obstáculo | Cuesta un porcentaje de su precio original |
-| Tienda | 3 ítems al azar (pueden repetirse). Refrescar cuesta 1 moneda. Se abre para todos al inicio de cada ronda |
-| Persistencia | Los obstáculos no se guardan: al terminar la ronda se descartan |
-| Rocas | Desaparecen 2 s después de sumar o restar monedas, o de tocar el suelo sin entrar a un hueco |
+| Jugadores | 2, 3 o 4, elegidos en *Nueva partida*. El turno avanza hacia la derecha |
+| Arena | Circular, con pared curva. Se divide en una sección por jugador |
+| Objetivo de cada tiro | Reventar burbujas con la pelota |
+| Burbujas | Aparecen al azar, en igual cantidad por sección. Más chica o más cerca del centro = más monedas |
+| Burbuja de castillo | Flota sobre cada castillo. Si la revienta un rival, le roba 3 monedas al dueño |
+| Turno | Compra → Colocación → Lanzamiento → Resolución → Fin |
+| Tienda | 3 ofertas al azar. Actualizar cuesta 1 moneda, **una vez por turno** |
+| Objetos | 7 tipos. Seis tienen variante normal, positiva y negativa; el aro multiplicador es especial |
+| Positivo | +2 monedas si la pelota lo toca y revientas al menos una burbuja en ese tiro |
+| Negativo | −2 monedas en las mismas condiciones |
+| Aro multiplicador | Si la pelota pasa por dentro y revientas burbujas, las monedas de burbujas se duplican |
+| Retirar objetos | Cualquier objeto, pagando su costo de retirada. No vuelve al inventario |
+| Persistencia | Los objetos colocados se quedan en la arena hasta que alguien los retire |
 | Victoria | Llegar a la meta de monedas (100 por defecto) |
 
 ---
 
 ## 1. Preparación
 
-- Cada jugador empieza con **0 monedas**.
-- Los castillos están en lados opuestos del mapa (con 4 jugadores, uno en cada lado) y cada catapulta queda frente a su castillo, mirando al centro.
-- El mapa tiene entre **6 y 10 huecos** de distintos tamaños y distancias. En el prototipo hay 9, colocados en espejo para que ningún jugador tenga ventaja.
-- El valor de cada hueco se calcula al empezar la partida y **no cambia** durante el juego. Se muestra encima del hueco (`+2`, `+5`, `+8`…).
+- Antes de jugar se elige cuántos participan: **2, 3 o 4**. La cantidad queda fija; para cambiarla hay que volver al menú y empezar otra partida.
+- Los jugadores se reparten alrededor de la arena (a 180°, 120° o 90°). Cada uno tiene su color: **Coral, Sol, Violeta y Magenta**. Son colores distintos de los de la interfaz, que usa azules, verdes y vidrio.
+- La arena se divide en una **sección por jugador**, frente a su castillo. Cada sección tiene la **misma cantidad de burbujas** (4 por defecto).
+- Cada jugador empieza con **5 monedas**, para que la tienda sirva desde el primer turno.
 
-## 2. Flujo de una ronda
+## 2. El turno
 
-1. **Inicio de ronda:** se abre la tienda para todos los jugadores.
-2. **Turno de cada jugador**, en orden hacia la derecha:
-   1. **Colocación:** coloca los obstáculos que compró. También puede quitar uno pagando.
-   2. **Tiro:** mueve la catapulta, apunta, carga potencia y dispara.
-   3. Cuando la roca desaparece, pasa el turno al siguiente jugador.
-3. **Fin de ronda:** cuando todos tiraron, se descartan los obstáculos (los colocados y los que no se usaron) y empieza la siguiente ronda con una tienda nueva.
-4. **En cuanto alguien llega a la meta, la partida termina**, aunque la ronda no haya acabado.
+| Fase | Qué se puede hacer |
+|---|---|
+| **1. Compra** | La tienda se abre sola. Comprar objetos y actualizar las ofertas. *Continuar* (o Enter) pasa a la siguiente fase |
+| **2. Colocación** | Colocar objetos del inventario y retirar objetos de la arena. *¡A lanzar!* (o Enter) pasa a la siguiente fase |
+| **3. Lanzamiento** | Mover, apuntar y disparar la catapulta. Un solo tiro |
+| **4. Resolución** | Se calculan las monedas del tiro, una sola vez, y se muestra el resumen |
+| **5. Fin del turno** | Las burbujas reventadas reaparecen y empieza el turno del siguiente jugador |
 
-Estados del juego, en orden: `Tienda → Colocación → Apuntando → EsperandoRoca → SiguienteTurno → FinDeRonda`.
+- Comprar, actualizar, colocar y retirar **solo se puede en su fase y en tu propio turno**.
+- Lo que pasó en un tiro (golpes, aros, burbujas) **no pasa al siguiente**: cada tiro empieza de cero.
 
 ## 3. La catapulta
 
 | Acción | Tecla | Detalle |
 |---|---|---|
-| Moverse | `A` / `D` | Solo un poco: hasta 6 unidades a cada lado de su posición inicial |
-| Girar | `Q` / `E` | Hasta 35° a cada lado (agregado en el prototipo, ver pendientes) |
-| Ángulo | `W` / `S` | Entre 15° y 75° (empieza en 45°) |
-| Cargar | Mantener `Espacio` | La barra de potencia sube y baja sola mientras lo mantienes |
-| Disparar | Soltar `Espacio` | La roca sale con la potencia que tenía la barra en ese momento |
+| Moverse | `A` / `D` | Hasta 6 unidades a cada lado |
+| Girar | `Q` / `E` | Hasta 35° a cada lado |
+| Ángulo | `W` / `S` | Entre 15° y 75° |
+| Cargar y disparar | Mantener y soltar `Espacio` | La potencia sube y baja mientras lo mantienes |
+| Otros | `C` cámara general · `Esc` pausa | |
 
-- **Un solo tiro por turno.** Después de disparar, la catapulta queda bloqueada hasta tu siguiente turno.
-- Una guía muestra la primera mitad del arco para ayudar a apuntar.
-- Otros controles: `C` cambia a la cámara general y `Esc` pausa.
+## 4. La pelota
 
-## 4. Las rocas
+- Revienta las burbujas que toca y **sigue de largo**, así que un tiro puede reventar varias.
+- Rebota en la pared, los castillos, las catapultas y los objetos colocados.
+- No puede salir de la arena: la pared tiene una barrera invisible alta.
+- Desaparece **2 segundos después de tocar el suelo**, o si se queda quieta encima de algo, se atasca (15 s) o cae fuera del mapa. Entonces se pasa a la Resolución.
 
-- Una roca **solo puede sumar o restar monedas una vez**.
-- Para contar, el **centro** de la roca tiene que quedar dentro del hueco. Rozar el borde no cuenta.
-- Al tocar el suelo empieza una cuenta de **2 segundos**: si en ese tiempo rueda hasta un hueco, todavía cuenta. Al terminar la cuenta, la roca desaparece y pasa el turno.
-- Al caer en un hueco, la roca se mete en él y desaparece 2 segundos después.
-- Reglas de seguridad: si la roca se atasca, desaparece a los **15 segundos**, y si cae fuera del mapa también desaparece.
-- Los obstáculos **no** cuentan como suelo: rebotar en uno no inicia la cuenta.
+## 5. Burbujas
 
-## 5. Huecos y monedas
-
-Cada hueco da más monedas cuanto **más pequeño** es y cuanto **más lejos de las esquinas** está:
+- Aparecen en **posiciones aleatorias** dentro de su sección y a distintas alturas, nunca:
+  - fuera del círculo ni pegadas a la pared,
+  - enterradas en el suelo,
+  - encima de otra burbuja (hay una separación mínima),
+  - cerca de castillos o catapultas,
+  - tocando un objeto colocado.
+- Cada partida tiene una distribución distinta. Se puede fijar una semilla en `GameBalance` para repetir un escenario en pruebas.
+- Las reventadas **reaparecen al final del turno** en un lugar libre de **su misma sección**. Las que siguen enteras no se mueven.
+- Si una burbuja no encuentra un lugar libre (la arena está muy llena), **no aparece** y se vuelve a intentar al final del siguiente turno. Nunca se enciman.
+- Su valor sale de la fórmula de los antiguos huecos, adaptada al círculo:
 
 ```
-factorTamaño    = radioDeReferencia / radioDelHueco               (limitado entre 0.5 y 3)
-factorDistancia = distanciaALaEsquinaMásCercana / distanciaMáxima (entre 0 y 1)
-monedas         = máx(1, redondear(base × factorTamaño × (1 + factorDistancia)))
+tamaño   = radioDeReferencia / radioDeLaBurbuja        (entre 0.5 y 3)
+cercanía = 1 − (distancia al centro / radio útil)      (entre 0 y 1)
+monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 ```
 
-- Con los valores actuales (base 2, radio de referencia 1.5) los huecos dan entre **2 y 8 monedas**.
-- Si la roca pasó por obstáculos: `monedas = máx(1, redondear(monedasDelHueco × multiplicadorDeLaRoca))`.
-- **Regla de balance:** ningún hueco debe dar tantas monedas que se pueda ganar en 2 o 3 tiros.
+  Dan entre **1 y 6 monedas**. El valor se muestra dentro de cada burbuja.
 
-## 6. Castillos y robo de monedas
+## 6. Burbuja de castillo (robo)
 
-- Los castillos **no reciben daño**: las rocas solo rebotan en sus muros.
-- Dentro de cada castillo (en el patio) hay un **hueco de castigo**.
-- Si un **rival** encesta en él, **le quita monedas al dueño y se las suma**:
-  - Robo base: **3 monedas** (× multiplicador de la roca), con un **tope de 10 por tiro**.
-  - Se roba como mucho lo que el dueño tiene: `robo real = mín(cantidad, monedas del dueño)`. **El dueño nunca baja de 0** y el ladrón solo recibe lo que realmente se quitó; no aparecen monedas de la nada.
-- Si el **dueño** encesta en su propio castillo, **no pasa nada** (la roca igual desaparece).
-- Robar también puede hacerte ganar la partida.
+- Sobre cada castillo flota una burbuja más grande, del color de su dueño.
+- Si la revienta un **rival**, le quita **3 monedas** al dueño y se las queda. El tope es de 10 por tiro.
+- El dueño **nunca baja de 0**: se roba como mucho lo que tiene.
+- La pelota del **dueño** pasa a través de su propia burbuja sin reventarla.
+- El robo **no cuenta como burbuja** para los positivos, negativos y aros, y el aro no lo duplica.
+- Vuelve a aparecer al final del turno.
 
-## 7. Obstáculos
+## 7. Objetos
 
-### Tipos
+| Objeto | Forma |
+|---|---|
+| Cubo | Bloque sólido |
+| Pared | Rectángulo largo |
+| Tapa | Disco plano y ancho |
+| Cilindro | Columna larga |
+| Esfera | Bola |
+| Pirámide | Base cuadrada y caras inclinadas |
+| Aro multiplicador | Anillo dorado (especial) |
 
-| Tipo | Multiplicador | Efecto en la roca |
-|---|---|---|
-| Bueno | mayor que 1 | La roca gana más monedas o roba más |
-| Malo | menor que 1 | La roca gana menos |
-| Neutro | igual a 1 | Solo cambia la trayectoria |
+- Todos tienen **colisión física real**: desvían la pelota según su forma.
+- Las seis formas geométricas vienen en tres variantes, que se distinguen a la vista:
+  - **Normal** (perla brillante): solo desvía la pelota, no da ni quita monedas.
+  - **Positivo** (verde esmeralda, con un "+" flotando): **+2 monedas** si la pelota lo toca **y** revientas al menos una burbuja en ese tiro.
+  - **Negativo** (obsidiana oscura, con un "−" flotando): **−2 monedas** con las mismas condiciones.
+- Golpear varias veces el mismo objeto cuenta **una sola vez** por tiro. Golpear objetos distintos suma el efecto de cada uno.
+- Los objetos afectan los tiros de **todos** los jugadores, no solo los de quien los colocó.
 
-- Los obstáculos afectan los tiros de **todos** los jugadores, no solo los de quien los colocó.
-- La roca empieza con multiplicador **1** y cada obstáculo que activa lo multiplica por su valor.
-- Una roca **no puede activar dos veces el mismo obstáculo**.
+### Aro multiplicador
 
-### Cómo se activan
+- Si la pelota **pasa por dentro** del aro **y** revientas al menos una burbuja en ese tiro, las monedas de **burbujas** se multiplican **×2**.
+- Tiene que pasar con la pelota entera dentro del agujero. **Tocar el borde no cuenta.**
+- Pasar varias veces por el mismo aro, o por varios aros, aplica el ×2 **una sola vez**.
+- El ×2 **no duplica** las bonificaciones ni penalizaciones de positivos y negativos.
 
-| Forma | Se activa si… | No se activa si… |
-|---|---|---|
-| **Caja** | La roca entra al hueco interior | Solo toca las paredes |
-| **Aro** | La roca pasa por dentro | Choca con el borde del aro |
-| **Plataforma** | La roca toca la cara plana de arriba | Toca los costados o la parte de abajo |
+## 8. Monedas de un tiro
 
-### Colocar
+Todo se calcula en un solo lugar (`RewardCalculator`), en la fase de Resolución:
 
-- Solo durante tu **fase de colocación**.
-- Se ve una versión translúcida (fantasma) antes de confirmar. `R` rota y **clic izquierdo** confirma.
-- No se puede colocar encima de huecos, castillos ni otros obstáculos.
-- Cada obstáculo colocado recuerda **quién lo puso** y **cuánto costó**.
+```
+B = suma de los valores de las burbujas reventadas
+P = positivos distintos tocados        N = negativos distintos tocados
+E = 2·P − 2·N                          (solo si B > 0)
+R = B + E          sin aro
+R = 2·B + E        con aro              (solo si B > 0)
+monedas del tiro = máx(0, R)
+```
 
-### Quitar
+- Un negativo reduce lo que ganas **en ese tiro**, pero **nunca te quita monedas que ya tenías**.
+- Ejemplo: revientas burbujas de 3 y 4 (B = 7), pasas por un aro y tocas un positivo: 2·7 + 2 = **16 monedas**.
 
-- **Clic derecho** sobre un obstáculo colocado: cuesta `redondear(precio original × porcentaje de quitar)` (por ejemplo, 50%).
-- Si no te alcanzan las monedas, aparece un aviso y el obstáculo se queda.
+## 9. Tienda
 
-## 8. Tienda
+- Aparece al empezar tu fase de Compra (también se abre con el botón **Tienda** o con `T`).
+- Muestra **3 ofertas al azar**, distintas entre sí. Cada tarjeta muestra el nombre, el ícono, la variante, la descripción y el precio. Si no te alcanza, sale deshabilitada con "Te faltan N".
+- **Comprar:** se descuenta el precio y el objeto va a tu inventario. Si algo falla, no se cobra nada.
+- **Actualizar ofertas:** cuesta **1 moneda** y se puede **una vez por turno**. Cerrar y abrir la tienda no lo reinicia. En tu siguiente turno vuelve a estar disponible.
+- Cada jugador tiene su propia tienda. Las ofertas se renuevan al empezar cada uno de tus turnos.
+- Si algún día la pool tuviera menos de 3 objetos distintos, los lugares que sobran se muestran como "Sin oferta".
 
-- Se abre para todos al **inicio de cada ronda**.
-- Muestra **3 ítems al azar**, que pueden repetirse.
-- **Comprar** descuenta el precio y guarda el ítem en tu inventario. Sin monedas suficientes no se puede comprar.
-- **Refrescar** cuesta **1 moneda** y vuelve a sortear los 3 ítems.
-- Cada jugador tiene su propia tienda: refrescar solo cambia la tuya (pendiente de confirmar, ver abajo).
-- Lo que no uses en la ronda **se pierde** al terminarla.
+### Precios iniciales
 
-## 9. Victoria
+| Objeto | Normal | Positivo | Negativo | Retirar (N / P / Neg) |
+|---|---|---|---|---|
+| Cubo, Tapa, Cilindro, Esfera, Pirámide | 3 | 8 | 6 | 8 / 12 / 10 |
+| Pared | 4 | 9 | 7 | 9 / 13 / 11 |
+| Aro multiplicador | — | — | — | Precio **15**, retirar **18** |
 
-- Gana el primer jugador que llega a la **meta de monedas**: **100** por defecto. Se puede cambiar en *Opciones* (de 20 a 200).
-- Al llegar a la meta se bloquean los turnos y aparece la pantalla de victoria, con las opciones de jugar otra vez o volver al menú.
+- Los normales son baratos. Las variantes valen más porque cambian monedas. El aro es lo más caro.
+- Retirar cuesta bastante más que comprar, para que colocar sea una decisión estratégica.
 
-## 10. Casos límite
+## 10. Inventario, colocación y retirada
+
+- Lo que compras queda en tu **inventario** (barra de abajo en la fase de Colocación) hasta que lo colocas.
+- **Colocar:**
+  1. Elige un objeto y aparece una vista previa de vidrio que sigue al mouse. Es **celeste** si el lugar sirve y **rosa** si no.
+  2. Gíralo y colócalo como quieras: `Q`/`E` girar, `R`/`F` inclinar, `Z`/`X` ladear, ruedita (o `RePág`/`AvPág`) para subir o bajar.
+  3. **Clic** para confirmar. **Clic derecho** o `Esc` cancela, y el objeto sigue en tu inventario.
+- No se puede colocar:
+  - fuera del círculo ni atravesando la pared,
+  - atravesando el suelo,
+  - encima de una burbuja (ni pegado a una),
+  - encimado con otro objeto, un castillo o una catapulta.
+- Los objetos colocados **se quedan en la arena** entre turnos y recuerdan **quién los puso**.
+- **Retirar:**
+  1. En tu fase de Colocación, haz clic sobre **cualquier** objeto de la arena, tuyo o de un rival.
+  2. Se muestra qué es, quién lo puso y cuánto cuesta. Hay que **confirmar** para pagar.
+  3. Si no te alcanzan las monedas, no se retira. Al confirmar, el objeto desaparece y **no vuelve al inventario**.
+
+## 11. Victoria
+
+- Gana el primero que llega a la **meta de monedas** (100 por defecto; de 20 a 200 en *Opciones*), sea por burbujas o por robo.
+- Al ganar se bloquean los turnos y aparece la pantalla de victoria, con *Jugar otra vez* o *Menú principal*.
+
+## 12. Casos límite
 
 | Situación | Qué pasa |
 |---|---|
-| Un rival encesta en tu castillo cuando tienes 0 monedas | No te quitan nada y él no gana nada |
-| Comprar sin monedas suficientes | No se permite |
-| Ítems comprados y no usados | Se descartan al terminar la ronda |
-| La roca se atasca | Desaparece a los 15 s y pasa el turno |
-| Colocar un obstáculo sobre un hueco | No se permite |
-| Multiplicadores muy altos | Ninguna combinación debe permitir ganar de un solo tiro |
+| Comprar o actualizar sin monedas | No se permite y no se cobra nada |
+| Robo cuando el dueño tiene 0 | No se roba nada |
+| Negativo más grande que lo ganado | El tiro da 0, no resta del saldo |
+| Tocar objetos sin reventar burbujas | No dan ni quitan nada |
+| La arena se llena de objetos | Las burbujas que no caben esperan al siguiente turno |
+| La pelota queda quieta sobre un objeto | El tiro termina a los 1,5 s |
 
 ---
 
 ## Pendiente de decidir (grupo)
 
-- [ ] **Orden de colocación:** ¿cada quien coloca en su turno (los obstáculos afectan solo a los tiros que vienen después en esa ronda) o todos colocan antes del primer tiro? Cambiarlo es solo reordenar las fases.
-- [ ] **Tienda:** ¿individual (propuesta) o los mismos 3 ítems para todos en la ronda?
-- [ ] **Números:** precios de la tienda, porcentaje para quitar obstáculos y valores de los multiplicadores.
-- [ ] **Tope en los huecos normales:** el robo tiene un tope de 10 por tiro; ¿ponemos uno también a las monedas de los huecos cuando hay multiplicadores?
-- [ ] **Girar con Q/E:** no estaba en el diseño original; se agregó porque sin girar no se llega a los huecos de los lados. ¿Se queda?
-- [ ] **4 jugadores:** en qué lado va cada uno y en qué sentido avanza el turno.
+- [ ] **Ritmo de la partida:** en pruebas automáticas, un tiro bien apuntado revienta 1 burbuja y da unas **3 monedas** (promedio de 3,0 a 3,4 en 48 tiros). Con meta 100 son unos 30 turnos por jugador, y una persona apunta peor que la prueba. Propuesta: bajar la meta a **50** o subir el valor base de las burbujas de 2 a **3** (`bubbleBaseValue`).
+- [ ] **Números:** probar partidas completas y ajustar precios, costos de retirada y valores de burbujas en `GameBalance.asset`. Los precios iniciales se pensaron con esas ~3 monedas por turno: un normal cuesta 1 turno, un positivo unos 3, el aro unos 5 y retirar de 3 a 6.
+- [ ] **Cantidad de burbujas por sección** (hoy 4): ¿más con 2 jugadores?
+- [ ] **Límite de objetos en la arena:** hoy no hay; con 4 jugadores se puede llenar.
+- [ ] **Girar con Q/E:** se agregó porque sin girar no se llega a los lados. ¿Se queda?
 
 ## Estado en el prototipo de Unity
 
 | Parte | Estado |
 |---|---|
-| Turnos de 2 jugadores, catapulta y rocas | ✅ Hecho |
-| Huecos con la fórmula de monedas | ✅ Hecho |
-| Hueco del castillo (robo) | ✅ Hecho |
-| Victoria, menú principal y opciones (volumen, música, meta) | ✅ Hecho |
-| Obstáculos | ⏳ Pendiente (paso 4) |
-| Tienda y rondas | ⏳ Pendiente (paso 5) |
-| 4 jugadores | ⏳ Pendiente (paso 7) |
+| Arena circular, secciones y burbujas aleatorias | ✅ Hecho |
+| 2, 3 y 4 jugadores (menú *Nueva partida*) | ✅ Hecho |
+| Fases del turno, tienda, inventario y colocación | ✅ Hecho |
+| Variantes, aro multiplicador y retirada | ✅ Hecho |
+| Equilibrio fino de la economía | ⏳ Pendiente (partidas de prueba del grupo) |
