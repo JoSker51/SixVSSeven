@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// Objeto colocable (cubo, pared, tapa, aro, cilindro, esfera o pirámide; normal, positivo o negativo).
+// Objeto colocable (cubo, pared, rampa, aro, cilindro, esfera o pirámide; normal, positivo o negativo).
 // La misma lógica sirve para todas las variantes: lo que cambia son los datos de su ItemDefinition.
 // La pelota avisa cuando lo golpea (Rock) y el aro detecta solo cuándo la pelota pasa por dentro.
 public class ArenaObject : MonoBehaviour
