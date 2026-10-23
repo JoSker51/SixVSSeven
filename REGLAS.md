@@ -2,7 +2,7 @@
 
 Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jugador tiene un **castillo**, una **catapulta**, un **color** y su **sección** del mapa. En tu turno compras objetos, los colocas en la arena y lanzas una pelota para **reventar burbujas**: cada burbuja da monedas, y los objetos que toque la pelota pueden sumar, restar o duplicar lo que ganes.
 
-**Gana quien llegue primero a 100 monedas** (la meta se puede cambiar en *Opciones*).
+**Gana quien llegue primero a la meta de monedas**, que se elige al empezar cada partida: de **50 a 5000** (la primera vez aparece 100).
 
 > Este documento es la referencia de diseño del grupo. Si una regla cambia, se cambia aquí primero (con un pull request) y después en el código. Todos los números están en `Assets/Resources/GameBalance.asset`.
 
@@ -22,10 +22,10 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 | Objetos | 7 tipos. Seis tienen variante normal, positiva y negativa; el aro multiplicador es especial |
 | Positivo | +2 monedas si la pelota lo toca y revientas al menos una burbuja en ese tiro |
 | Negativo | −2 monedas en las mismas condiciones |
-| Aro multiplicador | Si la pelota pasa por dentro y revientas burbujas, las monedas de burbujas se duplican |
+| Aro multiplicador | Cada pasada por un aro duplica las monedas de burbujas, y se apilan: ×2, ×4, ×8… |
 | Retirar objetos | Cualquier objeto, pagando su costo de retirada. No vuelve al inventario |
 | Persistencia | Los objetos colocados se quedan en la arena hasta que alguien los retire |
-| Victoria | Llegar a la meta de monedas (100 por defecto) |
+| Victoria | Llegar a la meta de monedas elegida al empezar (50 a 5000) |
 
 ---
 
@@ -118,10 +118,10 @@ monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 
 ### Aro multiplicador
 
-- Si la pelota **pasa por dentro** del aro **y** revientas al menos una burbuja en ese tiro, las monedas de **burbujas** se multiplican **×2**.
-- Tiene que pasar con la pelota entera dentro del agujero. **Tocar el borde no cuenta.**
-- Pasar varias veces por el mismo aro, o por varios aros, aplica el ×2 **una sola vez**.
-- El ×2 **no duplica** las bonificaciones ni penalizaciones de positivos y negativos.
+- Cada vez que la pelota **pasa por dentro** de un aro, las monedas de **burbujas** de ese tiro se multiplican **×2**, siempre que revientes al menos una burbuja.
+- **Se apilan:** 1 pasada ×2, 2 pasadas ×4, 3 pasadas ×8, y así (×2 elevado a las pasadas). Puede ser por aros distintos o **por el mismo aro** si la pelota vuelve a cruzarlo.
+- Tiene que pasar con la pelota entera dentro del agujero y salir del otro lado. **Tocar el borde no cuenta**, ni quedarse temblando en el agujero.
+- El multiplicador **no duplica** las bonificaciones ni penalizaciones de positivos y negativos.
 
 ## 8. Monedas de un tiro
 
@@ -130,14 +130,15 @@ Todo se calcula en un solo lugar (`RewardCalculator`), en la fase de Resolución
 ```
 B = suma de los valores de las burbujas reventadas
 P = positivos distintos tocados        N = negativos distintos tocados
+k = pasadas por aros                   (solo si B > 0)
 E = 2·P − 2·N                          (solo si B > 0)
-R = B + E          sin aro
-R = 2·B + E        con aro              (solo si B > 0)
+R = 2^k · B + E                        (sin aros, 2^0 = 1)
 monedas del tiro = máx(0, R)
 ```
 
 - Un negativo reduce lo que ganas **en ese tiro**, pero **nunca te quita monedas que ya tenías**.
 - Ejemplo: revientas burbujas de 3 y 4 (B = 7), pasas por un aro y tocas un positivo: 2·7 + 2 = **16 monedas**.
+- Ejemplo apilado: la misma B = 7 pasando 3 veces por aros: 8·7 = **56 monedas**.
 
 ## 9. Tienda
 
@@ -179,7 +180,8 @@ monedas del tiro = máx(0, R)
 
 ## 11. Victoria
 
-- Gana el primero que llega a la **meta de monedas** (100 por defecto; de 20 a 200 en *Opciones*), sea por burbujas o por robo.
+- Gana el primero que llega a la **meta de monedas**, sea por burbujas o por robo.
+- La meta se elige en **Nueva partida**, junto con cuántos juegan: de **50 a 5000** (opciones en `winCoinChoices`). Se recuerda la última; la primera vez aparece 100.
 - Al ganar se bloquean los turnos y aparece la pantalla de victoria, con *Jugar otra vez* o *Menú principal*.
 
 ## 12. Casos límite
@@ -197,7 +199,7 @@ monedas del tiro = máx(0, R)
 
 ## Pendiente de decidir (grupo)
 
-- [ ] **Ritmo de la partida:** en pruebas automáticas, un tiro bien apuntado revienta 1 burbuja y da unas **3 monedas** (promedio de 3,0 a 3,4 en 48 tiros). Con meta 100 son unos 30 turnos por jugador, y una persona apunta peor que la prueba. Propuesta: bajar la meta a **50** o subir el valor base de las burbujas de 2 a **3** (`bubbleBaseValue`).
+- [ ] **Ritmo de la partida:** en pruebas automáticas, un tiro bien apuntado revienta 1 burbuja y da unas **3 monedas** (promedio de 3,0 a 3,4 en 48 tiros). Con meta 100 son unos 30 turnos por jugador, y una persona apunta peor que la prueba. Ahora la meta se elige al empezar (50 a 5000) y los aros apilados pueden dar tiros enormes. Falta probar qué meta se siente bien con y sin aros, y si conviene subir el valor base de las burbujas de 2 a **3** (`bubbleBaseValue`).
 - [ ] **Números:** probar partidas completas y ajustar precios, costos de retirada y valores de burbujas en `GameBalance.asset`. Los precios iniciales se pensaron con esas ~3 monedas por turno: un normal cuesta 1 turno, un positivo unos 3, el aro unos 5 y retirar de 3 a 6.
 - [ ] **Cantidad de burbujas por sección** (hoy 4): ¿más con 2 jugadores?
 - [ ] **Límite de objetos en la arena:** hoy no hay; con 4 jugadores se puede llenar.
