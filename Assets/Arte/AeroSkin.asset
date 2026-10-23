@@ -14,8 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AeroSkin
   buttonGreen: {fileID: 21300000, guid: 691d05296a36bd244be8a102ee535192, type: 3}
   buttonBlue: {fileID: 21300000, guid: 7910b357b7eacc24787af74c0e872665, type: 3}
-  buttonOrange: {fileID: 21300000, guid: 40e9c0a1133e1e84ab06c4f0a46d931d, type: 3}
   buttonSilver: {fileID: 21300000, guid: ad03deea951893544a8363fce9f2da28, type: 3}
+  buttonGold: {fileID: 21300000, guid: 242d7318d4a64ae439bbb60f8b0d4c9b, type: 3}
+  playerButtons:
+  - {fileID: 21300000, guid: 3c9e80f25c8057b4b9b71d71ef57c453, type: 3}
+  - {fileID: 21300000, guid: dd09d2063eeaf3d48ae2f909b50445bc, type: 3}
+  - {fileID: 21300000, guid: b1805f04661e6984baf1e614e6cef9ab, type: 3}
+  - {fileID: 21300000, guid: 9160e951bc94e364f959698db99217c1, type: 3}
   glassPanel: {fileID: 21300000, guid: cae7c3e0df977a741a16788847f58b41, type: 3}
   bubble: {fileID: 21300000, guid: 37cae823cbbc5154486703972b6753c0, type: 3}
   orb: {fileID: 21300000, guid: fc250ba39395c474495656b323c21acb, type: 3}
@@ -26,5 +31,12 @@ MonoBehaviour:
   fill: {fileID: 21300000, guid: b063d8c136f240f42bc38fac69355a9b, type: 3}
   navy: {r: 0.04, g: 0.24, b: 0.4, a: 1}
   playerColors:
-  - {r: 0.17, g: 0.55, b: 1, a: 1}
-  - {r: 1, g: 0.55, b: 0.1, a: 1}
+  - {r: 1, g: 0.36862746, b: 0.34117648, a: 1}
+  - {r: 1, g: 0.7607843, b: 0.101960786, a: 1}
+  - {r: 0.60784316, g: 0.41960785, b: 1, a: 1}
+  - {r: 0.9411765, g: 0.28235295, b: 0.61960787, a: 1}
+  playerColorNames:
+  - Coral
+  - Sol
+  - Violeta
+  - Magenta

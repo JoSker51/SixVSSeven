@@ -157,6 +157,8 @@ MonoBehaviour:
   destroyDelay: 2
   maxLifetime: 15
   killY: -30
+  settleSpeed: 0.3
+  settleTime: 1.5
   groundTag: Ground
 --- !u!96 &1786350118407209169
 TrailRenderer:

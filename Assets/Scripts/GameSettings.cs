@@ -19,7 +19,14 @@ public static class GameSettings
         set { PlayerPrefs.SetFloat(MusicKey, Mathf.Clamp01(value)); Apply(); }
     }
 
-    // Si nunca se tocó en Opciones, el GameManager usa su valor del Inspector
+    // Cantidad de jugadores elegida la última vez en "Nueva partida"
+    public static int LastPlayerCount
+    {
+        get => PlayerPrefs.GetInt("partida.jugadores", 2);
+        set => PlayerPrefs.SetInt("partida.jugadores", value);
+    }
+
+    // Si nunca se tocó en Opciones, el GameManager usa la meta de GameBalance
     public static bool HasWinCoins => PlayerPrefs.HasKey(WinCoinsKey);
 
     public static int WinCoins

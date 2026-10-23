@@ -73,6 +73,18 @@ public class CatapultController : MonoBehaviour
         RefreshVisuals();
     }
 
+    // La llama MatchSetup al crear la catapulta de cada jugador
+    public void Setup(int player, Color color)
+    {
+        playerId = player;
+        playerColor = color;
+        if (trajectory)
+        {
+            trajectory.startColor = new Color(1f, 1f, 1f, 0.95f);
+            trajectory.endColor = new Color(color.r, color.g, color.b, 0f);
+        }
+    }
+
     public void SetActive(bool active)
     {
         IsActive = active;

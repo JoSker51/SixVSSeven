@@ -5,10 +5,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [SerializeField] private int playerCount = 2;   // pasa a 4 cuando amplíes
     [SerializeField] private int winCoins = 100;
 
     private int[] coins;
+    private int playerCount;
 
     public bool GameOver { get; private set; }
     public int PlayerCount => playerCount;
@@ -21,8 +21,10 @@ public class GameManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
-        if (GameSettings.HasWinCoins) winCoins = GameSettings.WinCoins;   // elegido en Opciones
+        playerCount = MatchConfig.PlayerCount;                              // elegido en "Nueva partida" (2 a 4)
+        winCoins = GameSettings.HasWinCoins ? GameSettings.WinCoins : GameBalance.Current.defaultWinCoins;
         coins = new int[playerCount];
+        for (int i = 0; i < playerCount; i++) coins[i] = GameBalance.Current.startingCoins;
     }
 
     private void OnDestroy()
@@ -30,30 +32,40 @@ public class GameManager : MonoBehaviour
         if (Instance == this) Instance = null;   // permite reiniciar la escena
     }
 
-    public int GetCoins(int player) => coins[player];
+    public bool IsValidPlayer(int player) => player >= 0 && player < playerCount;
+
+    public int GetCoins(int player) => IsValidPlayer(player) ? coins[player] : 0;
 
     public void AddCoins(int player, int amount)
     {
-        if (GameOver || amount <= 0) return;
+        if (GameOver || amount <= 0 || !IsValidPlayer(player)) return;
         coins[player] += amount;
         CoinsChanged?.Invoke(player, coins[player]);
         CheckWin(player);
     }
 
-    // Para la tienda y para quitar obstáculos. Devuelve false si no alcanza.
+    // Para la tienda y para retirar objetos. Devuelve false si no alcanza (y no cobra nada).
     public bool SpendCoins(int player, int amount)
     {
-        if (amount < 0 || coins[player] < amount) return false;
+        if (GameOver || amount < 0 || !IsValidPlayer(player) || coins[player] < amount) return false;
         coins[player] -= amount;
         CoinsChanged?.Invoke(player, coins[player]);
         return true;
+    }
+
+    // Devuelve un cobro que no se pudo completar (no cuenta como ganar monedas)
+    public void Refund(int player, int amount)
+    {
+        if (amount <= 0 || !IsValidPlayer(player)) return;
+        coins[player] += amount;
+        CoinsChanged?.Invoke(player, coins[player]);
     }
 
     // Quita monedas de 'from' y las suma a 'to'. Nunca deja a 'from' por debajo de 0.
     // Devuelve la cantidad realmente transferida.
     public int Transfer(int from, int to, int amount)
     {
-        if (GameOver || from == to || amount <= 0) return 0;
+        if (GameOver || from == to || amount <= 0 || !IsValidPlayer(from) || !IsValidPlayer(to)) return 0;
 
         int real = Mathf.Min(amount, coins[from]);   // límite: no baja de 0
         if (real <= 0) return 0;

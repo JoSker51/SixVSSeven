@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00a2aaac7d5eee44789927941a715c4b, type: 3}
+  m_Name: GameBalance
+  m_EditorClassIdentifier: Assembly-CSharp::GameBalance
+  startingCoins: 5
+  defaultWinCoins: 100
+  randomSeed: 0
+  arenaRadius: 27
+  castleRingRadius: 21
+  catapultRingRadius: 14.5
+  castleKeepOut: 5.4
+  catapultKeepOut: 4.5
+  bubblesPerSection: 4
+  bubbleRadius: {x: 0.55, y: 1.1}
+  bubbleHeight: {x: 1.3, y: 5.5}
+  bubbleMinGap: 1.6
+  bubbleWallMargin: 1.5
+  bubbleCenterMargin: 2
+  bubbleObjectClearance: 0.6
+  bubbleMaxAttempts: 80
+  bubbleBaseValue: 2
+  bubbleReferenceRadius: 0.8
+  castleBubbleRadius: 1.3
+  castleBubbleHeight: 6.4
+  stealAmount: 3
+  maxStealPerShot: 10
+  positiveBonus: 2
+  negativePenalty: 2
+  ringMultiplier: 2
+  shopOffers: 3
+  refreshCost: 1
+  refreshesPerTurn: 1
+  placementMaxHeight: 6
+  placementClearance: 0.15
+  rotationStep: 15
+  heightStep: 0.25
+  objectBounciness: 0.45
+  objectFriction: 0.3
+  items: []

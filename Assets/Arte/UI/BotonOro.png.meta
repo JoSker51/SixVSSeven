@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 40e9c0a1133e1e84ab06c4f0a46d931d
+guid: 242d7318d4a64ae439bbb60f8b0d4c9b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7564290056005691032
-    second: BotonNaranja_0
+      213: 3145936879909800445
+    second: BotonOro_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +115,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: BotonNaranja_0
+      name: BotonOro_0
       rect:
         serializedVersion: 2
         x: 0
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 869d2c9754e360790800000000000000
-      internalID: -7564290056005691032
+      spriteID: df903d4acec98ab20800000000000000
+      internalID: 3145936879909800445
       vertices: []
       indices: 
       edges: []
