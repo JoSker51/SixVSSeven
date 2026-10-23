@@ -387,6 +387,20 @@ footer p { max-width: 60ch; }
 @media (max-width: 1359px) { .side { display: none; } }
 
 /* Ventanas clásicas de escritorio (decoración) */
+.xp-frame {
+  color: #000; font-size: 0.75rem; background: #ece9d8; border: 1px solid #0831d9; border-radius: 8px 8px 0 0; overflow: hidden;
+  margin-bottom: 14px; box-shadow: 0 10px 24px rgba(4, 38, 77, 0.28);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), box-shadow 0.35s;
+}
+.xp-frame:hover, .xp-frame:focus-within { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(4, 38, 77, 0.36); }
+.xp-frame .xp-title { filter: saturate(0.45) brightness(1.15); transition: filter 0.35s; }   /* ventana inactiva hasta que la miras */
+.xp-frame:hover .xp-title, .xp-frame:focus-within .xp-title { filter: none; }
+.xp-frame .shape-art {
+  margin: 3px; border: 1px solid #7f9db9; border-radius: 0;
+  background: radial-gradient(ellipse 45% 18% at 50% 88%, rgba(10, 61, 102, 0.2), transparent 70%), linear-gradient(to bottom, #f4faff, #d6ecfb 60%, #c2e2f6);
+}
+.xp-frame .xp-status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.22s; }
+.xp-frame .xp-status span.is-fading { opacity: 0; }
 #como-se-juega, #objetos { position: relative; }
 .xp-win {
   position: absolute; right: 0; top: -36px; width: 250px; z-index: 0; color: #000; font-size: 0.75rem;
@@ -443,6 +457,139 @@ footer p { max-width: 60ch; }
   .controls { grid-template-columns: minmax(0, 1fr); }
   .mult strong { font-size: 1.2rem; }
 }
+/* ---------- Suavidad: desplazamiento, apariciones y botones ---------- */
+html { scroll-behavior: smooth; }
+.sea { overflow-x: clip; }   /* los adornos de los costados ya no generan barra horizontal */
+.reveal { opacity: 0; transform: translateY(26px) scale(0.985); transition: opacity 0.8s cubic-bezier(.2, .8, .2, 1), transform 0.9s cubic-bezier(.2, .8, .2, 1); transition-delay: var(--d, 0s); }
+.reveal.is-in { opacity: 1; transform: none; }
+.nav ul a { transition: background 0.3s, border-color 0.3s, box-shadow 0.3s; }
+.nav ul a.is-active {
+  border-color: rgba(160, 220, 255, 0.7);
+  background: linear-gradient(to bottom, rgba(160, 220, 255, 0.45), rgba(80, 160, 230, 0.25) 50%, rgba(30, 110, 200, 0.35) 51%, rgba(110, 200, 255, 0.4));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 12px rgba(110, 200, 255, 0.5);
+}
+.gel { transition: transform 0.3s cubic-bezier(.2, .8, .2, 1.4), box-shadow 0.3s, filter 0.3s; }
+.gel:hover, .gel:focus-visible { transform: translateY(-2px) scale(1.03); filter: brightness(1.06); outline: none; }
+.gel:active { transform: translateY(1px) scale(0.98); }
+.shapes .pane, .basics .pane { transition: transform 0.4s cubic-bezier(.2, .8, .2, 1), box-shadow 0.4s, opacity 0.8s cubic-bezier(.2, .8, .2, 1); }
+.shapes .pane:hover, .basics .pane:hover { transform: translateY(-4px); box-shadow: 0 22px 46px rgba(4, 38, 77, 0.34), inset 0 1px 0 var(--white); }
+img { transition: opacity 0.5s; }
+
+/* Tu turno, paso a paso */
+.turn-pane { margin-top: 18px; }
+.phases { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.phases li { display: flex; gap: 10px; align-items: center; color: var(--ink); }
+.phases b {
+  flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--white); font-size: 1.05rem;
+  background: radial-gradient(circle at 35% 30%, #d6f0ff, #3f9ae6 50%, #1557a8); border: 1px solid #fff; box-shadow: 0 4px 10px rgba(4, 38, 77, 0.25);
+}
+.phases li:nth-child(4) b { background: radial-gradient(circle at 35% 30%, #fff6b0, #ffc928 45%, #d98a00); }
+
+/* Carrusel de capturas */
+.shot-stage { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--navy); touch-action: pan-y; }
+.shot-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.06); transition: opacity 0.9s ease, transform 6.6s cubic-bezier(.2, .6, .3, 1); }
+.shot-stage img.is-on { opacity: 1; transform: scale(1); }
+.shot-main { position: relative; }
+.shot-main figcaption { transition: opacity 0.35s; }
+.shot-main figcaption.is-fading { opacity: 0; }
+.shot-nav {
+  position: absolute; top: calc(50% - 50px); z-index: 2; width: 56px; height: 56px; border-radius: 50%; cursor: pointer; color: var(--white);
+  display: grid; place-items: center; font-size: 1.5rem; font-weight: 800; border: 1px solid rgba(255, 255, 255, 0.95);
+  background: radial-gradient(circle at 35% 30%, #d6f0ff, #3f9ae6 50%, #1557a8);
+  box-shadow: 0 8px 20px rgba(4, 38, 77, 0.4), inset 0 -5px 12px rgba(255, 255, 255, 0.25);
+  opacity: 0; transform: scale(0.9); transition: opacity 0.35s, transform 0.35s cubic-bezier(.2, .8, .2, 1.4);
+  text-shadow: 0 1px 2px rgba(4, 38, 77, 0.6);
+}
+.shot-nav::before { content: ""; position: absolute; left: 9px; right: 9px; top: 4px; height: 45%; border-radius: 50%; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.05)); }
+.shot-nav span { position: relative; }
+.shot-nav.prev { left: 16px; }
+.shot-nav.next { right: 16px; }
+.shot-main:hover .shot-nav, .shot-main:focus-within .shot-nav { opacity: 1; transform: none; }
+.shot-nav:hover { transform: scale(1.08); }
+@media (hover: none) { .shot-nav { opacity: 0.92; transform: none; } }
+.thumbs button { position: relative; transition: transform 0.3s cubic-bezier(.2, .8, .2, 1), border-color 0.3s, box-shadow 0.3s; }
+.thumbs button img { aspect-ratio: 16 / 9; object-fit: cover; transition: transform 0.5s cubic-bezier(.2, .8, .2, 1); }
+.thumbs button:hover img { transform: scale(1.07); }
+.thumbs button::after { content: ""; position: absolute; left: 0; bottom: 0; height: 4px; width: 0; background: linear-gradient(90deg, #d9ffbf, #5fd23c); box-shadow: 0 0 8px rgba(95, 210, 60, 0.8); }
+.thumbs button.is-playing::after { animation: progress var(--dur, 6s) linear forwards; }
+@keyframes progress { to { width: 100%; } }
+
+/* Objetos en 3D: se giran arrastrando y muestran sus variantes */
+canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 3; }
+.shape-art {
+  height: 200px; position: relative; border-radius: 16px; cursor: grab; touch-action: pan-y; outline: none;
+  background: radial-gradient(ellipse 45% 18% at 50% 88%, rgba(10, 61, 102, 0.2), transparent 70%), radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 62%);
+}
+.shape-art:active { cursor: grabbing; }
+.shape-art:focus-visible { box-shadow: 0 0 0 3px rgba(110, 200, 255, 0.8); }
+.shape-art .fallback { width: 150px; height: 150px; object-fit: contain; filter: drop-shadow(0 10px 12px rgba(4, 38, 77, 0.25)); }
+.has-3d .shape-art .fallback { opacity: 0; }
+.shape-art .hint {
+  position: absolute; right: 10px; bottom: 8px; font-size: 0.72rem; font-weight: 700; color: var(--ink-soft); opacity: 0;
+  transition: opacity 0.6s; pointer-events: none; letter-spacing: 0.02em;
+}
+.has-3d .shape-art .hint { opacity: 0.75; }
+.has-3d .shape-art.touched .hint { opacity: 0; }
+.variants { display: flex; gap: 6px; margin: 2px 0 10px; flex-wrap: wrap; }
+.variants button {
+  flex: 1 1 0; min-width: 0; padding: 7px 8px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  font: 700 0.8rem/1 var(--font-body); color: var(--navy); border: 1px solid #a9c4d8;
+  background: linear-gradient(to bottom, #ffffff, #d9e6ef); box-shadow: inset 0 1px 0 #fff;
+  transition: background 0.35s, color 0.35s, border-color 0.35s, transform 0.3s cubic-bezier(.2, .8, .2, 1.4), box-shadow 0.35s;
+}
+.variants button:hover, .variants button:focus-visible { transform: translateY(-1px); outline: none; border-color: #6fb3e6; }
+.variants button[aria-pressed="true"] { color: var(--white); text-shadow: 0 1px 2px rgba(4, 38, 77, 0.6); box-shadow: 0 4px 10px rgba(4, 38, 77, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.variants .v-normal[aria-pressed="true"] { background: linear-gradient(to bottom, #ffffff, #b4c6d4 55%, #8ea7ba); color: var(--navy); text-shadow: none; border-color: #6e8597; }
+.variants .v-pos[aria-pressed="true"] { background: linear-gradient(to bottom, #b4f08c, #62c93a 50%, #3fa821); border-color: #2c7a17; }
+.variants .v-neg[aria-pressed="true"] { background: linear-gradient(to bottom, #6b7390, #2b3146 50%, #1b1f2e); border-color: #12151f; }
+.variants .badge { padding: 7px 14px; border-radius: 999px; font: 700 0.8rem/1 var(--font-body); border: 1px solid #9a6a0c; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 10px rgba(4, 38, 77, 0.2); }
+.variants .v-special { background: linear-gradient(to bottom, #fff1b8, #f0b73c 50%, #d99a1c); color: var(--navy); }
+.effect { color: var(--ink); min-height: 3.2em; transition: opacity 0.3s; }
+.effect.is-fading { opacity: 0; }
+.price { margin-top: 10px; font-size: 0.85rem; color: var(--ink-soft); font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.price b { transition: color 0.3s; }
+.price b.on { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.shapes .shape-ring { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 6px 30px; align-items: center; }
+.shape-ring .shape-art { height: 280px; }
+.shape-ring .x2 {
+  position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%) scale(0.4); opacity: 0; pointer-events: none;
+  font-family: var(--font-display); font-weight: 800; font-size: 3rem; color: #ffe27a;
+  text-shadow: 0 0 18px rgba(255, 210, 80, 0.9), 0 2px 0 #9a6a0c, 0 0 2px #fff;
+}
+.shape-ring .x2.is-pop { animation: pop 1s cubic-bezier(.2, .8, .2, 1) forwards; }
+.ring-lead { margin-top: 10px; color: var(--ink); }
+.ring-ladder { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ring-ladder li {
+  border-radius: 14px; padding: 8px 4px; text-align: center; background: linear-gradient(to bottom, #fffdf3, #ffefbf);
+  border: 1px solid rgba(154, 106, 12, 0.35); box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(4, 38, 77, 0.12);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), background 0.35s, box-shadow 0.35s;
+}
+.ring-ladder strong { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; line-height: 1.15; color: #8a5d06; }
+.ring-ladder span { font-size: 0.78rem; font-weight: 600; color: var(--ink-soft); }
+.ring-ladder li.on {
+  background: linear-gradient(to bottom, #fff1b8, #f0b73c 50%, #d99a1c); transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 214, 90, 0.35), 0 8px 16px rgba(154, 106, 12, 0.3);
+}
+.ring-ladder li.on strong, .ring-ladder li.on span { color: var(--navy); }
+.ring-example { margin-top: 12px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--glass-edge); font-size: 0.92rem; color: var(--ink); }
+@keyframes pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); } 25% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
+.mult .bad { background: linear-gradient(to bottom, #6b7390, #2b3146 55%, #1b1f2e); }
+.shop-slots .slot img { width: 58px; height: 58px; object-fit: contain; }
+@media (max-width: 860px) {
+  .phases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shapes .shape-ring { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .shot-stage img { transition: opacity 0.2s; transform: none; }
+  .thumbs button.is-playing::after { animation: none; }
+  .ring-ladder li { transition: none; }
+  .xp-frame { transition: none; }
+  .xp-frame:hover, .xp-frame:focus-within { transform: none; }
+  .ring-ladder li.on { transform: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bubbles img { animation: none; display: none; }
   .cd, .spark, .fish, .fish svg, .toast, .beam-pulse, .beam-end, .xp-water svg, .float, .float .cd { animation: none; }
@@ -506,20 +653,20 @@ footer p { max-width: 60ch; }
       <div>
         <span class="eyebrow">Próximamente · PC</span>
         <h1>Catapultas <b>y Castillos</b></h1>
-        <p class="lede">Lanza rocas por turnos sobre una isla tropical, encesta en los huecos para ganar monedas y roba las del castillo rival. El primero en llegar a 100 monedas gana.</p>
+        <p class="lede">Lanza la pelota por turnos en una arena circular, revienta burbujas para ganar monedas y coloca objetos que cambian cada tiro. De 2 a 4 jugadores: gana el primero en llegar a la meta, que eligen al empezar.</p>
         <div class="cta-row">
           <span class="gel blue" role="note">
             <svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg>
             <span><small>Próximamente en</small>Steam</span>
           </span>
-          <a class="gel green" href="#objetos"><span>Ver las reglas de los objetos</span></a>
+          <a class="gel green" href="#objetos"><span>Ver los objetos en 3D</span></a>
         </div>
       </div>
 
       <div class="window-stack">
         <figure class="aero-window">
           <div class="titlebar"><span>Catapultas y castillos</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i class="close" aria-hidden="true"></i></div>
-          <img src="img/menu.jpg" width="1920" height="1080" alt="Menú principal del juego: el título Catapultas y castillos sobre la isla, con los botones Jugar, Opciones y Salir.">
+          <img src="img/menu.jpg" width="1920" height="1080" alt="Menú principal del juego: el título Catapultas y castillos sobre la arena circular, con los botones Jugar, Opciones y Salir.">
         </figure>
         <div class="toast" role="note">
           <div class="toast-bar"><span>Catapultas y castillos</span><i aria-hidden="true">✕</i></div>
@@ -540,7 +687,7 @@ footer p { max-width: 60ch; }
       <dl class="spec">
         <div><dt>Plataforma</dt><dd>PC (Windows)</dd></div>
         <div><dt>Tienda</dt><dd>Steam</dd></div>
-        <div><dt>Jugadores</dt><dd>2 en la misma pantalla (4 más adelante)</dd></div>
+        <div><dt>Jugadores</dt><dd>De 2 a 4 en la misma pantalla</dd></div>
         <div><dt>Fecha</dt><dd>Por anunciar</dd></div>
       </dl>
     </aside>
@@ -611,24 +758,33 @@ footer p { max-width: 60ch; }
       </div>
       <div class="section-head">
         <h2 id="t-juego">Un tiro por turno. <b>Cada moneda cuenta.</b></h2>
-        <p>Cada jugador tiene un castillo y una catapulta. En tu turno apuntas, cargas la potencia y disparas una sola roca.</p>
+        <p>Cada jugador tiene un castillo, una catapulta, un color y su parte de la arena. En tu turno compras, colocas objetos y disparas una sola pelota.</p>
       </div>
       <div class="basics">
         <div class="pane">
-          <div class="num">2–8<small>monedas</small></div>
-          <h3>Encesta en los huecos</h3>
-          <p>Cuanto más pequeño es el hueco y más lejos está de las esquinas, más monedas da. El valor aparece flotando sobre cada hueco.</p>
+          <div class="num">1–6<small>por burbuja</small></div>
+          <h3>Revienta burbujas</h3>
+          <p>Flotan por la arena en lugares al azar. Cuanto más chica y más cerca del centro, más monedas da. La pelota sigue de largo y puede reventar varias en un tiro.</p>
         </div>
         <div class="pane">
           <div class="num">3<small>por acierto</small></div>
           <h3>Roba en el castillo rival</h3>
-          <p>Si tu roca cae en el patio de otro castillo, le quitas monedas a su dueño y te las quedas, hasta 10 por tiro. Nadie baja de 0.</p>
+          <p>Sobre cada castillo flota una burbuja del color de su dueño. Si revientas la de un rival, le quitas monedas y te las quedas, hasta 10 por tiro. Nadie baja de 0.</p>
         </div>
         <div class="pane">
-          <div class="num">100<small>para ganar</small></div>
+          <div class="num">50–5000<small>tú eliges</small></div>
           <h3>Llega primero a la meta</h3>
-          <p>Gana quien junte 100 monedas antes que los demás. La meta se puede cambiar en Opciones, entre 20 y 200.</p>
+          <p>Al empezar la partida eligen a cuántas monedas se juega, de 50 a 5000. Gana quien llegue primero. Con aros apilados las monedas suben rápido.</p>
         </div>
+      </div>
+      <div class="pane turn-pane">
+        <h3>Tu turno, paso a paso</h3>
+        <ol class="phases">
+          <li><b>1</b><span><strong>Compra</strong> objetos en la tienda.</span></li>
+          <li><b>2</b><span><strong>Coloca</strong> lo que compraste en la arena.</span></li>
+          <li><b>3</b><span><strong>Lanza</strong> la pelota: un solo tiro.</span></li>
+          <li><b>4</b><span><strong>Cobra</strong>: se suman las monedas del tiro.</span></li>
+        </ol>
       </div>
     </section>
 
@@ -637,15 +793,24 @@ footer p { max-width: 60ch; }
         <h2 id="t-capturas">Así se ve <b>en el juego</b></h2>
         <p>Capturas reales de la versión de prueba, tomadas en Unity.</p>
       </div>
-      <figure class="shot-main">
-        <img id="shot-img" src="img/turno.jpg" width="1920" height="1080" alt="Turno del Jugador 1: vista detrás de la catapulta azul, con los huecos mostrando cuántas monedas vale cada uno y la guía de tiro.">
-        <figcaption id="shot-cap">Tu turno: cada hueco muestra cuántas monedas vale y la guía te ayuda a apuntar.</figcaption>
+      <figure class="shot-main" aria-roledescription="carrusel">
+        <div class="shot-stage" id="shot-stage">
+          <img class="is-on" src="img/turno.jpg" width="1920" height="1080" alt="Turno del Jugador 1: vista detrás de la catapulta coral, con burbujas que muestran su valor, objetos colocados y la guía de tiro.">
+          <img src="img/turno.jpg" width="1920" height="1080" alt="" aria-hidden="true">
+        </div>
+        <button type="button" class="shot-nav prev" aria-label="Captura anterior"><span>‹</span></button>
+        <button type="button" class="shot-nav next" aria-label="Captura siguiente"><span>›</span></button>
+        <figcaption id="shot-cap" aria-live="polite">Tu turno: la guía muestra el inicio del arco y cada burbuja dice cuántas monedas da.</figcaption>
       </figure>
       <div class="thumbs" role="group" aria-label="Elegir captura">
-        <button type="button" id="thumb-turno" aria-pressed="true" data-src="img/turno.jpg" data-cap="Tu turno: cada hueco muestra cuántas monedas vale y la guía te ayuda a apuntar." data-alt="Turno del Jugador 1: vista detrás de la catapulta azul, con los huecos mostrando cuántas monedas vale cada uno y la guía de tiro."><img src="img/turno.jpg" width="1920" height="1080" alt="Turno del Jugador 1"></button>
-        <button type="button" id="thumb-carga" aria-pressed="false" data-src="img/carga.jpg" data-cap="Mantén Espacio para cargar la potencia. Aquí el Jugador 2 apunta al hueco central, que da 8 monedas." data-alt="Turno del Jugador 2 cargando potencia, con la catapulta naranja apuntando al hueco central de +8."><img src="img/carga.jpg" width="1920" height="1080" alt="Jugador 2 cargando potencia"></button>
-        <button type="button" id="thumb-mapa" aria-pressed="false" data-src="img/mapa.jpg" data-cap="Con la tecla C ves todo el mapa: los dos castillos, las catapultas y los 9 huecos en espejo." data-alt="Vista general de la isla con los dos castillos enfrentados, las catapultas y los huecos con sus valores."><img src="img/mapa.jpg" width="1920" height="1080" alt="Vista general del mapa"></button>
-        <button type="button" id="thumb-victoria" aria-pressed="false" data-src="img/victoria.jpg" data-cap="El primero en llegar a la meta gana la partida." data-alt="Pantalla de victoria: Gana el Jugador 1, llegó a 100 monedas, con los botones Jugar otra vez y Menú principal."><img src="img/victoria.jpg" width="1920" height="1080" alt="Pantalla de victoria"></button>
+        <button type="button" aria-pressed="true" data-src="img/turno.jpg" data-cap="Tu turno: la guía muestra el inicio del arco y cada burbuja dice cuántas monedas da." data-alt="Turno del Jugador 1: vista detrás de la catapulta coral, con burbujas que muestran su valor, objetos colocados y la guía de tiro."><img src="img/turno.jpg" width="1920" height="1080" loading="lazy" alt="Turno del Jugador 1"></button>
+        <button type="button" aria-pressed="false" data-src="img/carga.jpg" data-cap="Mantén Espacio para cargar la potencia y suelta para disparar." data-alt="El Jugador 1 cargando la potencia del tiro, con la barra de potencia abajo."><img src="img/carga.jpg" width="1920" height="1080" loading="lazy" alt="Cargando potencia"></button>
+        <button type="button" aria-pressed="false" data-src="img/vuelo.jpg" data-cap="La pelota vuela rápido y revienta todas las burbujas que toca en el camino." data-alt="La pelota en el aire camino a las burbujas."><img src="img/vuelo.jpg" width="1920" height="1080" loading="lazy" alt="Pelota en el aire"></button>
+        <button type="button" aria-pressed="false" data-src="img/resumen.jpg" data-cap="Al terminar el tiro, un resumen te dice cuántas monedas ganaste y por qué." data-alt="Resumen del tiro con las monedas ganadas."><img src="img/resumen.jpg" width="1920" height="1080" loading="lazy" alt="Resumen del tiro"></button>
+        <button type="button" aria-pressed="false" data-src="img/tienda.jpg" data-cap="La tienda: 3 ofertas al azar, cada una con su variante y su precio." data-alt="Panel de la tienda con tres ofertas, sus íconos, variantes y precios."><img src="img/tienda.jpg" width="1920" height="1080" loading="lazy" alt="Tienda"></button>
+        <button type="button" aria-pressed="false" data-src="img/colocacion.jpg" data-cap="Colocación: el objeto se ve de vidrio celeste si el lugar sirve. Gíralo, inclínalo y súbelo como quieras." data-alt="Vista desde arriba en la fase de colocación, con un objeto de vidrio en vista previa y el inventario abajo."><img src="img/colocacion.jpg" width="1920" height="1080" loading="lazy" alt="Colocación de objetos"></button>
+        <button type="button" aria-pressed="false" data-src="img/mapa.jpg" data-cap="Hasta 4 jugadores, cada uno con su color, su castillo y su parte del mapa." data-alt="Vista general de la arena circular con cuatro castillos de colores, burbujas y objetos colocados."><img src="img/mapa.jpg" width="1920" height="1080" loading="lazy" alt="Vista general de la arena"></button>
+        <button type="button" aria-pressed="false" data-src="img/victoria.jpg" data-cap="El primero en llegar a la meta gana la partida." data-alt="Pantalla de victoria con burbujas: Gana el Jugador 1."><img src="img/victoria.jpg" width="1920" height="1080" loading="lazy" alt="Pantalla de victoria"></button>
       </div>
     </section>
 
@@ -664,52 +829,165 @@ footer p { max-width: 60ch; }
         <div class="xp-status"><span>6 objeto(s)</span><span>Mi PC</span></div>
       </div>
       <div class="section-head">
-        <h2 id="t-objetos">Objetos: <b>cambia el mapa antes de tirar</b></h2>
-        <p>Al inicio de cada ronda se abre la tienda. Lo que compras son obstáculos que colocas en la isla para ayudar a tus tiros o complicar los de los demás.</p>
+        <h2 id="t-objetos">Objetos: <b>cambia la arena antes de tirar</b></h2>
+        <p>En tu fase de Compra la tienda te ofrece objetos. Los colocas en la arena para desviar la pelota, sumar monedas o complicarle el tiro a los demás. Arrastra cada uno para girarlo y prueba sus variantes.</p>
       </div>
 
       <div class="shop">
         <div class="pane">
           <h3>La tienda</h3>
-          <p>Te ofrece 3 objetos al azar, que pueden repetirse. Comprar descuenta su precio de tus monedas.</p>
+          <p>Te ofrece 3 objetos al azar, distintos entre sí. Comprar descuenta su precio; si no te alcanza, la oferta sale bloqueada.</p>
           <div class="shop-slots" aria-hidden="true">
-            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-caja"/></svg></div>
-            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
-            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-plataforma"/></svg></div>
+            <div class="slot"><img src="img/objetos/pyramid_positive.png" alt=""></div>
+            <div class="slot"><img src="img/objetos/ring_special.png" alt=""></div>
+            <div class="slot"><img src="img/objetos/wall_negative.png" alt=""></div>
           </div>
-          <span class="refresh"><span class="coin" aria-hidden="true"></span> Refrescar la tienda: 1 moneda</span>
+          <span class="refresh"><span class="coin" aria-hidden="true"></span> Actualizar ofertas: 1 moneda, una vez por turno</span>
         </div>
         <div class="pane">
-          <h3>Algunos objetos multiplican lo que gana la roca</h3>
-          <p>La roca sale con multiplicador ×1. Cada obstáculo con multiplicador que activa lo multiplica por su valor, y nunca activa dos veces el mismo.</p>
+          <h3>Cada forma viene en tres variantes</h3>
+          <p>Los efectos solo cuentan si en ese tiro revientas al menos una burbuja, y golpear varias veces el mismo objeto cuenta una sola vez. Afectan los tiros de todos.</p>
           <div class="mult">
-            <div class="good"><strong>× &gt;1</strong><span>Bueno: gana o roba más</span></div>
-            <div class="bad"><strong>× &lt;1</strong><span>Malo: gana menos</span></div>
-            <div class="neutral"><strong>× 1</strong><span>Neutro: solo desvía</span></div>
+            <div class="good"><strong>+2</strong><span>Positivo: suma al tiro</span></div>
+            <div class="bad"><strong>−2</strong><span>Negativo: resta al tiro</span></div>
+            <div class="neutral"><strong>±0</strong><span>Normal: solo desvía</span></div>
           </div>
         </div>
       </div>
 
       <div class="shapes">
         <article class="pane">
-          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-caja"/></svg></div>
-          <h3>Caja</h3>
-          <div class="rule"><i class="info">■</i><p>Es un bloqueo: la roca choca contra ella y no la atraviesa.</p></div>
-          <div class="rule"><i class="info">⚑</i><p>Ponla en el camino a un hueco para que un rival no lo aproveche tiro tras tiro.</p></div>
-          <div class="rule"><i class="info">×1</i><p>No da monedas extra.</p></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Cubo - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="cube" data-variant="normal" tabindex="0" role="img" aria-label="Cubo en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cube_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
+          <h3>Cubo</h3>
+          <div class="variants" role="group" aria-label="Variantes de cubo">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Bloque sólido: la pelota rebota y no lo atraviesa.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Ponlo en el camino de una burbuja para protegerla de los rivales.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
-          <h3>Aro</h3>
-          <div class="rule"><i class="yes">✓</i><p>Se activa si la roca pasa por dentro.</p></div>
-          <div class="rule"><i class="no">✕</i><p>Chocar con el borde no cuenta.</p></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Pared - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="wall" data-variant="normal" tabindex="0" role="img" aria-label="Pared en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/wall_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">4 monedas</span></div>
+          </div>
+          <h3>Pared</h3>
+          <div class="variants" role="group" aria-label="Variantes de pared">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Rectángulo largo para cerrar un paso o hacer rebotar tiros.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Gírala e inclínala para cerrar pasos o hacer techos.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 4</b> · <b data-v="positive">Positivo 9</b> · <b data-v="negative">Negativo 7</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-plataforma"/></svg></div>
-          <h3>Plataforma</h3>
-          <div class="rule"><i class="info">↯</i><p>Desvía la roca: si la toca por cualquier lado, cambia su dirección.</p></div>
-          <div class="rule"><i class="info">↻</i><p>Puedes girarla como quieras antes de colocarla.</p></div>
-          <div class="rule"><i class="info">↕</i><p>La altura del poste que la sostiene se puede ajustar.</p></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Rampa - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="ramp" data-variant="normal" tabindex="0" role="img" aria-label="Rampa en 3D: arrastra para girarla"><img class="fallback" src="img/objetos/ramp_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
+          <h3>Rampa</h3>
+          <div class="variants" role="group" aria-label="Variantes de rampa">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Cuña inclinada: la pelota sube por ella y sale volando.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Apúntala hacia las burbujas; por detrás es una pared.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
+        </article>
+        <article class="pane">
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Cilindro - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="cylinder" data-variant="normal" tabindex="0" role="img" aria-label="Cilindro en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cylinder_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
+          <h3>Cilindro</h3>
+          <div class="variants" role="group" aria-label="Variantes de cilindro">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Columna larga; acostada hace de rodillo.</p></div>
+          <div class="rule"><i class="info">↻</i><p>De pie es un poste fino que cambia el rebote.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
+        </article>
+        <article class="pane">
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Esfera - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="sphere" data-variant="normal" tabindex="0" role="img" aria-label="Esfera en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/sphere_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
+          <h3>Esfera</h3>
+          <div class="variants" role="group" aria-label="Variantes de esfera">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Bola brillante con rebotes impredecibles.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Cualquier golpe la manda en otra dirección.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
+        </article>
+        <article class="pane">
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Pirámide - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="pyramid" data-variant="normal" tabindex="0" role="img" aria-label="Pirámide en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/pyramid_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
+          <h3>Pirámide</h3>
+          <div class="variants" role="group" aria-label="Variantes de pirámide">
+            <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
+            <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
+            <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
+          </div>
+          <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
+          <div class="rule"><i class="info">■</i><p>Sus caras inclinadas mandan la pelota de lado.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Úsala para desviar tiros hacia las burbujas que quieres.</p></div>
+          <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
+        </article>
+        <article class="pane shape-ring">
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Aro multiplicador - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="ring" data-variant="special" tabindex="0" role="img" aria-label="Aro multiplicador en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/ring_special.png" alt=""><span class="x2" aria-hidden="true">×2</span><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Especial ×2 por pasada</span><span class="xp-cost">15 monedas</span></div>
+          </div>
+          <div>
+            <h3>Aro multiplicador</h3>
+            <div class="variants"><span class="badge v-special">Especial ×2 por pasada · el objeto más caro</span></div>
+            <p class="ring-lead">Cada vez que la pelota pasa por dentro de un aro, <b>las monedas de burbujas de ese tiro se duplican</b>. Y se acumula con cada pasada:</p>
+            <ol class="ring-ladder" aria-label="Multiplicador según cuántas veces pasa la pelota">
+              <li data-n="1"><strong>×2</strong><span>1 pasada</span></li>
+              <li data-n="2"><strong>×4</strong><span>2 pasadas</span></li>
+              <li data-n="3"><strong>×8</strong><span>3 pasadas</span></li>
+              <li data-n="4"><strong>×16</strong><span>4… y sigue</span></li>
+            </ol>
+            <p class="ring-example">Ejemplo: revientas burbujas por <b>6</b> y la pelota cruza aros <b>3 veces</b> → 6 × 8 = <b>48 monedas</b>.</p>
+            <div class="rule"><i class="yes">✓</i><p>Cuentan aros distintos y también <b>el mismo aro</b> si la pelota vuelve a cruzarlo.</p></div>
+            <div class="rule"><i class="no">✕</i><p>Tocar el borde no cuenta: la pelota entera tiene que atravesar el agujero.</p></div>
+            <div class="rule"><i class="no">✕</i><p>Si no revientas burbujas no hay nada que multiplicar, y los +2 y −2 de otros objetos no se multiplican.</p></div>
+            <div class="rule"><i class="info">↕</i><p>Colócalo de pie y en el aire: puedes girarlo y subirlo como quieras.</p></div>
+            <p class="price"><span class="coin" aria-hidden="true"></span> <b class="on">Precio 15</b> · Retirarlo cuesta 18</p>
+          </div>
         </article>
       </div>
 
@@ -717,21 +995,22 @@ footer p { max-width: 60ch; }
         <div class="pane">
           <h3>Colocar</h3>
           <ul class="steps">
-            <li><span>Hazlo en tu fase de colocación, antes de disparar. Verás una versión transparente del objeto.</span></li>
-            <li><kbd>R</kbd><span>Gira el objeto.</span></li>
-            <li><kbd>Clic izq.</kbd><span>Confirma dónde va. No se puede poner sobre huecos, castillos ni otros obstáculos.</span></li>
+            <li><span>Hazlo en tu fase de colocación. Verás el objeto de vidrio: celeste si el lugar sirve, rosa si no.</span></li>
+            <li><kbd>Q</kbd><kbd>E</kbd><span>Girar · <kbd>R</kbd><kbd>F</kbd> inclinar · <kbd>Z</kbd><kbd>X</kbd> ladear</span></li>
+            <li><kbd>Rueda</kbd><span>Sube o baja el objeto para dejarlo en el aire.</span></li>
+            <li><kbd>Clic izq.</kbd><span>Confirma. No se puede encimar con burbujas, castillos, catapultas ni otros objetos.</span></li>
           </ul>
         </div>
         <div class="pane">
-          <h3>Quitar y descartar</h3>
+          <h3>Retirar</h3>
           <ul class="steps">
-            <li><kbd>Clic der.</kbd><span>Quita un obstáculo ya colocado, pagando una parte de su precio original.</span></li>
-            <li><span>Los obstáculos afectan los tiros de todos, también los de quien los puso.</span></li>
-            <li><span>Al terminar la ronda se descartan todos, colocados o no.</span></li>
+            <li><kbd>Clic</kbd><span>Sobre cualquier objeto de la arena, tuyo o de un rival: ves cuánto cuesta y confirmas.</span></li>
+            <li><span>Retirar cuesta más que comprar, y el objeto no vuelve a tu inventario.</span></li>
+            <li><span>Los objetos se quedan en la arena entre turnos hasta que alguien los retire.</span></li>
           </ul>
         </div>
       </div>
-      <p class="note">Los objetos están en desarrollo: los precios, el costo de quitar y los valores de cada multiplicador todavía se están ajustando.</p>
+      <p class="note">Los objetos están en desarrollo: los precios y los costos de retirada todavía se están ajustando.</p>
     </section>
   </div>
 </main>
@@ -747,6 +1026,9 @@ footer p { max-width: 60ch; }
         <div><kbd>Espacio</kbd> Mantén para cargar, suelta para disparar</div>
         <div><kbd>C</kbd> Vista general del mapa</div>
         <div><kbd>Esc</kbd> Pausa</div>
+        <div><kbd>Enter</kbd> Pasar a la siguiente fase</div>
+        <div><kbd>T</kbd> Abrir la tienda</div>
+        <div><kbd>Rueda</kbd> Subir o bajar el objeto al colocarlo</div>
       </div>
     </div>
     <footer>
@@ -914,19 +1196,157 @@ footer p { max-width: 60ch; }
     else window.addEventListener("resize", draw);
   })();
 
-  // Galería: al elegir una miniatura cambia la captura grande
+  // Carrusel de capturas: fundido suave entre dos imágenes, avance automático (se pausa al pasar el mouse),
+  // flechas, teclado y deslizar con el dedo
   (function () {
-    var img = document.getElementById("shot-img");
+    var stage = document.getElementById("shot-stage");
     var cap = document.getElementById("shot-cap");
-    var buttons = document.querySelectorAll(".thumbs button");
-    buttons.forEach(function (b) {
-      b.addEventListener("click", function () {
-        img.src = b.dataset.src;
-        img.alt = b.dataset.alt;
-        cap.textContent = b.dataset.cap;
-        buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+    var fig = stage.parentElement;
+    var imgs = stage.querySelectorAll("img");
+    var buttons = Array.prototype.slice.call(document.querySelectorAll(".thumbs button"));
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var DUR = 6000, index = 0, front = 0, timer = null, hover = false, visible = true;
+
+    function playing() { return !reduce && !hover && visible && !document.hidden; }
+
+    function mark() {
+      buttons.forEach(function (o, k) {
+        o.setAttribute("aria-pressed", k === index ? "true" : "false");
+        o.classList.remove("is-playing");
+      });
+      var b = buttons[index];
+      b.style.setProperty("--dur", DUR + "ms");
+      void b.offsetWidth;   // reinicia la barrita de progreso
+      if (playing()) b.classList.add("is-playing");
+    }
+
+    function schedule() {
+      clearTimeout(timer);
+      if (playing()) timer = setTimeout(function () { show(index + 1); }, DUR);
+      mark();
+    }
+
+    function show(n) {
+      n = (n + buttons.length) % buttons.length;
+      if (n === index) { schedule(); return; }
+      index = n;
+      var b = buttons[n], next = imgs[1 - front], cur = imgs[front];
+      var swap = function () {
+        next.alt = b.dataset.alt;
+        next.removeAttribute("aria-hidden");
+        cur.setAttribute("aria-hidden", "true");
+        cur.alt = "";
+        next.classList.add("is-on");
+        cur.classList.remove("is-on");
+        front = 1 - front;
+      };
+      next.src = b.dataset.src;
+      if (next.decode) next.decode().then(swap, swap); else next.onload = swap;
+      cap.classList.add("is-fading");
+      setTimeout(function () { cap.textContent = b.dataset.cap; cap.classList.remove("is-fading"); }, 300);
+      schedule();
+    }
+
+    buttons.forEach(function (b, k) { b.addEventListener("click", function () { show(k); }); });
+    fig.querySelector(".prev").addEventListener("click", function () { show(index - 1); });
+    fig.querySelector(".next").addEventListener("click", function () { show(index + 1); });
+    fig.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") { hover = true; schedule(); } });
+    fig.addEventListener("pointerleave", function () { hover = false; schedule(); });
+    document.getElementById("capturas").addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") show(index - 1);
+      if (e.key === "ArrowRight") show(index + 1);
+    });
+    var x0 = null;
+    stage.addEventListener("pointerdown", function (e) { x0 = e.clientX; });
+    stage.addEventListener("pointerup", function (e) {
+      if (x0 === null) return;
+      var dx = e.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 40) show(index + (dx < 0 ? 1 : -1));
+    });
+    document.addEventListener("visibilitychange", schedule);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; schedule(); }, { threshold: 0.3 }).observe(stage);
+    }
+    // Precarga las demás capturas para que el fundido sea instantáneo
+    window.addEventListener("load", function () { buttons.forEach(function (b) { var i = new Image(); i.src = b.dataset.src; }); });
+    schedule();
+  })();
+
+  // Variantes de cada objeto: botones, texto, precio e ícono (funciona aunque no haya 3D)
+  (function () {
+    var EFFECT = {
+      normal: "Solo desvía la pelota: no da ni quita monedas.",
+      positive: "+2 monedas si la pelota lo toca y en ese tiro revientas al menos una burbuja.",
+      negative: "−2 monedas al tiro que lo toque y reviente burbujas. Ideal para estorbar."
+    };
+    document.querySelectorAll(".shapes .pane").forEach(function (card) {
+      var art = card.querySelector(".shape-art");
+      var effect = card.querySelector(".effect");
+      card.querySelectorAll(".variants button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var v = btn.dataset.variant;
+          if (art.dataset.variant === v) return;
+          art.dataset.variant = v;
+          card.querySelectorAll(".variants button").forEach(function (o) { o.setAttribute("aria-pressed", o === btn ? "true" : "false"); });
+          card.querySelectorAll(".price b[data-v]").forEach(function (p) { p.classList.toggle("on", p.dataset.v === v); });
+          var img = art.querySelector(".fallback");
+          if (img) img.src = "img/objetos/" + art.dataset.kind + "_" + v + ".png";
+          effect.classList.add("is-fading");
+          var status = card.querySelectorAll(".xp-status span");
+          var price = card.querySelector('.price b[data-v="' + v + '"]');
+          status.forEach(function (s) { s.classList.add("is-fading"); });
+          setTimeout(function () {
+            effect.textContent = EFFECT[v];
+            effect.classList.remove("is-fading");
+            if (status.length === 2) {
+              status[0].textContent = btn.textContent;
+              status[1].textContent = (price ? price.textContent.replace(/\D+/g, "") : "?") + " monedas";
+            }
+            status.forEach(function (s) { s.classList.remove("is-fading"); });
+          }, 220);
+          art.dispatchEvent(new CustomEvent("variantchange", { detail: v }));
+        });
       });
     });
+  })();
+
+  // Apariciones suaves al hacer scroll y el botón de la barra de tareas que corresponde a la sección
+  (function () {
+    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce && "IntersectionObserver" in window) {
+      var groups = document.querySelectorAll(".section-head, .basics, .turn-pane, .gallery .shot-main, .thumbs, .shop, .shapes, .place, .island .pane, .platform");
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          e.target.classList.add("is-in");
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
+      groups.forEach(function (g) {
+        // Grupos con varias tarjetas: cada tarjeta entra con un pequeño retraso
+        var kids = g.matches(".basics, .shop, .shapes, .place") ? g.children : [g];
+        Array.prototype.forEach.call(kids, function (el, k) {
+          el.classList.add("reveal");
+          el.style.setProperty("--d", Math.min(k * 0.08, 0.48) + "s");
+          io.observe(el);
+        });
+      });
+    }
+    var links = {};
+    document.querySelectorAll(".nav ul a").forEach(function (a) { links[a.getAttribute("href").slice(1)] = a; });
+    if ("IntersectionObserver" in window) {
+      var nav = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          var a = links[e.target.id];
+          if (a && e.isIntersecting) {
+            Object.keys(links).forEach(function (k) { links[k].classList.remove("is-active"); });
+            a.classList.add("is-active");
+          }
+        });
+      }, { rootMargin: "-45% 0px -50% 0px" });
+      Object.keys(links).forEach(function (id) { var s = document.getElementById(id); if (s) nav.observe(s); });
+    }
   })();
 
   // Burbujas del menú del juego subiendo por toda la pantalla
@@ -945,4 +1365,358 @@ footer p { max-width: 60ch; }
       box.appendChild(img);
     }
   })();
+</script>
+
+<!-- Objetos en 3D (three.js). Si no hay WebGL o no carga, quedan los íconos del juego. -->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+  import * as THREE from "three";
+  import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+
+  const arts = Array.from(document.querySelectorAll(".shape-art[data-kind]"));
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let renderer = null;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+  } catch (e) { renderer = null; }
+
+  if (renderer && arts.length) {
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight, false);
+    renderer.setClearColor(0x000000, 0);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = 1.0;
+    renderer.domElement.className = "gl3d";
+    renderer.domElement.setAttribute("aria-hidden", "true");
+    document.body.appendChild(renderer.domElement);
+    document.documentElement.classList.add("has-3d");
+
+    // Cielo Aero pintado en un canvas: degradado azul, horizonte claro, césped y nubes. Sirve para los reflejos.
+    function skyTexture() {
+      const c = document.createElement("canvas");
+      c.width = 1024; c.height = 512;
+      const g = c.getContext("2d");
+      const grad = g.createLinearGradient(0, 0, 0, 512);
+      grad.addColorStop(0, "#1c6be3"); grad.addColorStop(0.38, "#6fc2ff"); grad.addColorStop(0.49, "#effcff");
+      grad.addColorStop(0.53, "#bfeaf7"); grad.addColorStop(0.75, "#4fb6de"); grad.addColorStop(1, "#1a6fa8");   // abajo, agua (no césped: teñía de verde los objetos blancos)
+      g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+      let seed = 7;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      for (let i = 0; i < 70; i++) {
+        const x = rnd() * 1024, y = 90 + rnd() * 130, r = 18 + rnd() * 50;
+        const rg = g.createRadialGradient(x, y, 0, x, y, r);
+        rg.addColorStop(0, "rgba(255,255,255,0.85)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+        g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+      const sun = g.createRadialGradient(300, 90, 0, 300, 90, 90);
+      sun.addColorStop(0, "rgba(255,255,240,1)"); sun.addColorStop(0.2, "rgba(255,255,230,0.9)"); sun.addColorStop(1, "rgba(255,255,230,0)");
+      g.fillStyle = sun; g.fillRect(180, 0, 240, 220);
+      const t = new THREE.CanvasTexture(c);
+      t.mapping = THREE.EquirectangularReflectionMapping;
+      t.colorSpace = THREE.SRGBColorSpace;
+      return t;
+    }
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const sky = skyTexture();
+    const env = pmrem.fromEquirectangular(sky).texture;
+    sky.dispose();
+
+    // Sombra suave bajo cada objeto y burbujitas que flotan alrededor
+    function blobTexture() {
+      const c = document.createElement("canvas"); c.width = c.height = 128;
+      const g = c.getContext("2d");
+      const rg = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+      rg.addColorStop(0, "rgba(10,61,102,0.45)"); rg.addColorStop(1, "rgba(10,61,102,0)");
+      g.fillStyle = rg; g.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    }
+    function bubbleTexture() {
+      const c = document.createElement("canvas"); c.width = c.height = 128;
+      const g = c.getContext("2d");
+      const rg = g.createRadialGradient(64, 64, 40, 64, 64, 62);
+      rg.addColorStop(0, "rgba(255,255,255,0.05)"); rg.addColorStop(0.8, "rgba(200,240,255,0.45)"); rg.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = rg; g.beginPath(); g.arc(64, 64, 62, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "rgba(255,255,255,0.9)"; g.beginPath(); g.ellipse(44, 40, 14, 8, -0.7, 0, Math.PI * 2); g.fill();
+      const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+    }
+    const blob = blobTexture(), bubbleTex = bubbleTexture();
+
+    // Los mismos materiales del juego
+    const LOOK = {
+      normal:   { color: 0xe3ecf6, emissive: 0x000000, metalness: 0.05, roughness: 0.14 },
+      positive: { color: 0x38d685, emissive: 0x0d5a2e, metalness: 0.0,  roughness: 0.1 },
+      negative: { color: 0x262b3d, emissive: 0x16050c, metalness: 0.15, roughness: 0.08 },
+      special:  { color: 0xffb93a, emissive: 0x5a3500, metalness: 0.55, roughness: 0.18 },   // dorado cálido (con más metal reflejaba el cielo y se veía verde)
+    };
+
+    // Formas con las medidas del juego (en metros)
+    function geometry(kind) {
+      switch (kind) {
+        case "wall": return new RoundedBoxGeometry(5, 2, 0.5, 4, 0.06);
+        case "ramp": {   // cuña: 4,4 de largo, 2 de alto y 2,6 de ancho
+          const s = new THREE.Shape();
+          s.moveTo(-2.2, 0); s.lineTo(2.2, 0); s.lineTo(2.2, 2.0); s.closePath();
+          return new THREE.ExtrudeGeometry(s, { depth: 2.6, bevelEnabled: false });
+        }
+        case "cylinder": return new THREE.CylinderGeometry(0.55, 0.55, 4.2, 56);
+        case "sphere": return new THREE.SphereGeometry(1.05, 64, 32);
+        case "pyramid": { const p = new THREE.ConeGeometry(2.4 / Math.SQRT2, 2.1, 4, 1); p.rotateY(Math.PI / 4); return p; }
+        case "ring": return new THREE.TorusGeometry(2.0, 0.2, 32, 128);
+        default: return new RoundedBoxGeometry(1.9, 1.9, 1.9, 4, 0.08);
+      }
+    }
+    // Pose inicial que mejor muestra cada forma
+    const POSE = { wall: [0.12, 0.5], ramp: [0.2, 0.6], cylinder: [0.15, 0.9], pyramid: [0.05, 0.3], ring: [0.08, 0.55], cube: [0.25, 0.6], sphere: [0, 0] };
+
+    function symbol(plus) {
+      const grp = new THREE.Group();
+      const mat = new THREE.MeshStandardMaterial({
+        color: plus ? 0xd9ffe6 : 0xffd6df, emissive: plus ? 0x4dff8a : 0xff4d7a, emissiveIntensity: 0.9, roughness: 0.2,
+      });
+      const bar = new THREE.BoxGeometry(0.75, 0.2, 0.2);
+      grp.add(new THREE.Mesh(bar, mat));
+      if (plus) { const v = new THREE.Mesh(bar, mat); v.rotation.z = Math.PI / 2; grp.add(v); }
+      grp.scale.setScalar(0.0001);
+      return grp;
+    }
+
+    const easeOutBack = (t) => 1 + 2.7 * Math.pow(t - 1, 3) + 1.7 * Math.pow(t - 1, 2);
+
+    class View {
+      constructor(el) {
+        this.el = el;
+        this.kind = el.dataset.kind;
+        this.scene = new THREE.Scene();
+        this.scene.environment = env;
+        this.camera = new THREE.PerspectiveCamera(28, 1, 0.1, 200);
+        this.scene.add(new THREE.HemisphereLight(0xe6f6ff, 0x3f7fb0, 0.55));
+        const sun = new THREE.DirectionalLight(0xffffff, 2.4);
+        sun.position.set(-3, 6, 5);
+        this.scene.add(sun);
+
+        const v = el.dataset.variant || "normal";
+        const look = LOOK[v];
+        this.mat = new THREE.MeshPhysicalMaterial({
+          color: look.color, emissive: look.emissive, metalness: look.metalness, roughness: look.roughness,
+          clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 0.95, flatShading: this.kind === "pyramid",
+        });
+        this.target = { ...look };
+        this.colorNow = new THREE.Color(look.color);
+        this.emissiveNow = new THREE.Color(look.emissive);
+
+        const geo = geometry(this.kind);
+        geo.computeBoundingSphere();
+        geo.center();
+        this.radius = geo.boundingSphere.radius;
+        this.mesh = new THREE.Mesh(geo, this.mat);
+        this.pivot = new THREE.Group();
+        this.pivot.add(this.mesh);
+        this.scene.add(this.pivot);
+
+        // Símbolo + o − flotando encima (solo positivos y negativos)
+        this.plus = symbol(true); this.minus = symbol(false);
+        const top = this.radius * 0.95 + 0.6;
+        this.plus.position.y = this.minus.position.y = top;
+        this.scene.add(this.plus, this.minus);
+        this.symbolNow = { plus: v === "positive" ? 1 : 0, minus: v === "negative" ? 1 : 0 };
+        this.symbolGoal = { ...this.symbolNow };
+
+        const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: blob, transparent: true, depthWrite: false }));
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = -this.radius * 0.9 - 0.15;
+        shadow.scale.setScalar(this.radius * 2.4);
+        this.scene.add(shadow);
+
+        this.bubbles = [];
+        for (let i = 0; i < 4; i++) {
+          const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: bubbleTex, transparent: true, depthWrite: false }));
+          s.userData = { a: Math.random() * Math.PI * 2, r: this.radius * (1.1 + Math.random() * 0.5), y: Math.random(), sp: 0.15 + Math.random() * 0.2 };
+          s.scale.setScalar(0.35 + Math.random() * 0.4);
+          this.scene.add(s);
+          this.bubbles.push(s);
+        }
+
+        // Aro: una pelota va y vuelve tres veces por dentro y el multiplicador se apila: ×2, ×4, ×8
+        if (this.kind === "ring") {
+          this.ball = new THREE.Mesh(new THREE.SphereGeometry(0.35, 32, 16), new THREE.MeshPhysicalMaterial({ color: 0xff8a80, roughness: 0.1, clearcoat: 1 }));
+          this.pivot.add(this.ball);
+          this.ballT = 3.5;   // empieza en la pausa
+          this.x2 = el.querySelector(".x2");
+          this.flash = 0;
+        }
+
+        const [pitch, yaw] = POSE[this.kind] || [0.2, 0.5];
+        this.pitch = pitch; this.yaw = yaw; this.pitchGoal = pitch;
+        this.spin = reduce ? 0 : 0.35;    // giro automático lento
+        this.vel = 0; this.hover = 0; this.hoverGoal = 0;
+        this.t = Math.random() * 10;
+        this.card = el.closest(".pane");
+        this.ladder = this.kind === "ring" && this.card ? [...this.card.querySelectorAll(".ring-ladder li")] : [];
+        this.appear = 0;
+        this.bind();
+      }
+
+      // Ilumina en la escalera del aro el multiplicador que lleva la animación (nada en la pausa)
+      lightLadder() {
+        for (const li of this.ladder) li.classList.toggle("on", Number(li.dataset.n) === this.passes);
+      }
+
+      bind() {
+        const el = this.el;
+        let dragging = false, lastX = 0, lastY = 0, lastT = 0;
+        el.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0) return;
+          dragging = true; lastX = e.clientX; lastY = e.clientY; lastT = performance.now();
+          this.vel = 0; el.setPointerCapture(e.pointerId); el.classList.add("touched");
+        });
+        el.addEventListener("pointermove", (e) => {
+          if (!dragging) return;
+          // Si el "soltar" se perdió (fuera de la ventana), el mouse llega sin botón: termina el arrastre.
+          if (e.pointerType === "mouse" && e.buttons === 0) { dragging = false; return; }
+          const now = performance.now(), dt = Math.max(1, now - lastT) / 1000;
+          const dx = e.clientX - lastX, dy = e.clientY - lastY;
+          this.yaw += dx * 0.012;
+          this.pitchGoal = THREE.MathUtils.clamp(this.pitchGoal + dy * 0.008, -0.9, 1.1);
+          this.vel = THREE.MathUtils.lerp(this.vel, (dx * 0.012) / dt, 0.5);
+          lastX = e.clientX; lastY = e.clientY; lastT = now;
+        });
+        const end = () => { dragging = false; };
+        el.addEventListener("pointerup", end);
+        el.addEventListener("pointercancel", end);
+        el.addEventListener("lostpointercapture", end);
+        el.addEventListener("pointerenter", () => { this.hoverGoal = 1; });
+        el.addEventListener("pointerleave", () => { this.hoverGoal = 0; });
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowLeft") { this.vel -= 3; e.preventDefault(); }
+          if (e.key === "ArrowRight") { this.vel += 3; e.preventDefault(); }
+          if (e.key === "ArrowUp") { this.pitchGoal = Math.max(-0.9, this.pitchGoal - 0.2); e.preventDefault(); }
+          if (e.key === "ArrowDown") { this.pitchGoal = Math.min(1.1, this.pitchGoal + 0.2); e.preventDefault(); }
+          el.classList.add("touched");
+        });
+        el.addEventListener("variantchange", (e) => this.setVariant(e.detail));
+        this.dragging = () => dragging;
+      }
+
+      setVariant(v) {
+        this.target = { ...LOOK[v] };
+        this.symbolGoal = { plus: v === "positive" ? 1 : 0, minus: v === "negative" ? 1 : 0 };
+        this.vel += reduce ? 0 : 4;   // un giro rápido para lucir el cambio
+      }
+
+      update(dt) {
+        this.t += dt;
+        const k = 1 - Math.exp(-dt * 6);
+        // Materiales: transición suave hacia la variante elegida
+        this.colorNow.lerp(new THREE.Color(this.target.color), k);
+        this.emissiveNow.lerp(new THREE.Color(this.target.emissive), k);
+        this.mat.color.copy(this.colorNow);
+        this.mat.emissive.copy(this.emissiveNow);
+        this.mat.metalness += (this.target.metalness - this.mat.metalness) * k;
+        this.mat.roughness += (this.target.roughness - this.mat.roughness) * k;
+
+        for (const s of ["plus", "minus"]) {
+          this.symbolNow[s] += (this.symbolGoal[s] - this.symbolNow[s]) * (1 - Math.exp(-dt * 7));
+          const sc = Math.max(0.0001, easeOutBack(THREE.MathUtils.clamp(this.symbolNow[s], 0, 1)));
+          this[s].scale.setScalar(sc);
+          this[s].rotation.y += dt * 1.6;
+          this[s].position.y = this.radius * 0.95 + 0.6 + (reduce ? 0 : Math.sin(this.t * 2) * 0.08);
+        }
+
+        // Giro: arrastre con inercia que vuelve de a poco al giro automático
+        if (!this.dragging()) {
+          this.vel += (this.spin - this.vel) * (1 - Math.exp(-dt * 1.6));
+          this.yaw += this.vel * dt;
+        }
+        this.pitch += (this.pitchGoal - this.pitch) * (1 - Math.exp(-dt * 8));
+        this.hover += (this.hoverGoal - this.hover) * (1 - Math.exp(-dt * 8));
+        this.pivot.rotation.set(this.pitch, this.yaw, 0, "YXZ");
+        this.pivot.position.y = reduce ? 0 : Math.sin(this.t * 1.4) * 0.08 * this.radius;
+        const shown = !this.card || !this.card.classList.contains("reveal") || this.card.classList.contains("is-in");
+        this.appear = shown ? Math.min(1, this.appear + dt * 1.8) : 0;
+        const pop = reduce ? 1 : easeOutBack(this.appear);
+        this.pivot.scale.setScalar(Math.max(0.0001, pop) * (1 + 0.06 * this.hover));
+        for (const b of this.bubbles) b.visible = this.appear > 0.3;
+
+        for (const b of this.bubbles) {
+          const u = b.userData;
+          u.a += dt * u.sp;
+          u.y = (u.y + dt * 0.08) % 1;
+          b.position.set(Math.cos(u.a) * u.r, (u.y - 0.5) * this.radius * 2.2, Math.sin(u.a) * u.r * 0.6 - 0.4);
+          b.material.opacity = Math.sin(u.y * Math.PI);
+        }
+
+        if (this.ball) {
+          this.ballT += dt / 1.1;
+          if (this.ballT > 4) { this.ballT = 0; this.passes = 0; this.prevZ = undefined; this.lightLadder(); }
+          const t = Math.min(this.ballT, 3);
+          const z = -5 * Math.cos(Math.PI * t);   // ida, vuelta e ida: cruza el aro en t = 0,5, 1,5 y 2,5
+          this.ball.position.set(0, 0, z);
+          this.ball.visible = this.ballT < 3;
+          if (this.prevZ !== undefined && this.ball.visible && (this.prevZ < 0) !== (z < 0)) {
+            this.passes = (this.passes || 0) + 1;
+            this.flash = 1;
+            if (this.x2) {
+              this.x2.textContent = "×" + 2 ** this.passes;
+              this.x2.classList.remove("is-pop"); void this.x2.offsetWidth; this.x2.classList.add("is-pop");
+            }
+            this.lightLadder();
+          }
+          this.prevZ = z;
+          this.flash = Math.max(0, this.flash - dt * 1.8);
+          this.mat.emissiveIntensity = 1 + this.flash * 3;
+        }
+      }
+
+      render(rect) {
+        const w = rect.width, h = rect.height;
+        this.camera.aspect = w / h;
+        const vfov = THREE.MathUtils.degToRad(this.camera.fov);
+        const hfov = 2 * Math.atan(Math.tan(vfov / 2) * this.camera.aspect);
+        const fit = (this.radius + 1.05) / Math.sin(Math.min(vfov, hfov) / 2);
+        this.camera.position.set(0, fit * 0.22, fit * 0.98);
+        this.camera.lookAt(0, this.radius * 0.22, 0);
+        this.camera.updateProjectionMatrix();
+        const y = window.innerHeight - rect.bottom;
+        renderer.setViewport(rect.left, y, w, h);
+        renderer.setScissor(rect.left, y, w, h);
+        renderer.render(this.scene, this.camera);
+      }
+    }
+
+    const views = arts.map((el) => new View(el));
+    let active = true;
+    const section = document.getElementById("objetos");
+    if ("IntersectionObserver" in window && section) {
+      new IntersectionObserver((es) => { active = es[0].isIntersecting; }, { rootMargin: "200px 0px" }).observe(section);
+    }
+    window.addEventListener("resize", () => renderer.setSize(window.innerWidth, window.innerHeight, false));
+
+    const clock = new THREE.Clock();
+    let cleared = false;
+    renderer.setAnimationLoop(() => {
+      const dt = Math.min(clock.getDelta(), 0.05);
+      if (!active || document.hidden) {
+        // Fuera de la sección: se borra una vez para que no queden objetos pintados encima de la página
+        if (!cleared) { renderer.setScissorTest(false); renderer.clear(); cleared = true; }
+        return;
+      }
+      cleared = false;
+      renderer.setScissorTest(false);
+      renderer.clear();
+      renderer.setScissorTest(true);
+      const vh = window.innerHeight, vw = window.innerWidth;
+      for (const v of views) {
+        const r = v.el.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw || r.width === 0) continue;
+        v.update(dt);
+        v.render(r);
+      }
+    });
+  }
 </script>
