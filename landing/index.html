@@ -387,6 +387,20 @@ footer p { max-width: 60ch; }
 @media (max-width: 1359px) { .side { display: none; } }
 
 /* Ventanas clásicas de escritorio (decoración) */
+.xp-frame {
+  color: #000; font-size: 0.75rem; background: #ece9d8; border: 1px solid #0831d9; border-radius: 8px 8px 0 0; overflow: hidden;
+  margin-bottom: 14px; box-shadow: 0 10px 24px rgba(4, 38, 77, 0.28);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), box-shadow 0.35s;
+}
+.xp-frame:hover, .xp-frame:focus-within { transform: translateY(-3px); box-shadow: 0 16px 32px rgba(4, 38, 77, 0.36); }
+.xp-frame .xp-title { filter: saturate(0.45) brightness(1.15); transition: filter 0.35s; }   /* ventana inactiva hasta que la miras */
+.xp-frame:hover .xp-title, .xp-frame:focus-within .xp-title { filter: none; }
+.xp-frame .shape-art {
+  margin: 3px; border: 1px solid #7f9db9; border-radius: 0;
+  background: radial-gradient(ellipse 45% 18% at 50% 88%, rgba(10, 61, 102, 0.2), transparent 70%), linear-gradient(to bottom, #f4faff, #d6ecfb 60%, #c2e2f6);
+}
+.xp-frame .xp-status span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity 0.22s; }
+.xp-frame .xp-status span.is-fading { opacity: 0; }
 #como-se-juega, #objetos { position: relative; }
 .xp-win {
   position: absolute; right: 0; top: -36px; width: 250px; z-index: 0; color: #000; font-size: 0.75rem;
@@ -543,6 +557,21 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
   text-shadow: 0 0 18px rgba(255, 210, 80, 0.9), 0 2px 0 #9a6a0c, 0 0 2px #fff;
 }
 .shape-ring .x2.is-pop { animation: pop 1s cubic-bezier(.2, .8, .2, 1) forwards; }
+.ring-lead { margin-top: 10px; color: var(--ink); }
+.ring-ladder { list-style: none; margin: 12px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.ring-ladder li {
+  border-radius: 14px; padding: 8px 4px; text-align: center; background: linear-gradient(to bottom, #fffdf3, #ffefbf);
+  border: 1px solid rgba(154, 106, 12, 0.35); box-shadow: inset 0 1px 0 #fff, 0 3px 8px rgba(4, 38, 77, 0.12);
+  transition: transform 0.35s cubic-bezier(.2, .8, .2, 1), background 0.35s, box-shadow 0.35s;
+}
+.ring-ladder strong { display: block; font-family: var(--font-display); font-weight: 600; font-size: 1.35rem; line-height: 1.15; color: #8a5d06; }
+.ring-ladder span { font-size: 0.78rem; font-weight: 600; color: var(--ink-soft); }
+.ring-ladder li.on {
+  background: linear-gradient(to bottom, #fff1b8, #f0b73c 50%, #d99a1c); transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 0 0 3px rgba(255, 214, 90, 0.35), 0 8px 16px rgba(154, 106, 12, 0.3);
+}
+.ring-ladder li.on strong, .ring-ladder li.on span { color: var(--navy); }
+.ring-example { margin-top: 12px; padding: 8px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.6); border: 1px solid var(--glass-edge); font-size: 0.92rem; color: var(--ink); }
 @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); } 25% { opacity: 1; transform: translate(-50%, -60%) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -110%) scale(1); } }
 .mult .bad { background: linear-gradient(to bottom, #6b7390, #2b3146 55%, #1b1f2e); }
 .shop-slots .slot img { width: 58px; height: 58px; object-fit: contain; }
@@ -555,6 +584,10 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
   .reveal { opacity: 1; transform: none; transition: none; }
   .shot-stage img { transition: opacity 0.2s; transform: none; }
   .thumbs button.is-playing::after { animation: none; }
+  .ring-ladder li { transition: none; }
+  .xp-frame { transition: none; }
+  .xp-frame:hover, .xp-frame:focus-within { transform: none; }
+  .ring-ladder li.on { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -824,7 +857,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 
       <div class="shapes">
         <article class="pane">
-          <div class="shape-art" data-kind="cube" data-variant="normal" tabindex="0" role="img" aria-label="Cubo en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cube_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Cubo - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="cube" data-variant="normal" tabindex="0" role="img" aria-label="Cubo en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cube_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
           <h3>Cubo</h3>
           <div class="variants" role="group" aria-label="Variantes de cubo">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -837,7 +875,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="wall" data-variant="normal" tabindex="0" role="img" aria-label="Pared en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/wall_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Pared - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="wall" data-variant="normal" tabindex="0" role="img" aria-label="Pared en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/wall_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">4 monedas</span></div>
+          </div>
           <h3>Pared</h3>
           <div class="variants" role="group" aria-label="Variantes de pared">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -850,7 +893,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 4</b> · <b data-v="positive">Positivo 9</b> · <b data-v="negative">Negativo 7</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="ramp" data-variant="normal" tabindex="0" role="img" aria-label="Rampa en 3D: arrastra para girarla"><img class="fallback" src="img/objetos/ramp_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Rampa - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="ramp" data-variant="normal" tabindex="0" role="img" aria-label="Rampa en 3D: arrastra para girarla"><img class="fallback" src="img/objetos/ramp_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
           <h3>Rampa</h3>
           <div class="variants" role="group" aria-label="Variantes de rampa">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -863,7 +911,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="cylinder" data-variant="normal" tabindex="0" role="img" aria-label="Cilindro en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cylinder_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Cilindro - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="cylinder" data-variant="normal" tabindex="0" role="img" aria-label="Cilindro en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/cylinder_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
           <h3>Cilindro</h3>
           <div class="variants" role="group" aria-label="Variantes de cilindro">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -876,7 +929,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="sphere" data-variant="normal" tabindex="0" role="img" aria-label="Esfera en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/sphere_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Esfera - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="sphere" data-variant="normal" tabindex="0" role="img" aria-label="Esfera en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/sphere_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
           <h3>Esfera</h3>
           <div class="variants" role="group" aria-label="Variantes de esfera">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -889,7 +947,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="pyramid" data-variant="normal" tabindex="0" role="img" aria-label="Pirámide en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/pyramid_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Pirámide - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="pyramid" data-variant="normal" tabindex="0" role="img" aria-label="Pirámide en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/pyramid_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Normal</span><span class="xp-cost">3 monedas</span></div>
+          </div>
           <h3>Pirámide</h3>
           <div class="variants" role="group" aria-label="Variantes de pirámide">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
@@ -902,14 +965,26 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane shape-ring">
-          <div class="shape-art" data-kind="ring" data-variant="special" tabindex="0" role="img" aria-label="Aro multiplicador en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/ring_special.png" alt=""><span class="x2" aria-hidden="true">×2</span><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <div class="xp-frame">
+            <div class="xp-title"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1 L15 4.5 V11.5 L8 15 L1 11.5 V4.5 Z" fill="#a9d6ff" stroke="#1d4f91"/><path d="M1 4.5 L8 8 L15 4.5 M8 8 V15" fill="none" stroke="#1d4f91"/></svg><span>Aro multiplicador - Visor 3D</span><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" aria-hidden="true">×</b></div>
+            <div class="xp-menu" aria-hidden="true"><span>Archivo</span><span>Ver</span><span>Variantes</span><span>Ayuda</span></div>
+            <div class="shape-art" data-kind="ring" data-variant="special" tabindex="0" role="img" aria-label="Aro multiplicador en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/ring_special.png" alt=""><span class="x2" aria-hidden="true">×2</span><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+            <div class="xp-status"><span class="xp-variant">Especial ×2 por pasada</span><span class="xp-cost">15 monedas</span></div>
+          </div>
           <div>
             <h3>Aro multiplicador</h3>
             <div class="variants"><span class="badge v-special">Especial ×2 por pasada · el objeto más caro</span></div>
-            <div class="rule"><i class="yes">✓</i><p>Cada vez que la pelota pasa por un aro y revientas burbujas, las monedas de burbujas se duplican.</p></div>
-            <div class="rule"><i class="no">✕</i><p>Tocar el borde no cuenta: la pelota entera tiene que pasar por el agujero.</p></div>
-            <div class="rule"><i class="info">×8</i><p>Se apilan: 2 pasadas ×4, 3 pasadas ×8, y así. Si la pelota vuelve a cruzar el mismo aro, también cuenta.</p></div>
-            <div class="rule"><i class="info">±</i><p>No multiplica los +2 ni los −2 de los otros objetos.</p></div>
+            <p class="ring-lead">Cada vez que la pelota pasa por dentro de un aro, <b>las monedas de burbujas de ese tiro se duplican</b>. Y se acumula con cada pasada:</p>
+            <ol class="ring-ladder" aria-label="Multiplicador según cuántas veces pasa la pelota">
+              <li data-n="1"><strong>×2</strong><span>1 pasada</span></li>
+              <li data-n="2"><strong>×4</strong><span>2 pasadas</span></li>
+              <li data-n="3"><strong>×8</strong><span>3 pasadas</span></li>
+              <li data-n="4"><strong>×16</strong><span>4… y sigue</span></li>
+            </ol>
+            <p class="ring-example">Ejemplo: revientas burbujas por <b>6</b> y la pelota cruza aros <b>3 veces</b> → 6 × 8 = <b>48 monedas</b>.</p>
+            <div class="rule"><i class="yes">✓</i><p>Cuentan aros distintos y también <b>el mismo aro</b> si la pelota vuelve a cruzarlo.</p></div>
+            <div class="rule"><i class="no">✕</i><p>Tocar el borde no cuenta: la pelota entera tiene que atravesar el agujero.</p></div>
+            <div class="rule"><i class="no">✕</i><p>Si no revientas burbujas no hay nada que multiplicar, y los +2 y −2 de otros objetos no se multiplican.</p></div>
             <div class="rule"><i class="info">↕</i><p>Colócalo de pie y en el aire: puedes girarlo y subirlo como quieras.</p></div>
             <p class="price"><span class="coin" aria-hidden="true"></span> <b class="on">Precio 15</b> · Retirarlo cuesta 18</p>
           </div>
@@ -1218,7 +1293,18 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           var img = art.querySelector(".fallback");
           if (img) img.src = "img/objetos/" + art.dataset.kind + "_" + v + ".png";
           effect.classList.add("is-fading");
-          setTimeout(function () { effect.textContent = EFFECT[v]; effect.classList.remove("is-fading"); }, 220);
+          var status = card.querySelectorAll(".xp-status span");
+          var price = card.querySelector('.price b[data-v="' + v + '"]');
+          status.forEach(function (s) { s.classList.add("is-fading"); });
+          setTimeout(function () {
+            effect.textContent = EFFECT[v];
+            effect.classList.remove("is-fading");
+            if (status.length === 2) {
+              status[0].textContent = btn.textContent;
+              status[1].textContent = (price ? price.textContent.replace(/\D+/g, "") : "?") + " monedas";
+            }
+            status.forEach(function (s) { s.classList.remove("is-fading"); });
+          }, 220);
           art.dispatchEvent(new CustomEvent("variantchange", { detail: v }));
         });
       });
@@ -1471,8 +1557,14 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         this.vel = 0; this.hover = 0; this.hoverGoal = 0;
         this.t = Math.random() * 10;
         this.card = el.closest(".pane");
+        this.ladder = this.kind === "ring" && this.card ? [...this.card.querySelectorAll(".ring-ladder li")] : [];
         this.appear = 0;
         this.bind();
+      }
+
+      // Ilumina en la escalera del aro el multiplicador que lleva la animación (nada en la pausa)
+      lightLadder() {
+        for (const li of this.ladder) li.classList.toggle("on", Number(li.dataset.n) === this.passes);
       }
 
       bind() {
@@ -1561,7 +1653,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 
         if (this.ball) {
           this.ballT += dt / 1.1;
-          if (this.ballT > 4) { this.ballT = 0; this.passes = 0; this.prevZ = undefined; }
+          if (this.ballT > 4) { this.ballT = 0; this.passes = 0; this.prevZ = undefined; this.lightLadder(); }
           const t = Math.min(this.ballT, 3);
           const z = -5 * Math.cos(Math.PI * t);   // ida, vuelta e ida: cruza el aro en t = 0,5, 1,5 y 2,5
           this.ball.position.set(0, 0, z);
@@ -1573,6 +1665,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
               this.x2.textContent = "×" + 2 ** this.passes;
               this.x2.classList.remove("is-pop"); void this.x2.offsetWidth; this.x2.classList.add("is-pop");
             }
+            this.lightLadder();
           }
           this.prevZ = z;
           this.flash = Math.max(0, this.flash - dt * 1.8);
