@@ -358,7 +358,7 @@ public static partial class CatapultasSceneBuilder
         AeroUI.Gradient(titleText, Color.white, new Color(0.42f, 0.8f, 1f));
         AeroUI.Effect<Outline>(titleText, Navy, new Vector2(3.5f, -3.5f));
         AeroUI.Effect<Shadow>(titleText, new Color(0.02f, 0.15f, 0.3f, 0.35f), new Vector2(0f, -8f));
-        var sub = AeroUI.Label(title, "Subtitulo", "y burbujas", 54, new Color(0.1f, 0.4f, 0.66f), AeroWeight.Regular);
+        var sub = AeroUI.Label(title, "Subtitulo", "y castillos", 54, new Color(0.1f, 0.4f, 0.66f), AeroWeight.Regular);
         sub.rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -200f), new Vector2(900f, 70f));
         AeroUI.Effect<Outline>(sub, new Color(1f, 1f, 1f, 0.85f), new Vector2(1.5f, -1.5f));
 

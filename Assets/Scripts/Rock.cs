@@ -27,6 +27,9 @@ public class Rock : MonoBehaviour
     private float slowTime;
     private bool timerStarted;
     private bool finished;
+    private float gravityScale = 1f;
+    private Vector3 lastPosition;
+    private bool hasLastPosition;
 
     private void Awake()
     {
@@ -36,10 +39,33 @@ public class Rock : MonoBehaviour
             Radius = sphere.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
     }
 
-    public void Launch(Vector3 direction, float speed, int ownerId)
+    // gravityScale > 1: cae más rápido (la catapulta lo compensa con más velocidad, ver GameBalance.projectileSpeed)
+    public void Launch(Vector3 direction, float speed, int ownerId, float gravityScale = 1f)
     {
         OwnerId = ownerId;
+        this.gravityScale = gravityScale;
         rb.linearVelocity = direction.normalized * speed; // en Unity 2022 o anterior usa rb.velocity
+        lastPosition = rb.position;
+        hasLastPosition = true;
+    }
+
+    private void FixedUpdate()
+    {
+        if (rb.isKinematic) { hasLastPosition = false; return; }
+        if (rb.useGravity && gravityScale != 1f) rb.AddForce(Physics.gravity * (gravityScale - 1f), ForceMode.Acceleration);
+
+        // Barrido entre pasos de física: aunque vaya muy rápido, no puede pasar "entre" un paso y otro sin tocar una burbuja
+        Vector3 pos = rb.position;
+        if (hasLastPosition)
+        {
+            Vector3 delta = pos - lastPosition;
+            float dist = delta.magnitude;
+            if (dist > 0.01f)
+                foreach (var hit in Physics.SphereCastAll(lastPosition, Radius, delta / dist, dist, ~0, QueryTriggerInteraction.Collide))
+                    if (hit.collider.TryGetComponent(out Bubble bubble)) bubble.HitBy(this);
+        }
+        lastPosition = pos;
+        hasLastPosition = true;
     }
 
     private void OnCollisionEnter(Collision collision)

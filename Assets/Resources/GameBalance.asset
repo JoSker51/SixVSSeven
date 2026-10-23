@@ -15,6 +15,7 @@ MonoBehaviour:
   startingCoins: 5
   defaultWinCoins: 100
   randomSeed: 0
+  projectileSpeed: 1.35
   arenaRadius: 27
   castleRingRadius: 21
   catapultRingRadius: 14.5
@@ -61,7 +62,7 @@ MonoBehaviour:
     kind: 0
     variant: 1
     displayName: Cubo
-    description: "Bloque s\xF3lido que desv\xEDa la pelota. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro."
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. +2 si lo toca y revientas burbujas."
     price: 8
     removalCost: 12
     inShop: 1
@@ -71,7 +72,7 @@ MonoBehaviour:
     kind: 0
     variant: 2
     displayName: Cubo
-    description: "Bloque s\xF3lido que desv\xEDa la pelota. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1
@@ -91,7 +92,7 @@ MonoBehaviour:
     kind: 1
     variant: 1
     displayName: Pared
-    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro."
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. +2 si lo toca y revientas burbujas."
     price: 9
     removalCost: 13
     inShop: 1
@@ -101,7 +102,7 @@ MonoBehaviour:
     kind: 1
     variant: 2
     displayName: Pared
-    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. \u22122 si lo toca y revientas burbujas."
     price: 7
     removalCost: 11
     inShop: 1
@@ -121,7 +122,7 @@ MonoBehaviour:
     kind: 2
     variant: 1
     displayName: Tapa
-    description: 'Disco plano: sirve de rampa o de techo. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.'
+    description: 'Disco plano: sirve de rampa o de techo. +2 si lo toca y revientas burbujas.'
     price: 8
     removalCost: 12
     inShop: 1
@@ -131,7 +132,7 @@ MonoBehaviour:
     kind: 2
     variant: 2
     displayName: Tapa
-    description: "Disco plano: sirve de rampa o de techo. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Disco plano: sirve de rampa o de techo. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1
@@ -151,7 +152,7 @@ MonoBehaviour:
     kind: 4
     variant: 1
     displayName: Cilindro
-    description: Columna larga; acostada hace de rodillo. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    description: Columna larga; acostada hace de rodillo. +2 si lo toca y revientas burbujas.
     price: 8
     removalCost: 12
     inShop: 1
@@ -161,7 +162,7 @@ MonoBehaviour:
     kind: 4
     variant: 2
     displayName: Cilindro
-    description: "Columna larga; acostada hace de rodillo. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Columna larga; acostada hace de rodillo. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1
@@ -181,7 +182,7 @@ MonoBehaviour:
     kind: 5
     variant: 1
     displayName: Esfera
-    description: Bola brillante con rebotes impredecibles. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    description: Bola brillante con rebotes impredecibles. +2 si lo toca y revientas burbujas.
     price: 8
     removalCost: 12
     inShop: 1
@@ -191,7 +192,7 @@ MonoBehaviour:
     kind: 5
     variant: 2
     displayName: Esfera
-    description: "Bola brillante con rebotes impredecibles. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Bola brillante con rebotes impredecibles. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1
@@ -211,7 +212,7 @@ MonoBehaviour:
     kind: 6
     variant: 1
     displayName: "Pir\xE1mide"
-    description: Sus caras inclinadas mandan la pelota de lado. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    description: Sus caras inclinadas mandan la pelota de lado. +2 si lo toca y revientas burbujas.
     price: 8
     removalCost: 12
     inShop: 1
@@ -221,7 +222,7 @@ MonoBehaviour:
     kind: 6
     variant: 2
     displayName: "Pir\xE1mide"
-    description: "Sus caras inclinadas mandan la pelota de lado. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    description: "Sus caras inclinadas mandan la pelota de lado. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1

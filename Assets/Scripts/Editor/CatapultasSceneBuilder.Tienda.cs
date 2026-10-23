@@ -60,8 +60,8 @@ public static partial class CatapultasSceneBuilder
                 var prefab = BuildItemPrefab(id, s.kind, v, torus, pyramid);
                 string effect = v switch
                 {
-                    ItemVariant.Positive => $" +{b.positiveBonus} monedas si la pelota lo toca y revientas burbujas en ese tiro.",
-                    ItemVariant.Negative => $" −{b.negativePenalty} monedas al tiro que lo toque y reviente burbujas.",
+                    ItemVariant.Positive => $" +{b.positiveBonus} si lo toca y revientas burbujas.",   // corto: cabe en la tarjeta
+                    ItemVariant.Negative => $" −{b.negativePenalty} si lo toca y revientas burbujas.",
                     _ => " No da ni quita monedas.",
                 };
                 int price = v == ItemVariant.Positive ? s.positive : v == ItemVariant.Negative ? s.negative : s.normal;

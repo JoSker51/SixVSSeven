@@ -93,7 +93,13 @@ public class Bubble : MonoBehaviour
     {
         if (Popped) return;
         var rock = other.attachedRigidbody ? other.attachedRigidbody.GetComponent<Rock>() : null;
-        if (rock == null) return;
+        if (rock != null) HitBy(rock);
+    }
+
+    // También la llama el barrido de la pelota (Rock.FixedUpdate) por si va tan rápido que el trigger no la ve
+    public void HitBy(Rock rock)
+    {
+        if (Popped || rock == null) return;
         if (IsCastle && rock.OwnerId == OwnerId) return;   // el dueño no revienta la burbuja de su castillo
 
         var shot = ShotTracker.Active;

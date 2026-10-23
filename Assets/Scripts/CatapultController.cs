@@ -140,7 +140,9 @@ public class CatapultController : MonoBehaviour
     }
 
     public Vector3 LaunchDirection => transform.rotation * Quaternion.Euler(-Angle, 0f, 0f) * Vector3.forward;
-    public float LaunchSpeed => Mathf.Lerp(minPower, maxPower, Power01);
+    // La velocidad sube con projectileSpeed y la gravedad del tiro con su cuadrado: mismas distancias, vuelo más rápido
+    public float LaunchSpeed => Mathf.Lerp(minPower, maxPower, Power01) * GameBalance.Current.projectileSpeed;
+    public static Vector3 ShotGravity => Physics.gravity * GameBalance.Current.ProjectileGravityScale;
     private Vector3 LaunchOrigin => launchPoint ? launchPoint.position : transform.position + Vector3.up * 2f;
 
     private IEnumerator FireRoutine()
@@ -161,7 +163,7 @@ public class CatapultController : MonoBehaviour
         var trail = rock.GetComponent<TrailRenderer>();
         if (trail) { trail.startColor = Color.Lerp(playerColor, Color.white, 0.5f); trail.endColor = new Color(playerColor.r, playerColor.g, playerColor.b, 0f); }
 
-        rock.Launch(LaunchDirection, LaunchSpeed, playerId);
+        rock.Launch(LaunchDirection, LaunchSpeed, playerId, GameBalance.Current.ProjectileGravityScale);
         AeroAudio.Play(Sfx.Launch);
         Fired?.Invoke(this, rock);
 
@@ -187,7 +189,7 @@ public class CatapultController : MonoBehaviour
         // Arco balístico simple (sin rozamiento) para ayudar a apuntar
         Vector3 p0 = LaunchOrigin;
         Vector3 v0 = LaunchDirection * LaunchSpeed;
-        Vector3 g = Physics.gravity;
+        Vector3 g = ShotGravity;   // la misma gravedad que usa la pelota
 
         // Tiempo hasta tocar y = 0
         float a = 0.5f * g.y, b = v0.y, c = p0.y;

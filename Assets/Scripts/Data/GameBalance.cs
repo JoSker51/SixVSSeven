@@ -42,6 +42,11 @@ public class GameBalance : ScriptableObject
     [Tooltip("0 = una distribución distinta en cada partida")]
     public int randomSeed = 0;
 
+    [Header("Pelota")]
+    [Tooltip("Multiplica la velocidad de la pelota. La gravedad del tiro sube con su cuadrado, así llega a las mismas distancias pero vuela más rápido (1 = como antes).")]
+    public float projectileSpeed = 1.35f;
+    public float ProjectileGravityScale => projectileSpeed * projectileSpeed;
+
     [Header("Arena circular")]
     public float arenaRadius = 27f;
     public float castleRingRadius = 21f;     // distancia del centro a cada castillo
