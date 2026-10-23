@@ -102,7 +102,7 @@ monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 |---|---|
 | Cubo | Bloque sólido |
 | Pared | Rectángulo largo |
-| Tapa | Disco plano y ancho |
+| Rampa | Cuña inclinada: la pelota sube por ella y sale volando |
 | Cilindro | Columna larga |
 | Esfera | Bola |
 | Pirámide | Base cuadrada y caras inclinadas |
@@ -152,7 +152,7 @@ monedas del tiro = máx(0, R)
 
 | Objeto | Normal | Positivo | Negativo | Retirar (N / P / Neg) |
 |---|---|---|---|---|
-| Cubo, Tapa, Cilindro, Esfera, Pirámide | 3 | 8 | 6 | 8 / 12 / 10 |
+| Cubo, Rampa, Cilindro, Esfera, Pirámide | 3 | 8 | 6 | 8 / 12 / 10 |
 | Pared | 4 | 9 | 7 | 9 / 13 / 11 |
 | Aro multiplicador | — | — | — | Precio **15**, retirar **18** |
 
