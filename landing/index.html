@@ -1473,11 +1473,14 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         const el = this.el;
         let dragging = false, lastX = 0, lastY = 0, lastT = 0;
         el.addEventListener("pointerdown", (e) => {
+          if (e.button !== 0) return;
           dragging = true; lastX = e.clientX; lastY = e.clientY; lastT = performance.now();
           this.vel = 0; el.setPointerCapture(e.pointerId); el.classList.add("touched");
         });
         el.addEventListener("pointermove", (e) => {
           if (!dragging) return;
+          // Si el "soltar" se perdió (fuera de la ventana), el mouse llega sin botón: termina el arrastre.
+          if (e.pointerType === "mouse" && e.buttons === 0) { dragging = false; return; }
           const now = performance.now(), dt = Math.max(1, now - lastT) / 1000;
           const dx = e.clientX - lastX, dy = e.clientY - lastY;
           this.yaw += dx * 0.012;
@@ -1488,6 +1491,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         const end = () => { dragging = false; };
         el.addEventListener("pointerup", end);
         el.addEventListener("pointercancel", end);
+        el.addEventListener("lostpointercapture", end);
         el.addEventListener("pointerenter", () => { this.hoverGoal = 1; });
         el.addEventListener("pointerleave", () => { this.hoverGoal = 0; });
         el.addEventListener("keydown", (e) => {
