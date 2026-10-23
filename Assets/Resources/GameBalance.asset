@@ -108,36 +108,36 @@ MonoBehaviour:
     inShop: 1
     prefab: {fileID: 2129346338796420650, guid: 1d55d779c26356941a8c2ae51e2d142c, type: 3}
     icon: {fileID: 21300000, guid: 1692aba7e7b7cf64f9d81854ae0ca9a4, type: 3}
-  - id: lid_normal
+  - id: ramp_normal
     kind: 2
     variant: 0
-    displayName: Tapa
-    description: 'Disco plano: sirve de rampa o de techo. No da ni quita monedas.'
+    displayName: Rampa
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. No da ni quita monedas."
     price: 3
     removalCost: 8
     inShop: 1
-    prefab: {fileID: 2525064588800427412, guid: f91d91228c5379c4b930d28bd533fa11, type: 3}
-    icon: {fileID: 21300000, guid: 2360b48c3b71e064f9b811f5e9869912, type: 3}
-  - id: lid_positive
+    prefab: {fileID: 399074988678007029, guid: 5669204e9cf387943a5d2ec7bf0e84be, type: 3}
+    icon: {fileID: 21300000, guid: ddbcd1310eb2fae4ba31de6d6b01d396, type: 3}
+  - id: ramp_positive
     kind: 2
     variant: 1
-    displayName: Tapa
-    description: 'Disco plano: sirve de rampa o de techo. +2 si lo toca y revientas burbujas.'
+    displayName: Rampa
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. +2 si lo toca y revientas burbujas."
     price: 8
     removalCost: 12
     inShop: 1
-    prefab: {fileID: 859284331239234215, guid: cea35dfb2d16f6f4f885b73a9216f20a, type: 3}
-    icon: {fileID: 21300000, guid: 5c05f1c4bbcb96e4b86c43777b619b18, type: 3}
-  - id: lid_negative
+    prefab: {fileID: 5829912648902111242, guid: 0a25e5fc693b7f848b2fac6c7dc64723, type: 3}
+    icon: {fileID: 21300000, guid: a6c87bb67e7992d4da4d612c61f7b9bd, type: 3}
+  - id: ramp_negative
     kind: 2
     variant: 2
-    displayName: Tapa
-    description: "Disco plano: sirve de rampa o de techo. \u22122 si lo toca y revientas burbujas."
+    displayName: Rampa
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. \u22122 si lo toca y revientas burbujas."
     price: 6
     removalCost: 10
     inShop: 1
-    prefab: {fileID: 1301789407295353175, guid: 7f7a1ba699279f044880e9c4dac7004b, type: 3}
-    icon: {fileID: 21300000, guid: 5c8c86b3e23b3ab489634af6b47e16c7, type: 3}
+    prefab: {fileID: 174571991218444844, guid: c67ae28905ecfb24fb70dfa6a93d3b3e, type: 3}
+    icon: {fileID: 21300000, guid: c77115fc529e3804f8b5c2ea1fa3218d, type: 3}
   - id: cylinder_normal
     kind: 4
     variant: 0

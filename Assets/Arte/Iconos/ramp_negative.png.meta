@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5c8c86b3e23b3ab489634af6b47e16c7
+guid: c77115fc529e3804f8b5c2ea1fa3218d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2257071993776096994
-    second: lid_negative_0
+      213: -4175680523393215463
+    second: ramp_negative_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -115,7 +115,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: lid_negative_0
+      name: ramp_negative_0
       rect:
         serializedVersion: 2
         x: 0
@@ -130,8 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e193e7aeaf44da0e0800000000000000
-      internalID: -2257071993776096994
+      spriteID: 91451ab00b00d06c0800000000000000
+      internalID: -4175680523393215463
       vertices: []
       indices: 
       edges: []

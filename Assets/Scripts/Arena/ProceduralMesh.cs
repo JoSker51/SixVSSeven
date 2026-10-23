@@ -134,6 +134,38 @@ public static class ProceduralMesh
         return Build("Piramide", v, uv, t, false);
     }
 
+    // Rampa (cuña): ancho en X, largo en Z; sube desde el suelo en −Z hasta la altura en +Z. Caras planas.
+    public static Mesh Ramp(float width, float length, float height)
+    {
+        float w = width / 2f, l = length / 2f;
+        Vector3 b0 = new Vector3(-w, 0, -l), b1 = new Vector3(w, 0, -l), b2 = new Vector3(w, 0, l), b3 = new Vector3(-w, 0, l);
+        Vector3 t2 = new Vector3(w, height, l), t3 = new Vector3(-w, height, l);
+        var v = new List<Vector3>();
+        var uv = new List<Vector2>();
+        var t = new List<int>();
+        void Quad(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            int s = v.Count;
+            v.Add(a); v.Add(b); v.Add(c); v.Add(d);
+            uv.Add(new Vector2(0, 0)); uv.Add(new Vector2(0, 1)); uv.Add(new Vector2(1, 1)); uv.Add(new Vector2(1, 0));
+            t.Add(s); t.Add(s + 1); t.Add(s + 2);
+            t.Add(s); t.Add(s + 2); t.Add(s + 3);
+        }
+        void Tri(Vector3 a, Vector3 b, Vector3 c)
+        {
+            int s = v.Count;
+            v.Add(a); v.Add(b); v.Add(c);
+            uv.Add(new Vector2(0, 0)); uv.Add(new Vector2(1, 0)); uv.Add(new Vector2(1, 1));
+            t.Add(s); t.Add(s + 1); t.Add(s + 2);
+        }
+        Quad(b0, t3, t2, b1);   // la pendiente
+        Quad(b2, t2, t3, b3);   // la pared alta de atrás
+        Quad(b0, b1, b2, b3);   // la base
+        Tri(b0, b3, t3);        // lado izquierdo
+        Tri(b1, t2, b2);        // lado derecho
+        return Build("Rampa", v, uv, t, false);
+    }
+
     private static Mesh Build(string name, List<Vector3> v, List<Vector2> uv, List<int> t, bool flatUp)
     {
         var mesh = new Mesh { name = name };

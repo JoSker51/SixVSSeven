@@ -7,7 +7,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 // Parte del constructor de escenas para la tienda y los objetos colocables:
-//  - 19 prefabs (cubo, pared, tapa, cilindro, esfera y pirámide en normal/positivo/negativo, y el aro multiplicador)
+//  - 19 prefabs (cubo, pared, rampa, cilindro, esfera y pirámide en normal/positivo/negativo, y el aro multiplicador)
 //  - sus íconos (se renderizan los modelos reales a PNG)
 //  - el catálogo con precios en GameBalance (si un precio ya existe en el asset, se respeta)
 //  - la interfaz: tienda, inventario, botones de fase y confirmación de retirada
@@ -18,6 +18,7 @@ public static partial class CatapultasSceneBuilder
 
     private static Material normalMat, positiveMat, negativeMat, ringMat, plusMat, minusMat, ghostValidMat, ghostInvalidMat, haloMat;
     private static PhysicsMaterial bouncyMaterial;
+    private static Mesh rampMesh;
 
     // Formas: nombre, descripción y precios iniciales (normal, positivo, negativo) y costo de retirada (normal, pos, neg)
     private struct Shape
@@ -30,7 +31,7 @@ public static partial class CatapultasSceneBuilder
     {
         new Shape { kind = ItemKind.Cube, name = "Cubo", description = "Bloque sólido que desvía la pelota.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
         new Shape { kind = ItemKind.Wall, name = "Pared", description = "Rectángulo largo para bloquear o hacer rebotar tiros.", normal = 4, positive = 9, negative = 7, removeNormal = 9, removePositive = 13, removeNegative = 11 },
-        new Shape { kind = ItemKind.Lid, name = "Tapa", description = "Disco plano: sirve de rampa o de techo.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
+        new Shape { kind = ItemKind.Ramp, name = "Rampa", description = "Cuña inclinada que lanza la pelota hacia arriba.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
         new Shape { kind = ItemKind.Cylinder, name = "Cilindro", description = "Columna larga; acostada hace de rodillo.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
         new Shape { kind = ItemKind.Sphere, name = "Esfera", description = "Bola brillante con rebotes impredecibles.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
         new Shape { kind = ItemKind.Pyramid, name = "Pirámide", description = "Sus caras inclinadas mandan la pelota de lado.", normal = 3, positive = 8, negative = 6, removeNormal = 8, removePositive = 12, removeNegative = 10 },
@@ -38,6 +39,7 @@ public static partial class CatapultasSceneBuilder
 
     private const int RingPrice = 15, RingRemoval = 18;
     private const float RingMajor = 2.0f, RingMinor = 0.2f;
+    private const float RampWidth = 2.6f, RampLength = 4.4f, RampHeight = 2.0f;   // unos 24° de pendiente: rodando rápido, la pelota salta a ~3 m
 
     static partial void BuildShopAssets()
     {
@@ -46,6 +48,8 @@ public static partial class CatapultasSceneBuilder
         SetupItemMaterials();
         var torus = SaveMesh(ProceduralMesh.Torus(RingMajor, RingMinor, 64, 16, "AroObjeto"), "AroObjeto");
         var pyramid = SaveMesh(ProceduralMesh.Pyramid(2.4f, 2.1f), "Piramide");
+        rampMesh = SaveMesh(ProceduralMesh.Ramp(RampWidth, RampLength, RampHeight), "Rampa");
+        RemoveOldLidAssets();
 
         var bal = balance;
         var b = GameBalance.Current;   // valores de efectos (por si alguien cambió +2/−2/×2)
@@ -111,9 +115,9 @@ public static partial class CatapultasSceneBuilder
         {
             case ItemKind.Wall:
                 shape = Prim(PrimitiveType.Cube, "Forma", root.transform, new Vector3(0f, 1f, 0f), new Vector3(5f, 2f, 0.5f), mat); top = 2f; break;
-            case ItemKind.Lid:
-                shape = Prim(PrimitiveType.Cylinder, "Forma", root.transform, new Vector3(0f, 0.08f, 0f), new Vector3(3.4f, 0.08f, 3.4f), mat, false);
-                ConvexCollider(shape); top = 0.16f; break;
+            case ItemKind.Ramp:
+                shape = MeshObject("Forma", root.transform, rampMesh, mat, false);
+                ConvexCollider(shape); top = RampHeight; break;
             case ItemKind.Cylinder:
                 shape = Prim(PrimitiveType.Cylinder, "Forma", root.transform, new Vector3(0f, 2.1f, 0f), new Vector3(1.1f, 2.1f, 1.1f), mat, false);
                 ConvexCollider(shape); top = 4.2f; break;
@@ -148,6 +152,16 @@ public static partial class CatapultasSceneBuilder
         PrefabUtility.SaveAsPrefabAsset(root, path);
         Object.DestroyImmediate(root);
         return Load<GameObject>(path);
+    }
+
+    // La rampa reemplazó a la tapa: se borran sus prefabs e íconos si quedaron de antes
+    private static void RemoveOldLidAssets()
+    {
+        foreach (var v in new[] { "normal", "positive", "negative" })
+        {
+            AssetDatabase.DeleteAsset($"{ItemFolder}/lid_{v}.prefab");
+            AssetDatabase.DeleteAsset($"{IconFolder}/lid_{v}.png");
+        }
     }
 
     private static void ConvexCollider(GameObject go)
@@ -218,7 +232,12 @@ public static partial class CatapultasSceneBuilder
         foreach (var item in items)
         {
             var go = Object.Instantiate(item.prefab, studio);
-            go.transform.localRotation = item.kind == ItemKind.Ring ? Quaternion.Euler(70f, 25f, 0f) : Quaternion.Euler(0f, 30f, 0f);
+            go.transform.localRotation = item.kind switch
+            {
+                ItemKind.Ring => Quaternion.Euler(70f, 25f, 0f),
+                ItemKind.Ramp => Quaternion.Euler(0f, -35f, 0f),   // se ve el lado triangular en sombra: si no, la rampa blanca se pierde
+                _ => Quaternion.Euler(0f, 30f, 0f),
+            };
             var bounds = new Bounds(go.transform.position, Vector3.zero);
             foreach (var r in go.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(r.bounds);
             float radius = bounds.extents.magnitude;
