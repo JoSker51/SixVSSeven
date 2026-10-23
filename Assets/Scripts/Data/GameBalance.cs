@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ItemKind { Cube, Wall, Lid, Ring, Cylinder, Sphere, Pyramid }
+public enum ItemKind { Cube, Wall, Ramp, Ring, Cylinder, Sphere, Pyramid }
 public enum ItemVariant { Normal, Positive, Negative, Special }
 
 // Un artículo de la tienda (una forma + una variante). Los datos viven aquí; la lógica es la misma para todos.
