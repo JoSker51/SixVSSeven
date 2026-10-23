@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Catapultas y Castillos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap">
+<style>
+/* Layout: cielo del juego arriba (hero), el mar como transición, paneles de vidrio
+   sobre agua para las reglas y la isla de césped al pie. Una sola estética, siempre de día. */
+:root {
+  color-scheme: light;
+  --sky: #1c6be3;
+  --sky-light: #6fc2ff;
+  --aqua: #19a6d8;
+  --sea: #105ea3;
+  --navy: #0a3d66;
+  --lime: #5fd23c;
+  --orange: #ff8c1a;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.95);
+  --ink: #0a3d66;
+  --ink-soft: #2d5f86;
+  --white: #ffffff;
+  --font-display: "Segoe UI Light", "Segoe UI", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Segoe UI", "Open Sans", "Helvetica Neue", Arial, sans-serif;
+  --step-0: 1rem;
+  --step-1: 1.2rem;
+  --step-2: 1.6rem;
+  --step-3: 2.3rem;
+  --step-4: clamp(2.6rem, 7vw, 5.2rem);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--sea);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.6;
+}
+h1, h2, h3 { text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background: url("img/cielo.png") center 0 / cover no-repeat, var(--sky);
+  color: var(--white);
+}
+.hero::after {           /* reflejo del sol sobre el horizonte */
+  content: "";
+  position: absolute; inset: auto 0 0 0; height: 46%;
+  background: linear-gradient(to bottom, rgba(16, 94, 163, 0) 0%, var(--sea) 100%);
+  pointer-events: none;
+}
+.hero .wrap { position: relative; z-index: 2; padding-block: clamp(48px, 8vw, 88px) 60px; }
+
+/* Barra de tareas estilo Vista: vidrio oscuro, botones con brillo y bandeja con reloj */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: #0b1622; }
+.taskbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: linear-gradient(to bottom, rgba(96, 118, 140, 0.82) 0%, rgba(28, 40, 56, 0.9) 48%, rgba(5, 10, 18, 0.94) 52%, rgba(14, 26, 40, 0.92) 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.45); border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35); backdrop-filter: blur(12px) saturate(1.4);
+}
+.nav { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; padding-block: 7px; color: var(--white); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: 0.02em; color: var(--white); text-decoration: none; margin-right: auto; }
+.brand .orb { width: 38px; height: 38px; filter: drop-shadow(0 0 8px rgba(120, 200, 255, 0.85)); }
+.nav ul { display: flex; gap: 4px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.nav ul a {
+  display: block; color: var(--white); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+  padding: 6px 14px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.18);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.12) 51%, rgba(255, 255, 255, 0.06));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.nav ul a:hover, .nav ul a:focus-visible {
+  outline: none; border-color: rgba(160, 220, 255, 0.7);
+  background: linear-gradient(to bottom, rgba(160, 220, 255, 0.45), rgba(80, 160, 230, 0.25) 50%, rgba(30, 110, 200, 0.35) 51%, rgba(110, 200, 255, 0.4));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 12px rgba(110, 200, 255, 0.5);
+}
+.tray {
+  display: flex; align-items: center; gap: 10px; padding: 4px 12px; border-radius: 4px; font-size: 0.85rem; font-variant-numeric: tabular-nums;
+  background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.12); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.tray-cd { width: 18px; height: 18px; border-radius: 50%; display: block;
+  background: radial-gradient(circle, #0b1622 0 14%, #dfe8ef 15% 22%, transparent 23%), conic-gradient(#d9f6ff, #ffd6f5, #fff7c2, #c9ffd8, #c7dcff, #d9f6ff); }
+
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+.eyebrow {
+  display: inline-block; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 999px; background: rgba(10, 61, 102, 0.35); margin-bottom: 18px;
+}
+.hero h1 {
+  font-family: var(--font-display); font-weight: 300; font-size: var(--step-4); line-height: 1.02; letter-spacing: -0.01em;
+  text-shadow: 0 2px 18px rgba(10, 61, 102, 0.45);
+}
+.hero h1 b { font-weight: 700; display: block; }
+.lede { margin-top: 20px; font-size: var(--step-1); max-width: 34ch; text-shadow: 0 1px 3px rgba(10, 61, 102, 0.55); }
+
+/* Botones de gel (los mismos del menú del juego) */
+.gel {
+  position: relative; display: inline-flex; align-items: center; gap: 12px;
+  padding: 14px 28px 14px 22px; border-radius: 999px; color: var(--white); font-weight: 700; font-size: 1.05rem;
+  text-decoration: none; border: 1px solid rgba(10, 61, 102, 0.55);
+  box-shadow: 0 6px 16px rgba(4, 38, 77, 0.35), inset 0 -6px 14px rgba(255, 255, 255, 0.25);
+  text-shadow: 0 1px 2px rgba(4, 38, 77, 0.6); overflow: hidden; isolation: isolate;
+}
+.gel::before {           /* brillo superior */
+  content: ""; position: absolute; left: 6px; right: 6px; top: 3px; height: 48%; border-radius: 999px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)); z-index: -1;
+}
+.gel.blue { background: linear-gradient(to bottom, #8fd0ff 0%, #4ea3ea 50%, #2f86da 100%); }
+.gel.green { background: linear-gradient(to bottom, #b4f08c 0%, #62c93a 50%, #3fa821 100%); border-color: rgba(30, 90, 20, 0.55); }
+.gel svg { width: 1.6em; height: 1.6em; filter: drop-shadow(0 1px 1px rgba(4, 38, 77, 0.5)); }
+.gel small { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.92; }
+.gel span { line-height: 1.15; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; align-items: center; }
+
+/* Tarjeta de plataforma */
+.platform {
+  background: var(--glass); border: 1px solid var(--glass-edge); border-radius: 26px; color: var(--ink);
+  padding: 26px; box-shadow: 0 20px 50px rgba(4, 38, 77, 0.35), inset 0 1px 0 var(--white);
+  backdrop-filter: blur(14px) saturate(1.3); position: relative; overflow: hidden;
+}
+.platform::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 42%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0)); pointer-events: none;
+}
+.platform > * { position: relative; }
+.platform {
+  margin-top: 84px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px 28px; align-items: center;
+}
+.platform .logos { margin: 0; }
+.platform .spec {
+  grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px;
+  padding-top: 18px; border-top: 1px solid rgba(10, 61, 102, 0.15); margin: 0;
+}
+.platform .spec div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.platform .spec dt { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.platform .spec dd { font-size: 1.05rem; }
+
+/* Ventana estilo Vista con la captura del menú */
+.aero-window {
+  margin: 0; border-radius: 12px; padding: 0 7px 7px; min-width: 0;
+  background: linear-gradient(to bottom, rgba(214, 238, 255, 0.85), rgba(150, 200, 240, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 24px 60px rgba(4, 38, 77, 0.45), inset 0 1px 0 var(--white);
+  backdrop-filter: blur(10px); transform: rotate(1.2deg);
+}
+.titlebar { display: flex; align-items: center; gap: 4px; height: 30px; color: var(--navy); font-size: 0.82rem; font-weight: 600; }
+.titlebar span { flex: 1; text-shadow: 0 0 8px var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.titlebar i { width: 26px; height: 17px; border-radius: 4px; background: linear-gradient(to bottom, #f4fbff, #b9d7ee); border: 1px solid rgba(10, 61, 102, 0.35); }
+.titlebar i.close { width: 42px; background: linear-gradient(to bottom, #f6b2a0, #d4452b 55%, #c23a22); }
+.aero-window img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid rgba(10, 61, 102, 0.4); }
+
+/* Galería de capturas */
+.gallery { margin-top: 64px; }
+.shot-main { margin: 0; border-radius: 18px; overflow: hidden; border: 3px solid var(--glass-edge); box-shadow: 0 20px 50px rgba(4, 38, 77, 0.4); background: var(--navy); }
+.shot-main img { display: block; width: 100%; height: auto; }
+.shot-main figcaption { padding: 12px 18px; color: var(--white); font-weight: 600; background: linear-gradient(to bottom, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)); }
+.thumbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+.thumbs button {
+  padding: 0; border-radius: 12px; overflow: hidden; cursor: pointer; background: var(--navy);
+  border: 3px solid rgba(255, 255, 255, 0.45); box-shadow: 0 6px 16px rgba(4, 38, 77, 0.3);
+  transition: transform 0.15s, border-color 0.15s;
+}
+.thumbs button img { display: block; width: 100%; height: auto; }
+.thumbs button:hover, .thumbs button:focus-visible { transform: translateY(-3px); border-color: var(--white); outline: none; }
+.thumbs button[aria-pressed="true"] { border-color: var(--lime); box-shadow: 0 0 0 3px rgba(95, 210, 60, 0.45), 0 6px 16px rgba(4, 38, 77, 0.3); }
+.platform h2 { font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+.logos { display: flex; align-items: center; gap: 18px; margin: 14px 0 18px; flex-wrap: wrap; }
+.logo-tile {
+  display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 16px;
+  background: linear-gradient(to bottom, #2a475e, #171a21); color: var(--white); font-weight: 700; font-size: 1.15rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+.logo-tile.win { background: linear-gradient(to bottom, #3aa0ff, #0063c7); }
+.logo-tile svg { width: 1.7em; height: 1.7em; }
+.spec { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 0.95rem; }
+.spec dt { color: var(--ink-soft); font-weight: 600; }
+.spec dd { margin: 0; font-weight: 600; }
+
+/* Burbujas que suben por toda la pantalla, detrás del contenido */
+.bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+.sea .wrap, .island .wrap { position: relative; z-index: 2; }
+.bubbles img { position: absolute; bottom: -140px; opacity: 0.85; animation: rise linear infinite; }
+@keyframes rise {
+  from { transform: translate(0, 0); }
+  50% { transform: translate(18px, -55vh); }
+  to { transform: translate(-6px, -115vh); }
+}
+
+/* ---------- Secciones sobre el agua ---------- */
+.sea { background: linear-gradient(to bottom, var(--sea) 0%, #0f72b6 40%, var(--aqua) 100%); padding-block: 20px 72px; position: relative; }
+.sea::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -40px; height: 160px;
+  background: url("img/aurora.png") center / 100% 100% no-repeat; opacity: 0.55; pointer-events: none;
+}
+.section-head { color: var(--white); margin-bottom: 28px; max-width: 60ch; position: relative; }
+.section-head h2 { font-family: var(--font-display); font-weight: 300; font-size: var(--step-3); line-height: 1.1; }
+.section-head h2 b { font-weight: 700; }
+.section-head p { margin-top: 10px; font-size: var(--step-1); opacity: 0.95; }
+
+.pane {
+  background: var(--glass); border: 1px solid var(--glass-edge); border-radius: 22px; padding: 22px;
+  box-shadow: 0 14px 34px rgba(4, 38, 77, 0.28), inset 0 1px 0 var(--white);
+  backdrop-filter: blur(12px) saturate(1.2); position: relative; overflow: hidden; min-width: 0;
+}
+.pane::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 38%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0)); pointer-events: none;
+}
+.pane > * { position: relative; }
+.pane h3 { font-size: var(--step-1); font-weight: 700; margin-bottom: 6px; }
+.pane p { color: var(--ink-soft); }
+
+.basics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.basics .num { font-family: var(--font-display); font-weight: 300; font-size: var(--step-3); line-height: 1; color: var(--sky); margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+.basics .num small { font-size: 1rem; font-weight: 600; color: var(--ink-soft); margin-left: 4px; }
+
+/* Objetos */
+.items-block { margin-top: 64px; }
+.shop { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 18px; margin-bottom: 18px; }
+.shop-slots { display: flex; gap: 12px; margin: 14px 0 12px; flex-wrap: wrap; }
+.slot {
+  width: 74px; height: 74px; border-radius: 18px; display: grid; place-items: center;
+  background: url("img/vidrio.png") center / 100% 100%; box-shadow: 0 4px 10px rgba(4, 38, 77, 0.18);
+}
+.slot svg { width: 46px; height: 46px; }
+.refresh {
+  display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.92rem; color: var(--navy);
+  padding: 6px 14px; border-radius: 999px; background: linear-gradient(to bottom, #ffffff, #d9e6ef); border: 1px solid #a9c4d8;
+}
+.coin { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6b0, #ffc928 45%, #d98a00); box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.25); display: inline-block; }
+
+.mult { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+.mult div { border-radius: 16px; padding: 12px; text-align: center; color: var(--white); font-weight: 700; text-shadow: 0 1px 2px rgba(4, 38, 77, 0.5); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.mult strong { display: block; font-size: 1.5rem; font-family: var(--font-display); font-weight: 600; }
+.mult span { font-size: 0.85rem; font-weight: 600; }
+.mult .good { background: linear-gradient(to bottom, #9ee874, #46b324); }
+.mult .bad { background: linear-gradient(to bottom, #ffb36b, #f06a1b); }
+.mult .neutral { background: linear-gradient(to bottom, #d9e4ec, #8ea7ba); }
+
+.shapes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.shape-art { height: 120px; display: grid; place-items: center; margin-bottom: 10px; }
+.shape-art svg { width: 130px; height: 110px; }
+.rule { display: flex; gap: 10px; align-items: flex-start; font-size: 0.95rem; margin-top: 8px; }
+.rule i { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 0.8rem; color: var(--white); margin-top: 2px; }
+.rule .yes { background: radial-gradient(circle at 35% 30%, #c8ffa6, #3fa821); }
+.rule .no { background: radial-gradient(circle at 35% 30%, #ffc6a0, #e2531a); }
+.rule .info { background: radial-gradient(circle at 35% 30%, #d8f2ff, #2f86da); font-size: 0.72rem; letter-spacing: -0.02em; }
+.rule p { color: var(--ink); }
+
+.place { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 18px; }
+.steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; }
+.steps li { display: flex; gap: 12px; align-items: baseline; color: var(--ink); }
+kbd {
+  display: inline-block; min-width: 2em; padding: 2px 9px; border-radius: 8px; text-align: center;
+  font-family: var(--font-body); font-weight: 700; font-size: 0.85rem; color: var(--navy);
+  background: linear-gradient(to bottom, #ffffff, #dbe8f2); border: 1px solid #9fbad0;
+  box-shadow: 0 2px 0 #9fbad0;
+}
+.note { margin-top: 16px; font-size: 0.85rem; color: rgba(255, 255, 255, 0.9); max-width: 70ch; }
+
+/* ---------- Controles sobre la isla ---------- */
+.island {
+  background: url("img/cesped.png") 0 0 / 220px repeat, var(--lime);
+  position: relative; padding-block: 56px 40px;
+  box-shadow: inset 0 14px 0 -6px #f4e2a6, inset 0 22px 18px -10px rgba(0, 0, 0, 0.15);
+}
+.island .pane { background: rgba(255, 255, 255, 0.8); }
+.controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 24px; margin-top: 14px; }
+.controls div { display: flex; gap: 10px; align-items: center; color: var(--ink); font-size: 0.95rem; }
+.controls kbd { flex: none; }
+footer { margin-top: 40px; color: var(--navy); font-size: 0.85rem; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-weight: 600; }
+footer p { max-width: 60ch; }
+
+/* ---------- Decoración Aero ---------- */
+.deco { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.rays {
+  position: absolute; left: -10%; top: -30%; width: 70%; height: 140%; transform: rotate(-18deg); opacity: 0.5;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0) 0 40px, rgba(255, 255, 255, 0.22) 60px, rgba(255, 255, 255, 0) 100px 150px);
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 75%); mask-image: linear-gradient(to bottom, #000, transparent 75%);
+}
+.swoosh { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.hills { position: absolute; left: 0; bottom: 0; width: 100%; height: 180px; }
+.cd {
+  position: absolute; border-radius: 50%; display: block; animation: spin 14s linear infinite;
+  background:
+    radial-gradient(circle, transparent 0 9%, rgba(255, 255, 255, 0.95) 10% 12%, #b9c7d2 13% 17%, transparent 18%),
+    conic-gradient(from 20deg, #e9fbff, #a8e7ff 12%, #ffc8f0 24%, #fff3b0 36%, #c3ffd2 48%, #e9fbff 55%, #b4c8ff 70%, #ffd0e8 85%, #e9fbff);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8), 0 14px 30px rgba(4, 38, 77, 0.35), inset 0 0 30px rgba(255, 255, 255, 0.7);
+  -webkit-mask-image: radial-gradient(circle, transparent 0 9%, #000 9.5%); mask-image: radial-gradient(circle, transparent 0 9%, #000 9.5%);
+}
+.cd::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(130deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, 0.5) 100%); }
+.cd-big { width: 210px; height: 210px; right: 2%; top: 2%; }
+.cd-small { width: 110px; height: 110px; left: 41%; bottom: 120px; animation-duration: 9s; animation-direction: reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spark { position: absolute; width: 34px; height: 34px; animation: twinkle 2.6s ease-in-out infinite; }
+.spark.small { width: 20px; height: 20px; }
+.spark::before, .spark::after {
+  content: ""; position: absolute; left: 50%; top: 50%; width: 100%; height: 3px; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, #fff, rgba(255, 255, 255, 0)); border-radius: 50%;
+}
+.spark::after { transform: translate(-50%, -50%) rotate(90deg); }
+@keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(45deg); } }
+
+/* Aviso estilo mensajería: "Jugador 2 acaba de iniciar sesión" */
+.window-stack { position: relative; min-width: 0; }
+.toast {
+  position: absolute; left: -36px; bottom: -48px; width: 270px; border-radius: 8px; overflow: hidden; color: var(--ink);
+  background: linear-gradient(to bottom, #ffffff, #e3f1fb); border: 1px solid #7fa9c9;
+  box-shadow: 0 14px 30px rgba(4, 38, 77, 0.45); animation: toast-in 0.7s 0.6s both cubic-bezier(.2, .9, .3, 1.2);
+}
+.toast-bar { display: flex; justify-content: space-between; align-items: center; padding: 4px 10px; font-size: 0.75rem; font-weight: 600; color: var(--white);
+  background: linear-gradient(to bottom, #8fc9f2, #3f8fd6 50%, #2a78c4 51%, #57a6e6); text-shadow: 0 1px 1px rgba(4, 38, 77, 0.6); }
+.toast-bar i { font-style: normal; font-size: 0.7rem; opacity: 0.85; }
+.toast-body { display: flex; align-items: center; gap: 12px; padding: 12px 14px; font-size: 0.88rem; line-height: 1.35; }
+.toast-body p { color: var(--ink); }
+.buddies { flex: none; width: 54px; height: 48px; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(24px) scale(0.92); } to { opacity: 1; transform: none; } }
+
+/* Acuario: peces nadando por el mar y una ola en la orilla */
+.aquarium { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.caustics {
+  position: absolute; inset: 0; opacity: 0.35;
+  background: repeating-linear-gradient(100deg, rgba(255, 255, 255, 0) 0 70px, rgba(190, 240, 255, 0.35) 90px, rgba(255, 255, 255, 0) 120px 220px);
+  -webkit-mask-image: linear-gradient(to bottom, #000, transparent 55%); mask-image: linear-gradient(to bottom, #000, transparent 55%);
+}
+.fish { position: absolute; left: -12%; animation: swim linear infinite; }
+.fish svg { display: block; width: 100%; height: auto; animation: bob 2.4s ease-in-out infinite; }
+.fish.left { animation-name: swim-left; left: auto; }
+.fish.left svg { transform: scaleX(-1); animation-name: bob-flip; }
+@keyframes swim { from { left: -12%; } to { left: 108%; } }
+@keyframes swim-left { from { left: 108%; } to { left: -12%; } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes bob-flip { 0%, 100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-10px); } }
+.shore { position: absolute; left: 0; top: 0; width: 100%; height: 34px; z-index: 1; pointer-events: none; }
+
+/* Rayo de luz que baja por el mar y termina subiendo en espiral */
+.beam { position: absolute; left: 0; top: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; overflow: visible; }
+.beam path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.beam-glow { stroke: #9fe9ff; stroke-width: 26; opacity: 0.55; filter: url(#beam-blur); }
+.beam-core { stroke: #ffffff; stroke-width: 4; opacity: 0.9; filter: url(#beam-soft); }
+.beam-pulse { stroke: #ffffff; stroke-width: 9; stroke-dasharray: 160 1400; filter: url(#beam-soft); animation: beam-run 6s linear infinite; }
+.beam-end { fill: #ffffff; filter: url(#beam-blur); animation: twinkle 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes beam-run { from { stroke-dashoffset: 1560; } to { stroke-dashoffset: 0; } }
+
+/* Detalles flotantes en los costados, cada uno con su propio giro */
+.side { position: absolute; top: 60px; bottom: 60px; width: calc((100% - 1120px) / 2); z-index: 1; pointer-events: none; }
+.side.left { left: 0; }
+.side.right { right: 0; }
+.float {
+  position: absolute; left: 50%; width: min(var(--s), 80%);
+  transform: translateX(-50%) rotate(var(--r));
+  animation: drift 7s ease-in-out infinite;
+  filter: drop-shadow(0 12px 18px rgba(4, 38, 77, 0.35));
+}
+.float svg { display: block; width: 100%; height: auto; }
+.float .cd { position: relative; width: 100%; height: auto; aspect-ratio: 1; animation: spin 16s linear infinite; }
+@keyframes drift {
+  0%, 100% { transform: translateX(-50%) translateY(0) rotate(var(--r)); }
+  50% { transform: translateX(-50%) translateY(-16px) rotate(calc(var(--r) + 5deg)); }
+}
+.player {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 8px; border-radius: 999px; color: var(--navy);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(196, 226, 247, 0.9) 50%, rgba(160, 205, 238, 0.9) 51%, rgba(220, 240, 255, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: inset 0 -2px 6px rgba(10, 61, 102, 0.15);
+}
+.player .play {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; color: var(--white); font-size: 0.85rem;
+  background: radial-gradient(circle at 35% 30%, #d6f0ff, #3f9ae6 50%, #1557a8); border: 1px solid #fff;
+}
+.player span { flex: 1; min-width: 0; font-size: 0.72rem; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player small { display: block; font-weight: 600; opacity: 0.7; }
+.player em { font-style: normal; font-size: 0.75rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (max-width: 1359px) { .side { display: none; } }
+
+/* Ventanas clásicas de escritorio (decoración) */
+#como-se-juega, #objetos { position: relative; }
+.xp-win {
+  position: absolute; right: 0; top: -36px; width: 250px; z-index: 0; color: #000; font-size: 0.75rem;
+  background: #ece9d8; border: 1px solid #0831d9; border-radius: 8px 8px 0 0; overflow: hidden;
+  box-shadow: 0 16px 34px rgba(4, 38, 77, 0.45); transform: rotate(4deg);
+}
+.xp-win.tilt-left { transform: rotate(-3deg); }
+.xp-title {
+  display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 4px 0 7px; color: #fff; font-weight: 700; font-size: 0.78rem;
+  background: linear-gradient(to bottom, #3c8af7 0%, #0a5ce8 12%, #0054e3 50%, #0047c8 88%, #0b3fa8 100%);
+  text-shadow: 1px 1px 0 #0a2a80;
+}
+.xp-title span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xp-title svg { width: 16px; height: 16px; flex: none; }
+.xp-title b {
+  width: 21px; height: 21px; border-radius: 3px; border: 1px solid #fff; display: grid; place-items: center; font-size: 0.7rem;
+  background: linear-gradient(to bottom, #6fa2ff, #2463e0); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.xp-title b.x { background: linear-gradient(to bottom, #f09c82, #d4452b 50%, #c23a22); }
+.xp-menu { display: flex; gap: 12px; padding: 2px 8px; border-bottom: 1px solid #c5c2b2; }
+.xp-cols { display: grid; grid-template-columns: 1fr 1fr; background: #fff; border-bottom: 1px solid #c5c2b2; }
+.xp-cols span { padding: 2px 6px; border-right: 1px solid #c5c2b2; background: linear-gradient(to bottom, #fff, #ebeadb); }
+.xp-body { height: 104px; position: relative; overflow: hidden; margin: 3px; border: 1px solid #7f9db9; }
+.xp-water {
+  background:
+    repeating-radial-gradient(ellipse at 30% 40%, rgba(255, 255, 255, 0) 0 14px, rgba(255, 255, 255, 0.35) 16px, rgba(255, 255, 255, 0) 19px 30px),
+    linear-gradient(to bottom, #5fd0f7, #1d8fda);
+}
+.xp-water svg { position: absolute; left: calc(50% - 28px); top: 30px; width: 56px; animation: bob 2.8s ease-in-out infinite; }
+.xp-body.xp-files { height: auto; }
+@media (max-width: 1000px) { .xp-win { display: none; } }
+.xp-files { background: #fff; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: start; gap: 6px; padding: 8px 4px; }
+.xp-files div { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; font-size: 0.68rem; line-height: 1.15; }
+.xp-files svg { width: 34px; height: 34px; }
+.xp-status { display: flex; justify-content: space-between; gap: 8px; padding: 2px 6px; border-top: 1px solid #fff; }
+.xp-status span { flex: 1; padding: 0 4px; border: 1px solid #c5c2b2; border-right-color: #fff; border-bottom-color: #fff; }
+
+@media (max-width: 760px) {
+  .platform { grid-template-columns: minmax(0, 1fr); }
+  .platform .spec { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 860px) {
+  .hero-grid, .shop, .place { grid-template-columns: minmax(0, 1fr); }
+  .aero-window { transform: none; }
+  .toast { position: relative; left: auto; bottom: auto; width: auto; max-width: 320px; margin: -18px 0 0 12px; }
+  .cd-big { width: 130px; height: 130px; right: -30px; top: 40px; }
+  .cd-small { display: none; }
+  .tray { display: none; }
+  .thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .basics, .shapes { grid-template-columns: minmax(0, 1fr); }
+  .controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .controls { grid-template-columns: minmax(0, 1fr); }
+  .mult strong { font-size: 1.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bubbles img { animation: none; display: none; }
+  .cd, .spark, .fish, .fish svg, .toast, .beam-pulse, .beam-end, .xp-water svg, .float, .float .cd { animation: none; }
+  .beam-pulse { display: none; }
+  .fish { left: 10%; }
+  .fish.left { left: 70%; }
+}
+</style>
+
+<div class="bubbles" aria-hidden="true" id="bubbles"></div>
+<div class="taskbar">
+  <nav class="wrap nav" aria-label="Principal">
+    <a class="brand" href="#inicio">
+      <svg class="orb" viewBox="0 0 30 30" aria-hidden="true"><defs><radialGradient id="o1" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#e8f7ff"/><stop offset=".45" stop-color="#4ea3ea"/><stop offset="1" stop-color="#1557a8"/></radialGradient></defs><circle cx="15" cy="15" r="14" fill="url(#o1)" stroke="#fff" stroke-opacity=".7"/><ellipse cx="15" cy="9" rx="8" ry="4.5" fill="#fff" fill-opacity=".7"/></svg>
+      <span>Catapultas y Castillos</span>
+    </a>
+    <ul>
+      <li><a href="#como-se-juega">Cómo se juega</a></li>
+      <li><a href="#capturas">Capturas</a></li>
+      <li><a href="#objetos">Objetos</a></li>
+      <li><a href="#controles">Controles</a></li>
+    </ul>
+    <span class="tray" aria-hidden="true"><i class="tray-cd"></i><span id="clock">12:00</span></span>
+  </nav>
+</div>
+
+<header class="hero" id="inicio">
+  <!-- Decoración Aero: rayos de luz, cintas de luz, destellos, discos y colinas -->
+  <div class="deco" aria-hidden="true">
+    <div class="rays"></div>
+    <svg class="swoosh" viewBox="0 0 1440 600" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="sw1" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <linearGradient id="sw2" x1="0" x2="1"><stop offset="0" stop-color="#bff3ff" stop-opacity="0"/><stop offset=".6" stop-color="#bff3ff" stop-opacity=".6"/><stop offset="1" stop-color="#bff3ff" stop-opacity="0"/></linearGradient>
+      </defs>
+      <path d="M-40 420 C 260 300, 520 520, 860 380 S 1300 260, 1500 330" fill="none" stroke="url(#sw1)" stroke-width="5"/>
+      <path d="M-40 450 C 300 340, 560 560, 900 410 S 1320 300, 1500 360" fill="none" stroke="url(#sw2)" stroke-width="14" opacity=".55"/>
+      <path d="M-40 470 C 320 380, 600 580, 940 440 S 1340 340, 1500 390" fill="none" stroke="url(#sw1)" stroke-width="2"/>
+    </svg>
+    <i class="cd cd-big"></i>
+    <i class="cd cd-small"></i>
+    <i class="spark" style="left: 8%; top: 22%"></i>
+    <i class="spark" style="left: 47%; top: 12%; animation-delay: -1.2s"></i>
+    <i class="spark" style="left: 92%; top: 58%; animation-delay: -2.1s"></i>
+    <i class="spark small" style="left: 30%; top: 64%; animation-delay: -0.6s"></i>
+    <i class="spark small" style="left: 70%; top: 8%; animation-delay: -1.7s"></i>
+    <svg class="hills" viewBox="0 0 1440 220" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="h1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b6f27c"/><stop offset="1" stop-color="#3fa821"/></linearGradient>
+        <linearGradient id="h2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fe05a"/><stop offset="1" stop-color="#2c8a17"/></linearGradient>
+      </defs>
+      <path d="M0 120 C 180 40, 360 40, 560 110 S 940 60, 1140 90 S 1380 40, 1440 70 L1440 220 L0 220 Z" fill="url(#h1)"/>
+      <path d="M0 170 C 220 100, 420 120, 640 160 S 1060 110, 1260 150 S 1400 130, 1440 140 L1440 220 L0 220 Z" fill="url(#h2)"/>
+      <path d="M0 120 C 180 40, 360 40, 560 110 S 940 60, 1140 90 S 1380 40, 1440 70" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3"/>
+      <path d="M0 214 L1440 214 L1440 220 L0 220 Z" fill="#f4e2a6"/>
+    </svg>
+  </div>
+  <div class="wrap">
+
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow">Próximamente · PC</span>
+        <h1>Catapultas <b>y Castillos</b></h1>
+        <p class="lede">Lanza rocas por turnos sobre una isla tropical, encesta en los huecos para ganar monedas y roba las del castillo rival. El primero en llegar a 100 monedas gana.</p>
+        <div class="cta-row">
+          <span class="gel blue" role="note">
+            <svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg>
+            <span><small>Próximamente en</small>Steam</span>
+          </span>
+          <a class="gel green" href="#objetos"><span>Ver las reglas de los objetos</span></a>
+        </div>
+      </div>
+
+      <div class="window-stack">
+        <figure class="aero-window">
+          <div class="titlebar"><span>Catapultas y castillos</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i class="close" aria-hidden="true"></i></div>
+          <img src="img/menu.jpg" width="1920" height="1080" alt="Menú principal del juego: el título Catapultas y castillos sobre la isla, con los botones Jugar, Opciones y Salir.">
+        </figure>
+        <div class="toast" role="note">
+          <div class="toast-bar"><span>Catapultas y castillos</span><i aria-hidden="true">✕</i></div>
+          <div class="toast-body">
+            <svg class="buddies" viewBox="0 0 64 56" aria-hidden="true"><use href="#ic-buddies"/></svg>
+            <p><b>Jugador 2</b> acaba de iniciar sesión.<br>¡Te reta a una partida!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="platform" aria-labelledby="plataforma-titulo">
+      <h2 id="plataforma-titulo">Lanzamiento</h2>
+      <div class="logos">
+        <span class="logo-tile"><svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg> Steam</span>
+        <span class="logo-tile win"><svg viewBox="0 0 88 88" aria-hidden="true"><use href="#ic-windows"/></svg> Windows PC</span>
+      </div>
+      <dl class="spec">
+        <div><dt>Plataforma</dt><dd>PC (Windows)</dd></div>
+        <div><dt>Tienda</dt><dd>Steam</dd></div>
+        <div><dt>Jugadores</dt><dd>2 en la misma pantalla (4 más adelante)</dd></div>
+        <div><dt>Fecha</dt><dd>Por anunciar</dd></div>
+      </dl>
+    </aside>
+  </div>
+</header>
+
+<!-- Logos de plataforma -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="ic-steam" viewBox="0 0 496 512"><path fill="currentColor" d="M496 256c0 137-111.2 248-248.4 248-113.8 0-209.6-76.3-239-180.4l95.2 39.3c6.4 32.1 34.9 56.4 68.9 56.4 39.2 0 71.9-32.4 70.2-73.5l84.5-60.2c52.1 1.3 95.8-40.9 95.8-93.5 0-51.6-42-93.5-93.7-93.5s-93.7 42-93.7 93.5v1.2L176.6 279c-15.5-.9-30.7 3.4-43.5 12.1L0 236.1C10.2 108.4 117.1 8 247.6 8 384.8 8 496 119 496 256zM155.7 384.3l-30.5-12.6a52.79 52.79 0 0 0 27.2 25.8c26.9 11.2 57.8-1.6 69-28.4 5.4-13 5.5-27.3.1-40.3-5.4-13-15.5-23.2-28.5-28.6-12.9-5.4-26.7-5.2-38.9-.6l31.5 13c19.8 8.2 29.2 30.9 20.9 50.7-8.3 19.9-31 29.2-50.8 21zm173.8-129.9c-34.4 0-62.4-28-62.4-62.3s28-62.3 62.4-62.3 62.4 28 62.4 62.3-27.9 62.3-62.4 62.3zm.1-15.6c25.9 0 46.9-21 46.9-46.8 0-25.9-21-46.8-46.9-46.8s-46.9 21-46.9 46.8c.1 25.8 21.1 46.8 46.9 46.8z"/></symbol>
+  <symbol id="ic-windows" viewBox="0 0 88 88"><path fill="currentColor" d="M0 12.4 35.7 7.5v34.5H0zm40-5.6L87.3 0v41.8H40zM0 45.7h35.7v34.6L0 75.3zm40 .4h47.3V88L40 81.3z"/></symbol>
+</svg>
+
+<main class="sea">
+  <svg class="shore" viewBox="0 0 1440 34" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 0 L1440 0 L1440 10 C 1320 30, 1200 4, 1080 18 S 840 30, 720 14 S 480 2, 360 20 S 120 28, 0 12 Z" fill="#f4e2a6"/>
+    <path d="M0 12 C 120 28, 240 6, 360 20 S 600 4, 720 14 S 960 30, 1080 18 S 1320 2, 1440 10" fill="none" stroke="#fff" stroke-width="4" stroke-opacity=".85"/>
+  </svg>
+  <svg class="beam" id="beam" aria-hidden="true">
+    <defs>
+      <filter id="beam-blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="9"/></filter>
+      <filter id="beam-soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.5"/></filter>
+    </defs>
+    <path class="beam-glow" d=""/>
+    <path class="beam-core" d=""/>
+    <path class="beam-pulse" d=""/>
+    <circle class="beam-end" r="10"/>
+  </svg>
+  <div class="aquarium" aria-hidden="true">
+    <div class="caustics"></div>
+    <div class="fish" style="top: 9%; width: 120px; animation-duration: 38s; animation-delay: -6s"><svg viewBox="0 0 120 70"><use href="#ic-clownfish"/></svg></div>
+    <div class="fish left" style="top: 34%; width: 96px; animation-duration: 46s; animation-delay: -20s"><svg viewBox="0 0 120 80"><use href="#ic-tang"/></svg></div>
+    <div class="fish" style="top: 58%; width: 72px; animation-duration: 30s; animation-delay: -14s"><svg viewBox="0 0 120 70"><use href="#ic-clownfish"/></svg></div>
+    <div class="fish left" style="top: 80%; width: 130px; animation-duration: 52s; animation-delay: -34s"><svg viewBox="0 0 120 80"><use href="#ic-tang"/></svg></div>
+    <div class="fish" style="top: 92%; width: 84px; animation-duration: 42s; animation-delay: -2s"><svg viewBox="0 0 120 80"><use href="#ic-tang"/></svg></div>
+  </div>
+  <!-- Detalles flotantes en los costados (solo en pantallas anchas) -->
+  <div class="side left" aria-hidden="true">
+    <div class="float" style="top: 3%; --s: 150px; --r: -16deg"><i class="cd"></i></div>
+    <div class="float" style="top: 15%; --s: 120px; --r: 10deg; animation-delay: -2s"><svg viewBox="0 0 64 56"><use href="#ic-buddies"/></svg></div>
+    <div class="float" style="top: 27%; --s: 130px; --r: -8deg; animation-delay: -4s"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
+    <div class="float" style="top: 39%; --s: 150px; --r: 6deg; animation-delay: -1s"><svg viewBox="0 0 100 100"><use href="#ic-globe"/></svg></div>
+    <div class="float" style="top: 52%; --s: 190px; --r: -10deg; animation-delay: -3s">
+      <div class="player"><b class="play">▶</b><span><small>Reproduciendo</small>Música de la isla</span><em>00:16</em></div>
+    </div>
+    <div class="float" style="top: 65%; --s: 120px; --r: 14deg; animation-delay: -5s"><svg viewBox="0 0 130 110"><use href="#ic-caja"/></svg></div>
+    <div class="float" style="top: 78%; --s: 100px; --r: -12deg; animation-delay: -2.5s"><svg viewBox="0 0 60 50"><use href="#ic-duck"/></svg></div>
+    <div class="float" style="top: 90%; --s: 110px; --r: 18deg; animation-delay: -6s"><svg viewBox="0 0 80 70"><use href="#ic-coins"/></svg></div>
+  </div>
+  <div class="side right" aria-hidden="true">
+    <div class="float" style="top: 9%; --s: 110px; --r: 12deg; animation-delay: -3s"><svg viewBox="0 0 80 70"><use href="#ic-coins"/></svg></div>
+    <div class="float" style="top: 21%; --s: 140px; --r: -10deg; animation-delay: -1s"><svg viewBox="0 0 130 110"><use href="#ic-plataforma"/></svg></div>
+    <div class="float" style="top: 33%; --s: 100px; --r: 8deg; animation-delay: -4s"><svg viewBox="0 0 60 50"><use href="#ic-duck"/></svg></div>
+    <div class="float" style="top: 45%; --s: 130px; --r: 20deg; animation-delay: -2s"><i class="cd"></i></div>
+    <div class="float" style="top: 58%; --s: 120px; --r: -14deg; animation-delay: -5s"><svg viewBox="0 0 100 100"><use href="#ic-globe"/></svg></div>
+    <div class="float" style="top: 71%; --s: 120px; --r: 10deg; animation-delay: -3.5s"><svg viewBox="0 0 64 56"><use href="#ic-buddies"/></svg></div>
+    <div class="float" style="top: 84%; --s: 130px; --r: -6deg; animation-delay: -0.5s"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
+  </div>
+  <div class="wrap">
+    <section id="como-se-juega" aria-labelledby="t-juego">
+      <div class="xp-win" aria-hidden="true">
+        <div class="xp-title"><svg viewBox="0 0 16 16"><path d="M3 4 H13 L12 15 H4 Z" fill="#cfe4f7" stroke="#2a5b8c"/><path d="M2 3 H14" stroke="#2a5b8c" stroke-width="1.5"/><path d="M6 6 L6.5 13 M10 6 L9.5 13" stroke="#6aa86a" stroke-width="1.2"/></svg><span>Recycle Bin</span><b>_</b><b>□</b><b class="x">✕</b></div>
+        <div class="xp-menu"><span>File</span><span>Edit</span><span>View</span><span>Help</span></div>
+        <div class="xp-cols"><span>Name</span><span>Original Location</span></div>
+        <div class="xp-body xp-water">
+          <svg viewBox="0 0 60 50"><ellipse cx="30" cy="44" rx="22" ry="4" fill="#0b5fa0" opacity=".35"/><ellipse cx="28" cy="34" rx="22" ry="12" fill="#ffd21a" stroke="#c99a00" stroke-width="1.5"/><circle cx="40" cy="18" r="10" fill="#ffd21a" stroke="#c99a00" stroke-width="1.5"/><path d="M48 19 L58 21 L48 24 Z" fill="#ff8c1a" stroke="#c75f00" stroke-width="1"/><circle cx="43" cy="15" r="2" fill="#1d1d1d"/><ellipse cx="22" cy="29" rx="9" ry="3.5" fill="#fff" opacity=".6"/><ellipse cx="37" cy="13" rx="4" ry="2" fill="#fff" opacity=".7"/></svg>
+        </div>
+        <div class="xp-status"><span>0 object(s)</span><span>0 bytes</span></div>
+      </div>
+      <div class="section-head">
+        <h2 id="t-juego">Un tiro por turno. <b>Cada moneda cuenta.</b></h2>
+        <p>Cada jugador tiene un castillo y una catapulta. En tu turno apuntas, cargas la potencia y disparas una sola roca.</p>
+      </div>
+      <div class="basics">
+        <div class="pane">
+          <div class="num">2–8<small>monedas</small></div>
+          <h3>Encesta en los huecos</h3>
+          <p>Cuanto más pequeño es el hueco y más lejos está de las esquinas, más monedas da. El valor aparece flotando sobre cada hueco.</p>
+        </div>
+        <div class="pane">
+          <div class="num">3<small>por acierto</small></div>
+          <h3>Roba en el castillo rival</h3>
+          <p>Si tu roca cae en el patio de otro castillo, le quitas monedas a su dueño y te las quedas, hasta 10 por tiro. Nadie baja de 0.</p>
+        </div>
+        <div class="pane">
+          <div class="num">100<small>para ganar</small></div>
+          <h3>Llega primero a la meta</h3>
+          <p>Gana quien junte 100 monedas antes que los demás. La meta se puede cambiar en Opciones, entre 20 y 200.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="capturas" class="gallery" aria-labelledby="t-capturas">
+      <div class="section-head">
+        <h2 id="t-capturas">Así se ve <b>en el juego</b></h2>
+        <p>Capturas reales de la versión de prueba, tomadas en Unity.</p>
+      </div>
+      <figure class="shot-main">
+        <img id="shot-img" src="img/turno.jpg" width="1920" height="1080" alt="Turno del Jugador 1: vista detrás de la catapulta azul, con los huecos mostrando cuántas monedas vale cada uno y la guía de tiro.">
+        <figcaption id="shot-cap">Tu turno: cada hueco muestra cuántas monedas vale y la guía te ayuda a apuntar.</figcaption>
+      </figure>
+      <div class="thumbs" role="group" aria-label="Elegir captura">
+        <button type="button" id="thumb-turno" aria-pressed="true" data-src="img/turno.jpg" data-cap="Tu turno: cada hueco muestra cuántas monedas vale y la guía te ayuda a apuntar." data-alt="Turno del Jugador 1: vista detrás de la catapulta azul, con los huecos mostrando cuántas monedas vale cada uno y la guía de tiro."><img src="img/turno.jpg" width="1920" height="1080" alt="Turno del Jugador 1"></button>
+        <button type="button" id="thumb-carga" aria-pressed="false" data-src="img/carga.jpg" data-cap="Mantén Espacio para cargar la potencia. Aquí el Jugador 2 apunta al hueco central, que da 8 monedas." data-alt="Turno del Jugador 2 cargando potencia, con la catapulta naranja apuntando al hueco central de +8."><img src="img/carga.jpg" width="1920" height="1080" alt="Jugador 2 cargando potencia"></button>
+        <button type="button" id="thumb-mapa" aria-pressed="false" data-src="img/mapa.jpg" data-cap="Con la tecla C ves todo el mapa: los dos castillos, las catapultas y los 9 huecos en espejo." data-alt="Vista general de la isla con los dos castillos enfrentados, las catapultas y los huecos con sus valores."><img src="img/mapa.jpg" width="1920" height="1080" alt="Vista general del mapa"></button>
+        <button type="button" id="thumb-victoria" aria-pressed="false" data-src="img/victoria.jpg" data-cap="El primero en llegar a la meta gana la partida." data-alt="Pantalla de victoria: Gana el Jugador 1, llegó a 100 monedas, con los botones Jugar otra vez y Menú principal."><img src="img/victoria.jpg" width="1920" height="1080" alt="Pantalla de victoria"></button>
+      </div>
+    </section>
+
+    <section id="objetos" class="items-block" aria-labelledby="t-objetos">
+      <div class="xp-win tilt-left" aria-hidden="true">
+        <div class="xp-title"><svg viewBox="0 0 16 16"><path d="M1 4 H6 L7.5 5.5 H15 V14 H1 Z" fill="#ffd96b" stroke="#b8860b"/></svg><span>C:\Juegos\Catapultas</span><b>_</b><b>□</b><b class="x">✕</b></div>
+        <div class="xp-menu"><span>Archivo</span><span>Edición</span><span>Ver</span><span>Favoritos</span></div>
+        <div class="xp-body xp-files">
+          <div><svg viewBox="0 0 34 34"><path d="M2 8 H13 L16 11 H32 V30 H2 Z" fill="#ffd96b" stroke="#b8860b"/><path d="M2 13 H32" stroke="#fff" stroke-opacity=".7"/></svg>Rocas</div>
+          <div><svg viewBox="0 0 34 34"><path d="M7 2 H22 L28 8 V32 H7 Z" fill="#fff" stroke="#6b7d8f"/><path d="M22 2 V8 H28" fill="#e3edf5" stroke="#6b7d8f"/><path d="M11 14 H24 M11 18 H24 M11 22 H20" stroke="#4a6b8a"/></svg>reglas.txt</div>
+          <div><svg viewBox="0 0 34 34"><rect x="3" y="5" width="28" height="22" rx="3" fill="#3f9ae6" stroke="#1557a8"/><rect x="3" y="5" width="28" height="6" rx="3" fill="#8fd0ff"/><circle cx="17" cy="19" r="5" fill="#ffd21a" stroke="#c99a00"/></svg>Catapultas.exe</div>
+          <div><svg viewBox="0 0 34 34"><rect x="3" y="6" width="28" height="22" fill="#fff" stroke="#6b7d8f"/><rect x="5" y="8" width="24" height="14" fill="#6fc2ff"/><path d="M5 22 L13 14 L19 19 L23 16 L29 22 Z" fill="#5fd23c"/></svg>isla.bmp</div>
+          <div><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="#e9fbff" stroke="#9fb4c6"/><circle cx="17" cy="17" r="14" fill="none" stroke="#ffc8f0" stroke-width="4" stroke-dasharray="10 12" opacity=".7"/><circle cx="17" cy="17" r="3" fill="#fff" stroke="#9fb4c6"/></svg>Música (D:)</div>
+          <div><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="#ffc928" stroke="#d98a00" stroke-width="2"/><circle cx="17" cy="17" r="8" fill="none" stroke="#d98a00"/><ellipse cx="13" cy="12" rx="4" ry="2.5" fill="#fff" opacity=".7"/></svg>monedas.sav</div>
+        </div>
+        <div class="xp-status"><span>6 objeto(s)</span><span>Mi PC</span></div>
+      </div>
+      <div class="section-head">
+        <h2 id="t-objetos">Objetos: <b>cambia el mapa antes de tirar</b></h2>
+        <p>Al inicio de cada ronda se abre la tienda. Lo que compras son obstáculos que colocas en la isla para ayudar a tus tiros o complicar los de los demás.</p>
+      </div>
+
+      <div class="shop">
+        <div class="pane">
+          <h3>La tienda</h3>
+          <p>Te ofrece 3 objetos al azar, que pueden repetirse. Comprar descuenta su precio de tus monedas.</p>
+          <div class="shop-slots" aria-hidden="true">
+            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-caja"/></svg></div>
+            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
+            <div class="slot"><svg viewBox="0 0 130 110"><use href="#ic-plataforma"/></svg></div>
+          </div>
+          <span class="refresh"><span class="coin" aria-hidden="true"></span> Refrescar la tienda: 1 moneda</span>
+        </div>
+        <div class="pane">
+          <h3>Algunos objetos multiplican lo que gana la roca</h3>
+          <p>La roca sale con multiplicador ×1. Cada obstáculo con multiplicador que activa lo multiplica por su valor, y nunca activa dos veces el mismo.</p>
+          <div class="mult">
+            <div class="good"><strong>× &gt;1</strong><span>Bueno: gana o roba más</span></div>
+            <div class="bad"><strong>× &lt;1</strong><span>Malo: gana menos</span></div>
+            <div class="neutral"><strong>× 1</strong><span>Neutro: solo desvía</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="shapes">
+        <article class="pane">
+          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-caja"/></svg></div>
+          <h3>Caja</h3>
+          <div class="rule"><i class="info">■</i><p>Es un bloqueo: la roca choca contra ella y no la atraviesa.</p></div>
+          <div class="rule"><i class="info">⚑</i><p>Ponla en el camino a un hueco para que un rival no lo aproveche tiro tras tiro.</p></div>
+          <div class="rule"><i class="info">×1</i><p>No da monedas extra.</p></div>
+        </article>
+        <article class="pane">
+          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
+          <h3>Aro</h3>
+          <div class="rule"><i class="yes">✓</i><p>Se activa si la roca pasa por dentro.</p></div>
+          <div class="rule"><i class="no">✕</i><p>Chocar con el borde no cuenta.</p></div>
+        </article>
+        <article class="pane">
+          <div class="shape-art" aria-hidden="true"><svg viewBox="0 0 130 110"><use href="#ic-plataforma"/></svg></div>
+          <h3>Plataforma</h3>
+          <div class="rule"><i class="info">↯</i><p>Desvía la roca: si la toca por cualquier lado, cambia su dirección.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Puedes girarla como quieras antes de colocarla.</p></div>
+          <div class="rule"><i class="info">↕</i><p>La altura del poste que la sostiene se puede ajustar.</p></div>
+        </article>
+      </div>
+
+      <div class="place">
+        <div class="pane">
+          <h3>Colocar</h3>
+          <ul class="steps">
+            <li><span>Hazlo en tu fase de colocación, antes de disparar. Verás una versión transparente del objeto.</span></li>
+            <li><kbd>R</kbd><span>Gira el objeto.</span></li>
+            <li><kbd>Clic izq.</kbd><span>Confirma dónde va. No se puede poner sobre huecos, castillos ni otros obstáculos.</span></li>
+          </ul>
+        </div>
+        <div class="pane">
+          <h3>Quitar y descartar</h3>
+          <ul class="steps">
+            <li><kbd>Clic der.</kbd><span>Quita un obstáculo ya colocado, pagando una parte de su precio original.</span></li>
+            <li><span>Los obstáculos afectan los tiros de todos, también los de quien los puso.</span></li>
+            <li><span>Al terminar la ronda se descartan todos, colocados o no.</span></li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Los objetos están en desarrollo: los precios, el costo de quitar y los valores de cada multiplicador todavía se están ajustando.</p>
+    </section>
+  </div>
+</main>
+
+<section class="island" id="controles" aria-labelledby="t-controles">
+  <div class="wrap">
+    <div class="pane">
+      <h3 id="t-controles">Controles</h3>
+      <div class="controls">
+        <div><kbd>A</kbd><kbd>D</kbd> Mover la catapulta</div>
+        <div><kbd>Q</kbd><kbd>E</kbd> Girar</div>
+        <div><kbd>W</kbd><kbd>S</kbd> Ángulo de tiro (15° a 75°)</div>
+        <div><kbd>Espacio</kbd> Mantén para cargar, suelta para disparar</div>
+        <div><kbd>C</kbd> Vista general del mapa</div>
+        <div><kbd>Esc</kbd> Pausa</div>
+      </div>
+    </div>
+    <footer>
+      <p>Catapultas y Castillos · Proyecto universitario en desarrollo para PC.</p>
+      <p>Steam y el logo de Steam son marcas de Valve Corporation. Windows es una marca de Microsoft.</p>
+    </footer>
+  </div>
+</section>
+
+<!-- Ilustraciones de los objetos, los personajes y los peces -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="bud-g" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#e2ffc4"/><stop offset=".5" stop-color="#5fd23c"/><stop offset="1" stop-color="#2c8a17"/></radialGradient>
+    <radialGradient id="bud-b" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#d6f0ff"/><stop offset=".5" stop-color="#3f9ae6"/><stop offset="1" stop-color="#1557a8"/></radialGradient>
+    <linearGradient id="fish-o" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc06b"/><stop offset=".55" stop-color="#ff7a12"/><stop offset="1" stop-color="#d9500a"/></linearGradient>
+    <linearGradient id="fish-y" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff59a"/><stop offset=".55" stop-color="#ffd21a"/><stop offset="1" stop-color="#e0a600"/></linearGradient>
+    <linearGradient id="g-aqua" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9f1ff"/><stop offset=".5" stop-color="#4cc3ec"/><stop offset="1" stop-color="#1a86c4"/></linearGradient>
+    <linearGradient id="g-aqua-side" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2aa2d8"/><stop offset="1" stop-color="#0e5f99"/></linearGradient>
+    <linearGradient id="g-lime" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9ffbf"/><stop offset=".5" stop-color="#78d94a"/><stop offset="1" stop-color="#3a9e1c"/></linearGradient>
+    <linearGradient id="g-orange" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe2b0"/><stop offset=".5" stop-color="#ff9a2e"/><stop offset="1" stop-color="#d4610b"/></linearGradient>
+  </defs>
+  <symbol id="ic-buddies" viewBox="0 0 64 56">
+    <circle cx="40" cy="14" r="10" fill="url(#bud-b)" stroke="#fff" stroke-opacity=".7"/>
+    <path d="M24 50 C 24 34, 32 27, 40 27 S 56 34, 56 50 Z" fill="url(#bud-b)" stroke="#fff" stroke-opacity=".7"/>
+    <circle cx="22" cy="20" r="11" fill="url(#bud-g)" stroke="#fff" stroke-opacity=".8"/>
+    <path d="M4 55 C 4 38, 13 33, 22 33 S 40 38, 40 55 Z" fill="url(#bud-g)" stroke="#fff" stroke-opacity=".8"/>
+    <ellipse cx="19" cy="15" rx="6" ry="3.2" fill="#fff" fill-opacity=".7"/>
+    <ellipse cx="37" cy="10" rx="5" ry="2.8" fill="#fff" fill-opacity=".6"/>
+  </symbol>
+  <symbol id="ic-clownfish" viewBox="0 0 120 70">
+    <path d="M14 35 L0 16 L4 35 L0 54 Z" fill="url(#fish-o)" stroke="#1d1d1d" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M52 12 C 60 2, 74 2, 78 12 Z" fill="url(#fish-o)" stroke="#1d1d1d" stroke-width="2"/>
+    <ellipse cx="62" cy="35" rx="50" ry="24" fill="url(#fish-o)" stroke="#1d1d1d" stroke-width="2"/>
+    <path d="M38 13 C 46 26, 46 44, 38 57 L 30 54 C 36 42, 36 28, 30 16 Z" fill="#fff" stroke="#1d1d1d" stroke-width="2"/>
+    <path d="M70 11 C 78 26, 78 44, 70 59 L 62 59 C 68 44, 68 26, 62 11 Z" fill="#fff" stroke="#1d1d1d" stroke-width="2"/>
+    <path d="M100 18 C 106 28, 106 42, 100 52" fill="none" stroke="#fff" stroke-width="5"/>
+    <circle cx="96" cy="30" r="5" fill="#fff" stroke="#1d1d1d" stroke-width="1.5"/><circle cx="97.5" cy="30" r="2.6" fill="#1d1d1d"/>
+    <ellipse cx="66" cy="22" rx="26" ry="6" fill="#fff" fill-opacity=".45"/>
+  </symbol>
+  <symbol id="ic-tang" viewBox="0 0 120 80">
+    <path d="M18 40 L2 22 L8 40 L2 58 Z" fill="url(#fish-y)" stroke="#a67a00" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M30 40 C 30 10, 70 2, 100 26 C 112 34, 112 46, 100 54 C 70 78, 30 70, 30 40 Z" fill="url(#fish-y)" stroke="#a67a00" stroke-width="2"/>
+    <path d="M44 16 C 60 4, 80 6, 92 18" fill="none" stroke="#fff" stroke-width="3" stroke-opacity=".7"/>
+    <circle cx="94" cy="34" r="5" fill="#fff"/><circle cx="95.5" cy="34" r="2.6" fill="#1d1d1d"/>
+    <path d="M104 46 L112 44" stroke="#a67a00" stroke-width="2" stroke-linecap="round"/>
+    <ellipse cx="68" cy="26" rx="22" ry="6" fill="#fff" fill-opacity=".45"/>
+  </symbol>
+  <symbol id="ic-duck" viewBox="0 0 60 50">
+    <ellipse cx="30" cy="46" rx="22" ry="3.5" fill="#0b5fa0" opacity=".3"/>
+    <ellipse cx="28" cy="34" rx="22" ry="12" fill="#ffd21a" stroke="#c99a00" stroke-width="1.5"/>
+    <circle cx="40" cy="18" r="10" fill="#ffd21a" stroke="#c99a00" stroke-width="1.5"/>
+    <path d="M48 19 L58 21 L48 24 Z" fill="#ff8c1a" stroke="#c75f00" stroke-width="1"/>
+    <circle cx="43" cy="15" r="2" fill="#1d1d1d"/>
+    <ellipse cx="22" cy="29" rx="9" ry="3.5" fill="#fff" opacity=".6"/>
+    <ellipse cx="37" cy="13" rx="4" ry="2" fill="#fff" opacity=".7"/>
+  </symbol>
+  <symbol id="ic-globe" viewBox="0 0 100 100">
+    <defs>
+      <radialGradient id="gl-sea" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="#d9f6ff"/><stop offset=".45" stop-color="#3fb4ec"/><stop offset="1" stop-color="#0d5ea8"/></radialGradient>
+      <clipPath id="gl-clip"><circle cx="50" cy="50" r="44"/></clipPath>
+    </defs>
+    <circle cx="50" cy="50" r="44" fill="url(#gl-sea)" stroke="#fff" stroke-opacity=".9" stroke-width="2"/>
+    <g clip-path="url(#gl-clip)" fill="#5fd23c" stroke="#2c8a17" stroke-width="1.2" opacity=".9">
+      <path d="M18 34 C 26 22, 42 24, 44 34 S 36 52, 28 50 S 12 44, 18 34 Z"/>
+      <path d="M52 52 C 62 46, 76 50, 78 62 S 70 84, 60 82 S 46 62, 52 52 Z"/>
+      <path d="M62 20 C 70 18, 80 24, 78 30 S 66 34, 62 28 Z"/>
+    </g>
+    <ellipse cx="40" cy="26" rx="22" ry="11" fill="#fff" opacity=".55"/>
+    <ellipse cx="50" cy="50" rx="44" ry="14" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2" transform="rotate(-20 50 50)"/>
+  </symbol>
+  <symbol id="ic-coins" viewBox="0 0 80 70">
+    <ellipse cx="40" cy="62" rx="30" ry="6" fill="#0b5fa0" opacity=".25"/>
+    <g stroke="#b97700" stroke-width="1.5">
+      <ellipse cx="34" cy="52" rx="22" ry="8" fill="#e8a400"/><ellipse cx="34" cy="48" rx="22" ry="8" fill="#ffc928"/>
+      <ellipse cx="38" cy="40" rx="22" ry="8" fill="#e8a400"/><ellipse cx="38" cy="36" rx="22" ry="8" fill="#ffd84a"/>
+      <ellipse cx="42" cy="28" rx="22" ry="8" fill="#e8a400"/><ellipse cx="42" cy="24" rx="22" ry="8" fill="#ffe27a"/>
+    </g>
+    <ellipse cx="36" cy="21" rx="9" ry="3" fill="#fff" opacity=".75"/>
+  </symbol>
+  <symbol id="ic-caja" viewBox="0 0 130 110">
+    <ellipse cx="65" cy="100" rx="44" ry="6" fill="#0a3d66" fill-opacity=".18"/>
+    <path d="M20 38 L65 22 L110 38 L110 82 L65 98 L20 82 Z" fill="url(#g-aqua-side)"/>
+    <path d="M20 38 L65 22 L110 38 L65 54 Z" fill="url(#g-aqua)" stroke="#fff" stroke-opacity=".8"/>
+    <path d="M65 54 L65 98" stroke="#fff" stroke-opacity=".5"/>
+    <path d="M24 44 L24 70" stroke="#fff" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ic-aro" viewBox="0 0 130 110">
+    <ellipse cx="65" cy="102" rx="30" ry="5" fill="#0a3d66" fill-opacity=".18"/>
+    <rect x="61" y="80" width="8" height="22" rx="3" fill="#8ea7ba"/>
+    <circle cx="65" cy="46" r="34" fill="none" stroke="url(#g-orange)" stroke-width="12"/>
+    <path d="M38 30 A34 34 0 0 1 80 15" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="3.5" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="ic-plataforma" viewBox="0 0 130 110">
+    <ellipse cx="65" cy="100" rx="46" ry="6" fill="#0a3d66" fill-opacity=".18"/>
+    <rect x="58" y="62" width="14" height="36" rx="4" fill="#8ea7ba"/>
+    <path d="M90 74 L90 96 M85 79 L90 73 L95 79 M85 91 L90 97 L95 91" fill="none" stroke="#2f86da" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M14 52 L65 36 L116 52 L116 62 L65 78 L14 62 Z" fill="#3a9e1c"/>
+    <path d="M14 52 L65 36 L116 52 L65 68 Z" fill="url(#g-lime)" stroke="#fff" stroke-opacity=".85"/>
+    <path d="M40 48 L65 41 L90 48" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<script>
+  // Reloj de la bandeja, como en la barra de tareas
+  (function () {
+    var el = document.getElementById("clock");
+    function tick() {
+      var d = new Date();
+      el.textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    }
+    tick();
+    setInterval(tick, 15000);
+  })();
+
+  // Rayo de luz: nace junto a "Un tiro por turno", baja zigzagueando por el mar
+  // y cerca de Controles sube un poco en espiral. Se recalcula si cambia el tamaño.
+  (function () {
+    var sea = document.querySelector(".sea");
+    var svg = document.getElementById("beam");
+    var start = document.getElementById("t-juego");
+    if (!sea || !svg || !start) return;
+    var paths = svg.querySelectorAll("path");
+    var end = svg.querySelector(".beam-end");
+
+    // Curva suave (Catmull-Rom → Bézier) que pasa por todos los puntos
+    function smooth(pts) {
+      var d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+      for (var i = 0; i < pts.length - 1; i++) {
+        var p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+        d += " C" + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + " " + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) +
+             " " + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + " " + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) +
+             " " + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+      }
+      return d;
+    }
+
+    function draw() {
+      var W = sea.clientWidth, H = sea.clientHeight;
+      var s = sea.getBoundingClientRect(), h = start.getBoundingClientRect();
+      svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+      var x0 = Math.max(12, h.left - s.left - 24), y0 = h.top - s.top + h.height * 0.35;
+      var yEnd = H - Math.min(170, H * 0.08);
+      var pts = [[x0, y0]];
+      var n = Math.max(3, Math.round((yEnd - y0) / 420));
+      for (var i = 1; i < n; i++) {
+        pts.push([i % 2 ? W * 0.93 : W * 0.07, y0 + (yEnd - y0) * i / n]);
+      }
+      // Espiral final: 2 vueltas que se cierran mientras suben
+      var R = Math.min(110, W * 0.16), lastX = W * 0.42;
+      pts.push([lastX, yEnd]);
+      var cx = lastX + R, turns = 2.2, steps = 44;
+      for (var k = 1; k <= steps; k++) {
+        var u = k / steps, a = Math.PI + u * turns * 2 * Math.PI, r = R * (1 - 0.6 * u);
+        pts.push([cx + r * Math.cos(a), yEnd - 170 * u + r * 0.7 * Math.sin(a)]);
+      }
+      var d = smooth(pts);
+      paths.forEach(function (p) { p.setAttribute("d", d); });
+      var last = pts[pts.length - 1];
+      end.setAttribute("cx", last[0]);
+      end.setAttribute("cy", last[1]);
+    }
+
+    draw();
+    if (window.ResizeObserver) new ResizeObserver(draw).observe(sea);
+    else window.addEventListener("resize", draw);
+  })();
+
+  // Galería: al elegir una miniatura cambia la captura grande
+  (function () {
+    var img = document.getElementById("shot-img");
+    var cap = document.getElementById("shot-cap");
+    var buttons = document.querySelectorAll(".thumbs button");
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        img.src = b.dataset.src;
+        img.alt = b.dataset.alt;
+        cap.textContent = b.dataset.cap;
+        buttons.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      });
+    });
+  })();
+
+  // Burbujas del menú del juego subiendo por toda la pantalla
+  (function () {
+    var box = document.getElementById("bubbles");
+    if (!box || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    for (var i = 0; i < 22; i++) {
+      var img = document.createElement("img");
+      img.src = "img/burbuja.png";
+      img.alt = "";
+      var size = 22 + Math.random() * 90;
+      img.style.width = size + "px";
+      img.style.left = (Math.random() * 100) + "%";
+      img.style.animationDuration = (14 + Math.random() * 16) * (0.7 + size / 160) + "s";
+      img.style.animationDelay = (-Math.random() * 30) + "s";
+      box.appendChild(img);
+    }
+  })();
+</script>
