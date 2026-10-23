@@ -528,7 +528,8 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 .variants .v-normal[aria-pressed="true"] { background: linear-gradient(to bottom, #ffffff, #b4c6d4 55%, #8ea7ba); color: var(--navy); text-shadow: none; border-color: #6e8597; }
 .variants .v-pos[aria-pressed="true"] { background: linear-gradient(to bottom, #b4f08c, #62c93a 50%, #3fa821); border-color: #2c7a17; }
 .variants .v-neg[aria-pressed="true"] { background: linear-gradient(to bottom, #6b7390, #2b3146 50%, #1b1f2e); border-color: #12151f; }
-.variants .badge { padding: 7px 14px; border-radius: 999px; font: 700 0.8rem/1 var(--font-body); border: 1px solid #9a6a0c; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 10px rgba(4, 38, 77, 0.2); }`n.variants .v-special { background: linear-gradient(to bottom, #fff1b8, #f0b73c 50%, #d99a1c); color: var(--navy); }
+.variants .badge { padding: 7px 14px; border-radius: 999px; font: 700 0.8rem/1 var(--font-body); border: 1px solid #9a6a0c; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 4px 10px rgba(4, 38, 77, 0.2); }
+.variants .v-special { background: linear-gradient(to bottom, #fff1b8, #f0b73c 50%, #d99a1c); color: var(--navy); }
 .effect { color: var(--ink); min-height: 3.2em; transition: opacity 0.3s; }
 .effect.is-fading { opacity: 0; }
 .price { margin-top: 10px; font-size: 0.85rem; color: var(--ink-soft); font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
@@ -845,20 +846,20 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           </div>
           <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
           <div class="rule"><i class="info">■</i><p>Rectángulo largo para cerrar un paso o hacer rebotar tiros.</p></div>
-          <div class="rule"><i class="info">↻</i><p>Gírala e inclínala para armar rampas.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Gírala e inclínala para cerrar pasos o hacer techos.</p></div>
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 4</b> · <b data-v="positive">Positivo 9</b> · <b data-v="negative">Negativo 7</b></p>
         </article>
         <article class="pane">
-          <div class="shape-art" data-kind="lid" data-variant="normal" tabindex="0" role="img" aria-label="Tapa en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/lid_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
-          <h3>Tapa</h3>
-          <div class="variants" role="group" aria-label="Variantes de tapa">
+          <div class="shape-art" data-kind="ramp" data-variant="normal" tabindex="0" role="img" aria-label="Rampa en 3D: arrastra para girarla"><img class="fallback" src="img/objetos/ramp_normal.png" alt=""><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
+          <h3>Rampa</h3>
+          <div class="variants" role="group" aria-label="Variantes de rampa">
             <button type="button" class="v-normal" data-variant="normal" aria-pressed="true">Normal</button>
             <button type="button" class="v-pos" data-variant="positive" aria-pressed="false">Positivo +2</button>
             <button type="button" class="v-neg" data-variant="negative" aria-pressed="false">Negativo −2</button>
           </div>
           <p class="effect">Solo desvía la pelota: no da ni quita monedas.</p>
-          <div class="rule"><i class="info">■</i><p>Disco plano y ancho: sirve de techo, de rampa o de trampolín.</p></div>
-          <div class="rule"><i class="info">↻</i><p>Súbela en el aire para tapar burbujas desde arriba.</p></div>
+          <div class="rule"><i class="info">■</i><p>Cuña inclinada: la pelota sube por ella y sale volando.</p></div>
+          <div class="rule"><i class="info">↻</i><p>Apúntala hacia las burbujas; por detrás es una pared.</p></div>
           <p class="price"><span class="coin" aria-hidden="true"></span> <b data-v="normal" class="on">Normal 3</b> · <b data-v="positive">Positivo 8</b> · <b data-v="negative">Negativo 6</b></p>
         </article>
         <article class="pane">
@@ -1371,7 +1372,11 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
     function geometry(kind) {
       switch (kind) {
         case "wall": return new RoundedBoxGeometry(5, 2, 0.5, 4, 0.06);
-        case "lid": return new THREE.CylinderGeometry(1.7, 1.7, 0.16, 72);
+        case "ramp": {   // cuña: 4,4 de largo, 2 de alto y 2,6 de ancho
+          const s = new THREE.Shape();
+          s.moveTo(-2.2, 0); s.lineTo(2.2, 0); s.lineTo(2.2, 2.0); s.closePath();
+          return new THREE.ExtrudeGeometry(s, { depth: 2.6, bevelEnabled: false });
+        }
         case "cylinder": return new THREE.CylinderGeometry(0.55, 0.55, 4.2, 56);
         case "sphere": return new THREE.SphereGeometry(1.05, 64, 32);
         case "pyramid": { const p = new THREE.ConeGeometry(2.4 / Math.SQRT2, 2.1, 4, 1); p.rotateY(Math.PI / 4); return p; }
@@ -1380,7 +1385,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
       }
     }
     // Pose inicial que mejor muestra cada forma
-    const POSE = { wall: [0.12, 0.5], lid: [0.55, 0], cylinder: [0.15, 0.9], pyramid: [0.05, 0.3], ring: [0.08, 0.55], cube: [0.25, 0.6], sphere: [0, 0] };
+    const POSE = { wall: [0.12, 0.5], ramp: [0.2, 0.6], cylinder: [0.15, 0.9], pyramid: [0.05, 0.3], ring: [0.08, 0.55], cube: [0.25, 0.6], sphere: [0, 0] };
 
     function symbol(plus) {
       const grp = new THREE.Group();
