@@ -952,7 +952,7 @@ public static partial class CatapultasSceneBuilder
             markerMats[i] = Lit($"Indicador{i + 1}", Color.Lerp(c, Color.white, 0.3f), 0.95f, 0f, c * 1.6f);
         }
 
-        sectionMat = Transparent(Unlit("Seccion", new Color(1f, 1f, 1f, 0.13f)));
+        sectionMat = Transparent(Unlit("Seccion", new Color(1f, 1f, 1f, 0.2f)));
         lineMat = SaveMat("Linea", new Material(Shader.Find("Sprites/Default")));
         bubbleMat = SaveMat("Burbuja", new Material(Shader.Find("Sprites/Default")));
         bubbleMat.mainTexture = skin.bubble.texture;

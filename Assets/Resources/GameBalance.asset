@@ -46,4 +46,194 @@ MonoBehaviour:
   heightStep: 0.25
   objectBounciness: 0.45
   objectFriction: 0.3
-  items: []
+  items:
+  - id: cube_normal
+    kind: 0
+    variant: 0
+    displayName: Cubo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. No da ni quita monedas."
+    price: 3
+    removalCost: 8
+    inShop: 1
+    prefab: {fileID: 4352377136866858937, guid: c7903f3e9252bc3499f5cb08d1586da0, type: 3}
+    icon: {fileID: 21300000, guid: 30e2f2e13da08ec4aae1f866865979a6, type: 3}
+  - id: cube_positive
+    kind: 0
+    variant: 1
+    displayName: Cubo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro."
+    price: 8
+    removalCost: 12
+    inShop: 1
+    prefab: {fileID: 2788871339642436027, guid: 8b8878532a132db4f92c2e61dc5100df, type: 3}
+    icon: {fileID: 21300000, guid: 6a5579ce6857f58489de61dde7f96780, type: 3}
+  - id: cube_negative
+    kind: 0
+    variant: 2
+    displayName: Cubo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    prefab: {fileID: 8173748460496144058, guid: 7988a058208bbc841b6887089182be52, type: 3}
+    icon: {fileID: 21300000, guid: 841103d61f4140346bc07d7f500eb64e, type: 3}
+  - id: wall_normal
+    kind: 1
+    variant: 0
+    displayName: Pared
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. No da ni quita monedas."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    prefab: {fileID: 5793511086302249393, guid: 73123cf1d0b45854a95843e2bb1cab06, type: 3}
+    icon: {fileID: 21300000, guid: f665954bd0e8e2a469dd1f115a070759, type: 3}
+  - id: wall_positive
+    kind: 1
+    variant: 1
+    displayName: Pared
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro."
+    price: 9
+    removalCost: 13
+    inShop: 1
+    prefab: {fileID: 5655036803201573575, guid: 2ee9c9719172bc04aa180727a5452bce, type: 3}
+    icon: {fileID: 21300000, guid: df450d322751ba34c839a654e915d234, type: 3}
+  - id: wall_negative
+    kind: 1
+    variant: 2
+    displayName: Pared
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 7
+    removalCost: 11
+    inShop: 1
+    prefab: {fileID: 2129346338796420650, guid: 1d55d779c26356941a8c2ae51e2d142c, type: 3}
+    icon: {fileID: 21300000, guid: 1692aba7e7b7cf64f9d81854ae0ca9a4, type: 3}
+  - id: lid_normal
+    kind: 2
+    variant: 0
+    displayName: Tapa
+    description: 'Disco plano: sirve de rampa o de techo. No da ni quita monedas.'
+    price: 3
+    removalCost: 8
+    inShop: 1
+    prefab: {fileID: 2525064588800427412, guid: f91d91228c5379c4b930d28bd533fa11, type: 3}
+    icon: {fileID: 21300000, guid: 2360b48c3b71e064f9b811f5e9869912, type: 3}
+  - id: lid_positive
+    kind: 2
+    variant: 1
+    displayName: Tapa
+    description: 'Disco plano: sirve de rampa o de techo. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.'
+    price: 8
+    removalCost: 12
+    inShop: 1
+    prefab: {fileID: 859284331239234215, guid: cea35dfb2d16f6f4f885b73a9216f20a, type: 3}
+    icon: {fileID: 21300000, guid: 5c05f1c4bbcb96e4b86c43777b619b18, type: 3}
+  - id: lid_negative
+    kind: 2
+    variant: 2
+    displayName: Tapa
+    description: "Disco plano: sirve de rampa o de techo. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    prefab: {fileID: 1301789407295353175, guid: 7f7a1ba699279f044880e9c4dac7004b, type: 3}
+    icon: {fileID: 21300000, guid: 5c8c86b3e23b3ab489634af6b47e16c7, type: 3}
+  - id: cylinder_normal
+    kind: 4
+    variant: 0
+    displayName: Cilindro
+    description: Columna larga; acostada hace de rodillo. No da ni quita monedas.
+    price: 3
+    removalCost: 8
+    inShop: 1
+    prefab: {fileID: 5961700902316615834, guid: 6321417fbfd7f524c937500641840587, type: 3}
+    icon: {fileID: 21300000, guid: 4a7d21bb36335d94e82da498379f9921, type: 3}
+  - id: cylinder_positive
+    kind: 4
+    variant: 1
+    displayName: Cilindro
+    description: Columna larga; acostada hace de rodillo. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    prefab: {fileID: 8429014840313241257, guid: a88ec320585de124391b9cdc8c58ec1e, type: 3}
+    icon: {fileID: 21300000, guid: f065d2a7eafb33449974699c7e5ae68f, type: 3}
+  - id: cylinder_negative
+    kind: 4
+    variant: 2
+    displayName: Cilindro
+    description: "Columna larga; acostada hace de rodillo. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    prefab: {fileID: 9130896025596121193, guid: e721e7343b0fdfc4183bcc6462e7a42b, type: 3}
+    icon: {fileID: 21300000, guid: 32485f9feff2bd24b8d3318b59a5142f, type: 3}
+  - id: sphere_normal
+    kind: 5
+    variant: 0
+    displayName: Esfera
+    description: Bola brillante con rebotes impredecibles. No da ni quita monedas.
+    price: 3
+    removalCost: 8
+    inShop: 1
+    prefab: {fileID: 3875203171769169745, guid: e9003aedc425df1408e8d7eb5fa088e2, type: 3}
+    icon: {fileID: 21300000, guid: ffedc5d963be190479e70c4c84a65ef1, type: 3}
+  - id: sphere_positive
+    kind: 5
+    variant: 1
+    displayName: Esfera
+    description: Bola brillante con rebotes impredecibles. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    prefab: {fileID: 1119782574560477876, guid: 7e288e0df6466ba4c84e7263b3b0734c, type: 3}
+    icon: {fileID: 21300000, guid: 517c61b61f93b28489627a9e33c3f126, type: 3}
+  - id: sphere_negative
+    kind: 5
+    variant: 2
+    displayName: Esfera
+    description: "Bola brillante con rebotes impredecibles. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    prefab: {fileID: 4269215928895312405, guid: 790e774379411ac4f9ba892bbcd96b6f, type: 3}
+    icon: {fileID: 21300000, guid: b10954de8d48bbe469af21bbdf324f9e, type: 3}
+  - id: pyramid_normal
+    kind: 6
+    variant: 0
+    displayName: "Pir\xE1mide"
+    description: Sus caras inclinadas mandan la pelota de lado. No da ni quita monedas.
+    price: 3
+    removalCost: 8
+    inShop: 1
+    prefab: {fileID: 4458311279254953641, guid: 0149c61af2e19eb408d83dbfd646562d, type: 3}
+    icon: {fileID: 21300000, guid: 2822c70526a152140bf785aeb2116924, type: 3}
+  - id: pyramid_positive
+    kind: 6
+    variant: 1
+    displayName: "Pir\xE1mide"
+    description: Sus caras inclinadas mandan la pelota de lado. +2 monedas si la pelota lo toca y revientas burbujas en ese tiro.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    prefab: {fileID: 6899207042279075965, guid: 9e3cc3c8d5b01c24a92620632233ac76, type: 3}
+    icon: {fileID: 21300000, guid: 13c668c5d5ea17840b2ef86fc661c52b, type: 3}
+  - id: pyramid_negative
+    kind: 6
+    variant: 2
+    displayName: "Pir\xE1mide"
+    description: "Sus caras inclinadas mandan la pelota de lado. \u22122 monedas al tiro que lo toque y reviente burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    prefab: {fileID: 6503325328713946607, guid: 61f36e7cac535a64a8567b8b27c9db8a, type: 3}
+    icon: {fileID: 21300000, guid: 8a9640b6b68eb3e439f3284d02894b1f, type: 3}
+  - id: ring_special
+    kind: 3
+    variant: 3
+    displayName: Aro multiplicador
+    description: "Si la pelota pasa por dentro y revienta burbujas, las monedas de burbujas se multiplican \xD72."
+    price: 15
+    removalCost: 18
+    inShop: 1
+    prefab: {fileID: 86470706614267782, guid: 23a8b848d3d4c754ab278ebef72a3b30, type: 3}
+    icon: {fileID: 21300000, guid: b75e24461271fb24d8b1c30e4b8e827c, type: 3}
