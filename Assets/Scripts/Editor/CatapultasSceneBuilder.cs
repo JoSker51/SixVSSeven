@@ -371,36 +371,38 @@ public static partial class CatapultasSceneBuilder
         var options = Place(AeroUI.Button(main, "Opciones", "Opciones", skin.buttonBlue, new Vector2(440f, 100f), Color.white, 46), -154f);
         var quit = Place(AeroUI.Button(main, "Salir", "Salir", skin.buttonSilver, new Vector2(440f, 100f), Navy, 46), -272f);
 
-        // Nueva partida: cuántos jugadores
-        var ng = AeroUI.Node("PanelNuevaPartida", root).At(new Vector2(0.5f, 0.5f), new Vector2(0f, -150f), new Vector2(880f, 580f));
+        // Nueva partida: cuántos jugadores y a cuántas monedas
+        var ng = AeroUI.Node("PanelNuevaPartida", root).At(new Vector2(0.5f, 0.5f), new Vector2(0f, -150f), new Vector2(880f, 640f));
         ng.gameObject.AddComponent<CanvasGroup>().alpha = 0f;
         var ngPanel = ng.gameObject.AddComponent<UIFadePanel>();
         Set(ngPanel, ("startVisible", false));
         AeroUI.Img(ng, "Vidrio", skin.glassPanel, Color.white).rectTransform.Stretch();
         Title(ng, "Nueva partida", 64, -28f);
-        AeroUI.Label(ng, "Pregunta", "¿Cuántos juegan?", 32, Navy).rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -122f), new Vector2(800f, 44f));
+        AeroUI.Label(ng, "Pregunta", "¿Cuántos juegan?", 32, Navy).rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(800f, 44f));
         var countButtons = new Button[MatchConfig.MaxPlayers - MatchConfig.MinPlayers + 1];
         for (int i = 0; i < countButtons.Length; i++)
         {
             int count = MatchConfig.MinPlayers + i;
             countButtons[i] = AeroUI.Button(ng, $"{count} jugadores", count.ToString(), skin.buttonSilver, new Vector2(200f, 100f), Navy, 54);
-            ((RectTransform)countButtons[i].transform).At(new Vector2(0.5f, 1f), new Vector2((i - 1) * 240f, -180f), new Vector2(200f, 100f));
+            ((RectTransform)countButtons[i].transform).At(new Vector2(0.5f, 1f), new Vector2((i - 1) * 240f, -162f), new Vector2(200f, 100f));
         }
         var preview = new Image[MatchConfig.MaxPlayers];
         for (int i = 0; i < preview.Length; i++)
         {
-            preview[i] = AeroUI.Orb(ng, $"Color J{i + 1}", skin, skin.PlayerColor(i), 58f);
-            preview[i].rectTransform.At(new Vector2(0.5f, 1f), new Vector2((i - 1.5f) * 80f, -318f), new Vector2(58f, 58f));
+            preview[i] = AeroUI.Orb(ng, $"Color J{i + 1}", skin, skin.PlayerColor(i), 52f);
+            preview[i].rectTransform.At(new Vector2(0.5f, 1f), new Vector2((i - 1.5f) * 76f, -284f), new Vector2(52f, 52f));
         }
-        AeroUI.Label(ng, "Nota", "Cada jugador tiene su color, su castillo y su parte del mapa", 24, new Color(Navy.r, Navy.g, Navy.b, 0.8f), AeroWeight.Light)
-            .rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -392f), new Vector2(820f, 34f));
+        // Meta: el slider recorre GameBalance.winCoinChoices (el MainMenu pone el rango al arrancar)
+        var goal = OptionRow(ng, "Monedas para ganar", -372f, 0f, 1f, true, out var goalValue);
+        AeroUI.Label(ng, "Nota", "Un tiro normal da unas 3 monedas; cada pasada por un aro las duplica", 24, new Color(Navy.r, Navy.g, Navy.b, 0.8f), AeroWeight.Light)
+            .rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -436f), new Vector2(820f, 34f));
         var ngBack = AeroUI.Button(ng, "Volver", "Volver", skin.buttonSilver, new Vector2(280f, 90f), Navy, 40);
         ((RectTransform)ngBack.transform).At(new Vector2(0.5f, 0f), new Vector2(-170f, 36f), new Vector2(280f, 90f));
         var start = AeroUI.Button(ng, "Empezar", "¡Empezar!", skin.buttonGreen, new Vector2(320f, 90f), Color.white, 42);
         ((RectTransform)start.transform).At(new Vector2(0.5f, 0f), new Vector2(170f, 36f), new Vector2(320f, 90f));
 
         // Opciones
-        var opt = AeroUI.Node("PanelOpciones", root).At(new Vector2(0.5f, 0.5f), new Vector2(0f, -130f), new Vector2(880f, 600f));
+        var opt = AeroUI.Node("PanelOpciones", root).At(new Vector2(0.5f, 0.5f), new Vector2(0f, -150f), new Vector2(880f, 440f));
         opt.gameObject.AddComponent<CanvasGroup>().alpha = 0f;
         var optPanel = opt.gameObject.AddComponent<UIFadePanel>();
         Set(optPanel, ("startVisible", false));
@@ -408,9 +410,6 @@ public static partial class CatapultasSceneBuilder
         Title(opt, "Opciones", 64, -28f);
         var volume = OptionRow(opt, "Volumen general", -150f, 0f, 1f, false, out var volumeValue);
         var music = OptionRow(opt, "Música", -250f, 0f, 1f, false, out var musicValue);
-        var coins = OptionRow(opt, "Monedas para ganar", -350f, 2f, 20f, true, out var coinsValue);
-        AeroUI.Label(opt, "Nota", "La meta de monedas se aplica al empezar una partida", 24, new Color(Navy.r, Navy.g, Navy.b, 0.75f), AeroWeight.Light)
-            .rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -425f), new Vector2(820f, 34f));
         var back = AeroUI.Button(opt, "Volver", "Volver", skin.buttonBlue, new Vector2(320f, 90f), Color.white, 40);
         ((RectTransform)back.transform).At(new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(320f, 90f));
 
@@ -434,8 +433,9 @@ public static partial class CatapultasSceneBuilder
             ("skin", skin), ("mainPanel", mainPanel), ("optionsPanel", optPanel), ("newGamePanel", ngPanel), ("fade", fadeGroup),
             ("playButton", play), ("optionsButton", options), ("quitButton", quit), ("backButton", back),
             ("playerCountButtons", countButtons), ("playerCountPreview", preview), ("startButton", start), ("newGameBackButton", ngBack),
-            ("volumeSlider", volume), ("musicSlider", music), ("coinsSlider", coins),
-            ("volumeValue", volumeValue), ("musicValue", musicValue), ("coinsValue", coinsValue));
+            ("goalSlider", goal), ("goalValue", goalValue),
+            ("volumeSlider", volume), ("musicSlider", music),
+            ("volumeValue", volumeValue), ("musicValue", musicValue));
     }
 
     private static Slider OptionRow(RectTransform parent, string label, float y, float min, float max, bool whole, out Text value)

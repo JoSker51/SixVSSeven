@@ -22,6 +22,8 @@ public class ArenaObject : MonoBehaviour
     private Rock trackedRock;
     private Vector3 prevLocal;
     private bool hasPrev;
+    private int ringSide;              // lado del aro donde está la pelota: +1, −1 o 0 (todavía en el plano)
+    private bool lastCrossInside;      // el último cruce del plano fue por dentro del agujero
 
     public void Init(ItemDefinition def, int owner)
     {
@@ -52,7 +54,9 @@ public class ArenaObject : MonoBehaviour
         AeroAudio.Play(Sfx.Hover, 0.8f);
     }
 
-    // Aro: cuenta solo si el centro de la pelota cruza el plano del aro con toda la pelota dentro del agujero.
+    // Aro: cada pasada cuenta (también si la pelota vuelve a cruzar el mismo aro) y vuelve a duplicar.
+    // Una pasada es cruzar el plano por dentro del agujero, con toda la pelota adentro, y salir del otro lado
+    // al menos un radio de pelota: así una pelota que tiembla justo en el plano no suma pasadas falsas.
     // Se compara la posición entre pasos de física, así una pelota rápida no "salta" el aro sin detectarse.
     private void FixedUpdate()
     {
@@ -60,18 +64,27 @@ public class ArenaObject : MonoBehaviour
         var shot = ShotTracker.Active;
         var rock = shot?.Rock;
         if (rock == null) { hasPrev = false; trackedRock = null; return; }
+        if (trackedRock != rock) { hasPrev = false; ringSide = 0; lastCrossInside = false; }
 
         Vector3 local = transform.InverseTransformPoint(rock.Body.position);
-        if (hasPrev && trackedRock == rock && (prevLocal.y > 0f) != (local.y > 0f))
+        if (hasPrev && (prevLocal.y > 0f) != (local.y > 0f))
         {
             float t = prevLocal.y / (prevLocal.y - local.y);
             Vector3 cross = Vector3.Lerp(prevLocal, local, t);
             float radial = new Vector2(cross.x, cross.z).magnitude;
-            if (radial + rock.Radius <= ringInnerRadius + 0.02f && shot.RegisterRing(this))
+            lastCrossInside = radial + rock.Radius <= ringInnerRadius + 0.02f;
+        }
+        int side = local.y > rock.Radius ? 1 : local.y < -rock.Radius ? -1 : 0;
+        if (side != 0)
+        {
+            if (ringSide != 0 && side != ringSide && lastCrossInside)
             {
-                GameHUD.Popup(transform.position, $"×{GameBalance.Current.ringMultiplier}", new Color(1f, 0.85f, 0.3f));
+                int passes = shot.RegisterRingPass(this);
+                GameHUD.Popup(transform.position, $"×{RewardCalculator.Multiplier(passes, GameBalance.Current)}", new Color(1f, 0.85f, 0.3f));
                 AeroAudio.Play(Sfx.Ring);
             }
+            ringSide = side;
+            lastCrossInside = false;
         }
         prevLocal = local;
         hasPrev = true;

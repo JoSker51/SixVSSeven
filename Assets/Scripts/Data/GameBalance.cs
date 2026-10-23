@@ -38,7 +38,10 @@ public class GameBalance : ScriptableObject
 {
     [Header("Partida")]
     public int startingCoins = 5;
+    [Tooltip("Meta elegida la primera vez en «Nueva partida»; después se recuerda la última")]
     public int defaultWinCoins = 100;
+    [Tooltip("Metas que se pueden elegir al empezar una partida (de menor a mayor; la última es el tope)")]
+    public int[] winCoinChoices = { 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000 };
     [Tooltip("0 = una distribución distinta en cada partida")]
     public int randomSeed = 0;
 
@@ -76,6 +79,7 @@ public class GameBalance : ScriptableObject
     [Header("Recompensas de objetos")]
     public int positiveBonus = 2;
     public int negativePenalty = 2;
+    [Tooltip("Cada pasada por un aro multiplica las monedas de burbujas por esto, y se apila: 2 pasadas ×4, 3 ×8...")]
     public int ringMultiplier = 2;
 
     [Header("Tienda")]

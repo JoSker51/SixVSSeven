@@ -15,6 +15,9 @@ public static class MatchConfig
         set => playerCount = Mathf.Clamp(value, MinPlayers, MaxPlayers);
     }
 
+    // Meta de monedas elegida en "Nueva partida" (0 = la última guardada o la de GameBalance)
+    public static int WinCoins { get; set; }
+
     // 0 = usar la semilla de GameBalance (y si también es 0, una al azar)
     public static int Seed { get; set; }
 

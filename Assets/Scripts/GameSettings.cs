@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Opciones del jugador guardadas en PlayerPrefs: volumen general, música y meta de monedas.
+// Preferencias guardadas en PlayerPrefs: volumen general, música, y los últimos jugadores y meta elegidos en "Nueva partida".
 public static class GameSettings
 {
     private const string VolumeKey = "opciones.volumen";
@@ -26,7 +26,7 @@ public static class GameSettings
         set => PlayerPrefs.SetInt("partida.jugadores", value);
     }
 
-    // Si nunca se tocó en Opciones, el GameManager usa la meta de GameBalance
+    // Si nunca se empezó una partida, "Nueva partida" propone la meta de GameBalance
     public static bool HasWinCoins => PlayerPrefs.HasKey(WinCoinsKey);
 
     public static int WinCoins

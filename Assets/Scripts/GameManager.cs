@@ -22,7 +22,8 @@ public class GameManager : MonoBehaviour
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
         playerCount = MatchConfig.PlayerCount;                              // elegido en "Nueva partida" (2 a 4)
-        winCoins = GameSettings.HasWinCoins ? GameSettings.WinCoins : GameBalance.Current.defaultWinCoins;
+        winCoins = MatchConfig.WinCoins > 0 ? MatchConfig.WinCoins                // elegida en "Nueva partida"
+                 : GameSettings.HasWinCoins ? GameSettings.WinCoins : GameBalance.Current.defaultWinCoins;
         coins = new int[playerCount];
         for (int i = 0; i < playerCount; i++) coins[i] = GameBalance.Current.startingCoins;
     }

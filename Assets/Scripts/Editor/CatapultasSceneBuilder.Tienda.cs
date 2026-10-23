@@ -75,7 +75,7 @@ public static partial class CatapultasSceneBuilder
 
         var ring = BuildItemPrefab("ring_special", ItemKind.Ring, ItemVariant.Special, torus, pyramid);
         items.Add(MakeItem(oldItems, "ring_special", ItemKind.Ring, ItemVariant.Special, "Aro multiplicador",
-            $"Si la pelota pasa por dentro y revienta burbujas, las monedas de burbujas se multiplican ×{b.ringMultiplier}.",
+            $"Cada pasada por un aro multiplica las monedas de burbujas ×{b.ringMultiplier}: se apilan (×4, ×8...).",
             RingPrice, RingRemoval, ring));
 
         RenderIcons(items);

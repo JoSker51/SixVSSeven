@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameBalance
   startingCoins: 5
   defaultWinCoins: 100
+  winCoinChoices: 320000006400000096000000c80000002c01000090010000f4010000ee020000e8030000dc050000d0070000c4090000b80b0000a00f000088130000i
   randomSeed: 0
   projectileSpeed: 1.35
   arenaRadius: 27
@@ -232,7 +233,7 @@ MonoBehaviour:
     kind: 3
     variant: 3
     displayName: Aro multiplicador
-    description: "Si la pelota pasa por dentro y revienta burbujas, las monedas de burbujas se multiplican \xD72."
+    description: "Cada pasada por un aro multiplica las monedas de burbujas \xD72: se apilan (\xD74, \xD78...)."
     price: 15
     removalCost: 18
     inShop: 1

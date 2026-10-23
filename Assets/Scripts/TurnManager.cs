@@ -129,7 +129,7 @@ public class TurnManager : MonoBehaviour
             reward.Stolen += stolen;
             cap -= stolen;
         }
-        Debug.Log($"Tiro J{record.ThrowerId}: burbujas {reward.BubbleCount} (B={reward.B}) P={reward.P} N={reward.N} aro={reward.Ring} → +{reward.Final}, robo {reward.Stolen}");
+        Debug.Log($"Tiro J{record.ThrowerId}: burbujas {reward.BubbleCount} (B={reward.B}) P={reward.P} N={reward.N} aros={reward.RingPasses} (x{reward.Multiplier}) → +{reward.Final}, robo {reward.Stolen}");
         return reward;
     }
 

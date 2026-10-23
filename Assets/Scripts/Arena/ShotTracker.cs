@@ -13,7 +13,7 @@ public class ShotRecord
     public readonly HashSet<ArenaObject> Touched = new HashSet<ArenaObject>();
     public readonly HashSet<ArenaObject> Positives = new HashSet<ArenaObject>();
     public readonly HashSet<ArenaObject> Negatives = new HashSet<ArenaObject>();
-    public readonly HashSet<ArenaObject> Rings = new HashSet<ArenaObject>();
+    public readonly List<ArenaObject> RingPasses = new List<ArenaObject>();   // una entrada por pasada (el mismo aro puede repetirse)
 
     public int BaseReward
     {
@@ -48,7 +48,12 @@ public class ShotRecord
         return true;
     }
 
-    public bool RegisterRing(ArenaObject ring) => ring != null && Rings.Add(ring);
+    // Cada pasada cuenta, aunque sea por el mismo aro. Devuelve cuántas lleva el tiro.
+    public int RegisterRingPass(ArenaObject ring)
+    {
+        if (ring != null) RingPasses.Add(ring);
+        return RingPasses.Count;
+    }
 }
 
 public static class ShotTracker
@@ -76,7 +81,8 @@ public struct ShotReward
     public int B;             // recompensa base de esas burbujas
     public int P;             // bonificaciones positivas activadas
     public int N;             // penalizaciones negativas activadas
-    public bool Ring;         // multiplicador activado
+    public int RingPasses;    // pasadas por aros que cuentan (0 si no hubo burbujas)
+    public long Multiplier;   // 2 elevado a las pasadas: 1, 2, 4, 8...
     public int E;             // bonificación neta de objetos = 2P - 2N
     public int R;             // antes del límite inferior
     public int Final;         // máx(0, R): lo que se suma al jugador
@@ -84,12 +90,22 @@ public struct ShotReward
 }
 
 // El único lugar donde se calculan las monedas de un tiro (sección 10.5 del documento de diseño):
-//   E = 2P - 2N ;  R = B + E  (o  R = 2B + E  con aro) ;  final = máx(0, R)
+//   E = 2P - 2N ;  M = 2^k (k = pasadas por aros) ;  R = M·B + E ;  final = máx(0, R)
 // Positivos, negativos y aros solo cuentan si en ese tiro se reventó al menos una burbuja.
-// El aro duplica solo B, y varios aros en el mismo tiro lo aplican una sola vez.
+// Los aros se apilan: cada pasada vuelve a duplicar B (1 pasada ×2, 2 ×4, 3 ×8...), aunque sea el mismo aro.
 public static class RewardCalculator
 {
-    public static ShotReward Compute(int bubbleCount, int baseReward, int positives, int negatives, int rings, GameBalance bal)
+    public const long MaxReward = 1_000_000_000;   // tope técnico para que los números no se desborden
+
+    // Multiplicador de k pasadas (base ×2 de GameBalance). Se corta al llegar al tope técnico.
+    public static long Multiplier(int passes, GameBalance bal)
+    {
+        long m = 1;
+        for (int i = 0; i < passes && m < MaxReward; i++) m *= Mathf.Max(1, bal.ringMultiplier);
+        return System.Math.Min(m, MaxReward);
+    }
+
+    public static ShotReward Compute(int bubbleCount, int baseReward, int positives, int negatives, int ringPasses, GameBalance bal)
     {
         bool any = bubbleCount > 0;
         var r = new ShotReward
@@ -98,14 +114,16 @@ public static class RewardCalculator
             B = any ? baseReward : 0,
             P = any ? positives : 0,
             N = any ? negatives : 0,
-            Ring = any && rings > 0,
+            RingPasses = any ? ringPasses : 0,
         };
         r.E = bal.positiveBonus * r.P - bal.negativePenalty * r.N;
-        r.R = (r.Ring ? bal.ringMultiplier : 1) * r.B + r.E;
+        r.Multiplier = Multiplier(r.RingPasses, bal);
+        long raw = System.Math.Min(r.Multiplier * r.B, MaxReward) + r.E;
+        r.R = (int)System.Math.Max(-MaxReward, System.Math.Min(raw, MaxReward));
         r.Final = Mathf.Max(0, r.R);
         return r;
     }
 
     public static ShotReward Compute(ShotRecord rec, GameBalance bal) =>
-        Compute(rec.Bubbles.Count, rec.BaseReward, rec.Positives.Count, rec.Negatives.Count, rec.Rings.Count, bal);
+        Compute(rec.Bubbles.Count, rec.BaseReward, rec.Positives.Count, rec.Negatives.Count, rec.RingPasses.Count, bal);
 }

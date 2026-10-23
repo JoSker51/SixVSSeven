@@ -195,7 +195,7 @@ public class GameHUD : MonoBehaviour
         {
             var r = rows[i];
             int c = gm.GetCoins(i);
-            if (c != r.shown) { r.pulse = r.shown == int.MinValue ? 0f : 1f; r.shown = c; r.coins.text = c.ToString(); }
+            if (c != r.shown) { r.pulse = r.shown == int.MinValue ? 0f : 1f; r.shown = c; r.coins.text = c.ToString(); r.coins.fontSize = c >= 100000 ? 26 : c >= 10000 ? 32 : 40; }   // con aros apilados caben números grandes
             r.pulse = Mathf.MoveTowards(r.pulse, 0f, dt * 2.5f);
             r.coins.rectTransform.localScale = Vector3.one * (1f + 0.35f * r.pulse * r.pulse);
 
@@ -321,7 +321,9 @@ public class GameHUD : MonoBehaviour
         if (r.BubbleCount > 0)
         {
             sb.Append($"Burbujas: <b>{r.BubbleCount}</b>  →  +{r.B}");
-            if (r.Ring) sb.Append($"\nAro ×{bal.ringMultiplier}  →  +{r.B * bal.ringMultiplier}");
+            long ringed = System.Math.Min(r.Multiplier * r.B, RewardCalculator.MaxReward);
+            if (r.RingPasses == 1) sb.Append($"\nAro ×{r.Multiplier}  →  +{ringed}");
+            else if (r.RingPasses > 1) sb.Append($"\nAros: {r.RingPasses} pasadas ×{r.Multiplier}  →  +{ringed}");
             if (r.P > 0) sb.Append($"\nPositivos: {r.P}  →  +{bal.positiveBonus * r.P}");
             if (r.N > 0) sb.Append($"\nNegativos: {r.N}  →  −{bal.negativePenalty * r.N}");
             if (r.R < 0) sb.Append("\n(la recompensa nunca baja de 0)");
@@ -329,7 +331,7 @@ public class GameHUD : MonoBehaviour
         else
         {
             sb.Append("No reventaste ninguna burbuja");
-            if (rec.Touched.Count > 0 || rec.Rings.Count > 0) sb.Append("\nSin burbujas, los objetos no dan ni quitan");
+            if (rec.Touched.Count > 0 || rec.RingPasses.Count > 0) sb.Append("\nSin burbujas, los objetos no dan ni quitan");
         }
         if (r.Stolen > 0) sb.Append($"\n¡Robo de castillo!  →  +{r.Stolen}");
 
