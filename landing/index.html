@@ -620,7 +620,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
       <div>
         <span class="eyebrow">Próximamente · PC</span>
         <h1>Catapultas <b>y Castillos</b></h1>
-        <p class="lede">Lanza la pelota por turnos en una arena circular, revienta burbujas para ganar monedas y coloca objetos que cambian cada tiro. De 2 a 4 jugadores: el primero en llegar a 100 monedas gana.</p>
+        <p class="lede">Lanza la pelota por turnos en una arena circular, revienta burbujas para ganar monedas y coloca objetos que cambian cada tiro. De 2 a 4 jugadores: gana el primero en llegar a la meta, que eligen al empezar.</p>
         <div class="cta-row">
           <span class="gel blue" role="note">
             <svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg>
@@ -739,9 +739,9 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <p>Sobre cada castillo flota una burbuja del color de su dueño. Si revientas la de un rival, le quitas monedas y te las quedas, hasta 10 por tiro. Nadie baja de 0.</p>
         </div>
         <div class="pane">
-          <div class="num">100<small>para ganar</small></div>
+          <div class="num">50–5000<small>tú eliges</small></div>
           <h3>Llega primero a la meta</h3>
-          <p>Gana quien junte 100 monedas antes que los demás. La meta se puede cambiar en Opciones, entre 20 y 200.</p>
+          <p>Al empezar la partida eligen a cuántas monedas se juega, de 50 a 5000. Gana quien llegue primero. Con aros apilados las monedas suben rápido.</p>
         </div>
       </div>
       <div class="pane turn-pane">
@@ -905,10 +905,11 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <div class="shape-art" data-kind="ring" data-variant="special" tabindex="0" role="img" aria-label="Aro multiplicador en 3D: arrastra para girarlo"><img class="fallback" src="img/objetos/ring_special.png" alt=""><span class="x2" aria-hidden="true">×2</span><span class="hint" aria-hidden="true">↻ Arrastra</span></div>
           <div>
             <h3>Aro multiplicador</h3>
-            <div class="variants"><span class="badge v-special">Especial ×2 · el objeto más caro</span></div>
-            <div class="rule"><i class="yes">✓</i><p>Si la pelota pasa por dentro y revientas burbujas, las monedas de burbujas se duplican.</p></div>
+            <div class="variants"><span class="badge v-special">Especial ×2 por pasada · el objeto más caro</span></div>
+            <div class="rule"><i class="yes">✓</i><p>Cada vez que la pelota pasa por un aro y revientas burbujas, las monedas de burbujas se duplican.</p></div>
             <div class="rule"><i class="no">✕</i><p>Tocar el borde no cuenta: la pelota entera tiene que pasar por el agujero.</p></div>
-            <div class="rule"><i class="info">×1</i><p>Varios aros en el mismo tiro no se acumulan, y no duplica los +2 ni los −2.</p></div>
+            <div class="rule"><i class="info">×8</i><p>Se apilan: 2 pasadas ×4, 3 pasadas ×8, y así. Si la pelota vuelve a cruzar el mismo aro, también cuenta.</p></div>
+            <div class="rule"><i class="info">±</i><p>No multiplica los +2 ni los −2 de los otros objetos.</p></div>
             <div class="rule"><i class="info">↕</i><p>Colócalo de pie y en el aire: puedes girarlo y subirlo como quieras.</p></div>
             <p class="price"><span class="coin" aria-hidden="true"></span> <b class="on">Precio 15</b> · Retirarlo cuesta 18</p>
           </div>
@@ -1455,11 +1456,11 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           this.bubbles.push(s);
         }
 
-        // Aro: una pelota pasa por dentro de vez en cuando y aparece el ×2
+        // Aro: una pelota va y vuelve tres veces por dentro y el multiplicador se apila: ×2, ×4, ×8
         if (this.kind === "ring") {
           this.ball = new THREE.Mesh(new THREE.SphereGeometry(0.35, 32, 16), new THREE.MeshPhysicalMaterial({ color: 0xff8a80, roughness: 0.1, clearcoat: 1 }));
           this.pivot.add(this.ball);
-          this.ballT = -1;
+          this.ballT = 3.5;   // empieza en la pausa
           this.x2 = el.querySelector(".x2");
           this.flash = 0;
         }
@@ -1560,13 +1561,18 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 
         if (this.ball) {
           this.ballT += dt / 1.1;
-          if (this.ballT > 2.2) this.ballT = -1;
-          const z = THREE.MathUtils.clamp(this.ballT, -1, 1) * 5;
+          if (this.ballT > 4) { this.ballT = 0; this.passes = 0; this.prevZ = undefined; }
+          const t = Math.min(this.ballT, 3);
+          const z = -5 * Math.cos(Math.PI * t);   // ida, vuelta e ida: cruza el aro en t = 0,5, 1,5 y 2,5
           this.ball.position.set(0, 0, z);
-          this.ball.visible = this.ballT < 1.05;
-          if (this.prevZ !== undefined && this.prevZ < 0 && z >= 0) {
+          this.ball.visible = this.ballT < 3;
+          if (this.prevZ !== undefined && this.ball.visible && (this.prevZ < 0) !== (z < 0)) {
+            this.passes = (this.passes || 0) + 1;
             this.flash = 1;
-            if (this.x2) { this.x2.classList.remove("is-pop"); void this.x2.offsetWidth; this.x2.classList.add("is-pop"); }
+            if (this.x2) {
+              this.x2.textContent = "×" + 2 ** this.passes;
+              this.x2.classList.remove("is-pop"); void this.x2.offsetWidth; this.x2.classList.add("is-pop");
+            }
           }
           this.prevZ = z;
           this.flash = Math.max(0, this.flash - dt * 1.8);
