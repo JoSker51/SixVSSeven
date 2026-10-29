@@ -195,7 +195,7 @@ public static partial class CatapultasSceneBuilder
 
         // Ayuda (cambia según la fase)
         var help = AeroUI.Img(root, "Controles", skin.glassPanel, Color.white, 1.4f);
-        help.rectTransform.At(new Vector2(0f, 0f), new Vector2(28f, 26f), new Vector2(390f, 250f));
+        help.rectTransform.At(new Vector2(0f, 0f), new Vector2(28f, 26f), new Vector2(400f, 330f));
         var helpGroup = help.gameObject.AddComponent<CanvasGroup>();
         helpGroup.blocksRaycasts = false;
         var helpText = AeroUI.Label(help.transform, "Texto", "", 22, Navy, AeroWeight.Regular, TextAnchor.MiddleLeft);

@@ -299,8 +299,8 @@ public class GameHUD : MonoBehaviour
 
     private static string HelpFor(TurnPhase phase) => phase switch
     {
-        TurnPhase.Shop => "<b>Compra</b>: abre la tienda y\ngasta tus monedas.\n\n<b>Enter</b>  pasar a colocación",
-        TurnPhase.Placement => "<b>Colocación</b>: elige un objeto abajo\n<b>Clic</b> colocar  ·  <b>Clic der.</b> cancelar\n<b>Q / E</b> girar  ·  <b>R / F</b> inclinar\n<b>Z / X</b> ladear  ·  <b>Rueda</b> altura\nClic en un objeto puesto: retirarlo\n<b>Enter</b>  ¡a lanzar!",
+        TurnPhase.Shop => "<b>Compra</b>: abre la tienda y\ngasta tus monedas.\n\n<b>Vista</b>: clic der. + arrastrar gira\n<b>WASD</b> mover  ·  <b>Rueda</b> zoom  ·  <b>C</b> centrar\n\n<b>Enter</b>  pasar a colocación",
+        TurnPhase.Placement => "<b>Colocación</b>: elige un objeto abajo\n<b>Clic</b> colocar (se apila encima)\n<b>Clic der.</b> cancelar  ·  <b>Esc</b> también\n<b>Q / E</b> girar  ·  <b>R / F</b> inclinar\n<b>Z / X</b> ladear  ·  <b>Shift+Rueda</b> altura\n<b>Vista</b>: clic der. + arrastrar, <b>WASD</b>,\n<b>Rueda</b> zoom, <b>C</b> centrar\nClic en un objeto puesto: retirarlo\n<b>Enter</b>  ¡a lanzar!",
         TurnPhase.Aiming => "<b>A / D</b>   mover\n<b>Q / E</b>   girar\n<b>W / S</b>   ángulo\n<b>Espacio</b>   cargar y soltar\n<b>C</b>  cámara   ·   <b>Esc</b>  pausa",
         _ => "",
     };

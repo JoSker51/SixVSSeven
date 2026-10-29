@@ -43,6 +43,7 @@ MonoBehaviour:
   refreshCost: 1
   refreshesPerTurn: 1
   placementMaxHeight: 6
+  stackMaxHeight: 16
   placementClearance: 0.15
   rotationStep: 15
   heightStep: 0.25

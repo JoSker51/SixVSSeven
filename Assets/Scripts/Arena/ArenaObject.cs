@@ -18,6 +18,7 @@ public class ArenaObject : MonoBehaviour
     public int OwnerId { get; private set; } = -1;
     public bool IsPlaced { get; private set; }
     public float RingInnerRadius => ringInnerRadius;
+    public bool Resting { get; set; }   // apoyado en el suelo o en otro objeto (no flotando a propósito)
 
     private Rock trackedRock;
     private Vector3 prevLocal;
@@ -43,6 +44,26 @@ public class ArenaObject : MonoBehaviour
     }
 
     private void OnDestroy() => All.Remove(this);
+
+    // Cae (con aceleración) cuando se retira lo que tenía debajo. La física ya está en 'to': esto es solo lo que se ve.
+    public void AnimateFall(Vector3 from, Vector3 to)
+    {
+        StopAllCoroutines();
+        StartCoroutine(Fall(from, to));
+    }
+
+    private System.Collections.IEnumerator Fall(Vector3 from, Vector3 to)
+    {
+        float duration = Mathf.Clamp(Mathf.Sqrt(2f * Vector3.Distance(from, to) / 9.81f), 0.12f, 0.6f);
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            float k = t / duration;
+            transform.position = Vector3.LerpUnclamped(from, to, k * k);
+            yield return null;
+        }
+        transform.position = to;
+        Physics.SyncTransforms();
+    }
 
     // Lo llama la pelota en OnCollisionEnter
     public void OnRockHit(ShotRecord shot)

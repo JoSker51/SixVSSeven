@@ -88,7 +88,10 @@ public class GameBalance : ScriptableObject
     public int refreshesPerTurn = 1;
 
     [Header("Colocación")]
+    [Tooltip("Cuánto se puede subir un objeto (Shift + ruedita) por encima de lo que tiene debajo")]
     public float placementMaxHeight = 6f;
+    [Tooltip("Altura máxima de lo construido: apilando objetos no se puede pasar de aquí")]
+    public float stackMaxHeight = 16f;
     public float placementClearance = 0.15f;
     public float rotationStep = 15f;
     public float heightStep = 0.25f;

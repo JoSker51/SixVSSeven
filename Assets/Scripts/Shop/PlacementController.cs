@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
@@ -11,10 +12,13 @@ public enum RemoveResult { Ok, WrongPhase, NoTarget, NotEnoughCoins }
 
 // Colocación y retirada de objetos, solo en la fase de Colocación del propio turno.
 //  - Colocar: se elige un objeto del inventario y se ve un "fantasma" de vidrio que sigue al mouse.
-//    Q/E gira, R/F inclina, Z/X ladea, la ruedita sube o baja. Clic confirma; clic derecho o Esc cancela
-//    (el objeto vuelve a estar disponible). No se puede salir del círculo, atravesar el suelo ni encimarse
-//    con burbujas, paredes, castillos, catapultas u otros objetos.
+//    El fantasma "cae" hasta apoyarse en el suelo o encima de otro objeto, así se pueden armar estructuras.
+//    Q/E gira, R/F inclina, Z/X ladea, Shift + ruedita (o RePág/AvPág) lo sube para dejarlo flotando.
+//    Clic confirma; clic derecho corto o Esc cancela (el objeto vuelve a estar disponible).
+//    Puede tocar a otros objetos pero no atravesarlos; tampoco salir del círculo, atravesar el suelo ni
+//    encimarse con burbujas, paredes, castillos o catapultas.
 //  - Retirar: clic sobre cualquier objeto colocado, se muestra el costo y hay que confirmar. No vuelve al inventario.
+//    Lo que estaba apoyado encima cae hasta lo que quede debajo.
 [DefaultExecutionOrder(-10)]
 public class PlacementController : MonoBehaviour
 {
@@ -41,6 +45,11 @@ public class PlacementController : MonoBehaviour
     private readonly Dictionary<string, Bounds> boundsCache = new Dictionary<string, Bounds>();
     private Transform placedRoot;
     private Camera cam;
+
+    private const int Mask = ~(1 << 2);              // todo menos "Ignore Raycast" (fantasma y aura)
+    private const float Shrink = 0.02f;              // la caja de prueba es un poco más chica: tocarse no es chocar
+    private const float RestGap = 0.03f;             // al apoyar, la caja chica queda así de separada (la real, ~1 cm)
+    private const float TouchTolerance = 0.03f;
 
     private static GameBalance Bal => GameBalance.Current;
     private static TurnManager Turns => TurnManager.Instance;
@@ -109,6 +118,7 @@ public class PlacementController : MonoBehaviour
         placed = go.GetComponent<ArenaObject>();
         placed.Init(item, p);
         Physics.SyncTransforms();
+        placed.Resting = DropDistance(placed) < 0.05f;   // apoyado: si se retira lo de abajo, cae
         AeroAudio.Play(Sfx.Place);
         Changed?.Invoke();
         return PlaceResult.Ok;
@@ -133,7 +143,7 @@ public class PlacementController : MonoBehaviour
         }
         if (!inside) { reason = "Fuera de la arena"; return false; }
         if (minY < -0.01f) { reason = "Atraviesa el suelo"; return false; }
-        if (maxY > Bal.placementMaxHeight + 3f) { reason = "Demasiado alto"; return false; }
+        if (maxY > Bal.stackMaxHeight) { reason = "Demasiado alto"; return false; }
         if (arena.InKeepOut(center, footprint * 0.6f)) { reason = "Muy cerca de un castillo o una catapulta"; return false; }
 
         foreach (var b in Bubble.All)
@@ -143,13 +153,17 @@ public class PlacementController : MonoBehaviour
             { reason = "Choca con una burbuja"; return false; }
         }
 
-        foreach (var c in Physics.OverlapBox(center, half + Vector3.one * Bal.placementClearance, rotation, ~0, QueryTriggerInteraction.Ignore))
+        foreach (var c in Physics.OverlapBox(center, half + Vector3.one * Bal.placementClearance, rotation, Mask, QueryTriggerInteraction.Ignore))
         {
-            if (c.CompareTag("Ground")) continue;
-            if (ghost && c.transform.IsChildOf(ghost.transform)) continue;
-            if (halo && c.transform.IsChildOf(halo.transform)) continue;
-            reason = c.GetComponentInParent<ArenaObject>() ? "Choca con otro objeto" : "Choca con la pared, un castillo o una catapulta";
+            if (c.CompareTag("Ground") || c.GetComponentInParent<ArenaObject>()) continue;
+            reason = "Choca con la pared, un castillo o una catapulta";
             return false;
+        }
+        // Con otros objetos se puede tocar (apoyarse encima o al lado), pero no atravesarlos
+        foreach (var c in Physics.OverlapBox(center, Shrunk(half, TouchTolerance), rotation, Mask, QueryTriggerInteraction.Ignore))
+        {
+            var other = c.GetComponentInParent<ArenaObject>();
+            if (other != null && other.IsPlaced) { reason = "Choca con otro objeto"; return false; }
         }
         reason = null;
         return true;
@@ -202,6 +216,7 @@ public class PlacementController : MonoBehaviour
         CancelRemoval();
         obj.RemoveFromArena();
         Physics.SyncTransforms();
+        Settle();
         AeroAudio.Play(Sfx.Pop);
         GameHUD.Popup(at, $"−{cost}", new Color(1f, 0.55f, 0.6f));
         LastMessage = $"Retiraste {name}";
@@ -234,7 +249,7 @@ public class PlacementController : MonoBehaviour
                 if (obj != null && obj.IsPlaced) SelectForRemoval(obj);
             }
         }
-        else if (RemovalTarget != null && (GameInput.RightClick || GameInput.Pressed(Key.Escape)))
+        else if (RemovalTarget != null && (GameInput.RightTap || GameInput.Pressed(Key.Escape)))
         {
             if (GameInput.Pressed(Key.Escape)) GameInput.ConsumeEscape();
             CancelRemoval();
@@ -250,18 +265,21 @@ public class PlacementController : MonoBehaviour
         if (GameInput.Pressed(Key.F)) euler.x -= step;
         if (GameInput.Pressed(Key.Z)) euler.z += step;
         if (GameInput.Pressed(Key.X)) euler.z -= step;
-        int scroll = GameInput.ScrollStep + (GameInput.Pressed(Key.PageUp) ? 1 : 0) - (GameInput.Pressed(Key.PageDown) ? 1 : 0);
+        // Altura: Shift + ruedita (la ruedita sola acerca o aleja la cámara)
+        int scroll = (GameInput.ShiftHeld ? GameInput.ScrollStep : 0) + (GameInput.Pressed(Key.PageUp) ? 1 : 0) - (GameInput.Pressed(Key.PageDown) ? 1 : 0);
         height = Mathf.Clamp(height + scroll * Bal.heightStep, 0f, Bal.placementMaxHeight);
 
         var ray = cam.ScreenPointToRay(GameInput.MousePosition);
-        if (Mathf.Abs(ray.direction.y) > 1e-4f)
+        if (Physics.Raycast(ray, out var hit, 500f, Mask, QueryTriggerInteraction.Ignore) && hit.collider.GetComponentInParent<ArenaObject>() != null)
+            floorPoint = hit.point;   // apuntando a un objeto: el nuevo se apila ahí
+        else if (Mathf.Abs(ray.direction.y) > 1e-4f)
         {
             float t = -ray.origin.y / ray.direction.y;
             if (t > 0f) floorPoint = ray.origin + ray.direction * t;
         }
 
         Quaternion rot = Quaternion.Euler(euler);
-        Vector3 pos = PoseOnFloor(Holding, floorPoint, height, rot);
+        Vector3 pos = PoseOnSupport(Holding, floorPoint, height, rot);
         ghost.transform.SetPositionAndRotation(pos, rot);
 
         IsValid = Validate(Holding, pos, rot, out string reason);
@@ -283,12 +301,68 @@ public class PlacementController : MonoBehaviour
             }
             else AeroAudio.Play(Sfx.Error);
         }
-        else if (GameInput.RightClick || GameInput.Pressed(Key.Escape))
+        else if (GameInput.RightTap || GameInput.Pressed(Key.Escape))   // clic derecho corto: arrastrar gira la cámara
         {
             if (GameInput.Pressed(Key.Escape)) GameInput.ConsumeEscape();
             CancelPlacing();
         }
     }
+
+    // Posición del objeto "dejándolo caer" en ese punto: queda apoyado en el suelo o encima del objeto que
+    // tenga debajo; 'lift' lo sube a partir de ahí para dejarlo flotando
+    public Vector3 PoseOnSupport(ItemDefinition item, Vector3 point, float lift, Quaternion rot)
+    {
+        Vector3 pos = PoseOnFloor(item, point, 0f, rot);
+        Bounds lb = LocalBounds(item);
+        Vector3 center = pos + rot * lb.center;
+        float top = Bal.stackMaxHeight + 5f;
+        float raise = 0f;
+        foreach (var h in Physics.BoxCastAll(center + Vector3.up * top, Shrunk(lb.extents, Shrink), Vector3.down, rot, top, Mask, QueryTriggerInteraction.Ignore))
+        {
+            if (h.distance <= 0f) continue;
+            var obj = h.collider.GetComponentInParent<ArenaObject>();
+            if (obj == null || !obj.IsPlaced) continue;   // solo se apila sobre objetos (el suelo es la base)
+            raise = Mathf.Max(raise, top - h.distance + RestGap);
+        }
+        pos.y += raise + lift;
+        return pos;
+    }
+
+    // Cuánto puede bajar un objeto colocado hasta apoyarse en el suelo o en otro objeto
+    public float DropDistance(ArenaObject obj)
+    {
+        Bounds lb = LocalBounds(obj.Definition);
+        Quaternion rot = obj.transform.rotation;
+        Vector3 center = obj.transform.position + rot * lb.center;
+        float drop = obj.transform.position.y - PoseOnFloor(obj.Definition, obj.transform.position, 0f, rot).y;   // hasta el suelo
+        foreach (var h in Physics.BoxCastAll(center, Shrunk(lb.extents, Shrink), Vector3.down, rot, drop + 1f, Mask, QueryTriggerInteraction.Ignore))
+        {
+            if (h.distance <= 0f || h.collider.transform.IsChildOf(obj.transform)) continue;
+            var other = h.collider.GetComponentInParent<ArenaObject>();
+            if (other == null || !other.IsPlaced) continue;
+            drop = Mathf.Min(drop, h.distance - RestGap);
+        }
+        return Mathf.Max(0f, drop);
+    }
+
+    // Después de retirar algo: lo que estaba apoyado cae, de abajo hacia arriba (así una torre baja entera).
+    // Lo que se dejó flotando a propósito (con Shift + ruedita) se queda donde está.
+    private void Settle()
+    {
+        var falls = new List<(ArenaObject obj, Vector3 from, Vector3 to)>();
+        foreach (var o in ArenaObject.All.Where(o => o && o.IsPlaced && o.Resting).OrderBy(o => o.transform.position.y).ToList())
+        {
+            float d = DropDistance(o);
+            if (d < 0.02f) continue;
+            Vector3 from = o.transform.position, to = from + Vector3.down * d;
+            o.transform.position = to;
+            Physics.SyncTransforms();
+            falls.Add((o, from, to));
+        }
+        foreach (var f in falls) f.obj.AnimateFall(f.from, f.to);
+    }
+
+    private static Vector3 Shrunk(Vector3 half, float by) => Vector3.Max(half - Vector3.one * by, Vector3.one * 0.01f);
 
     // Posición del objeto para que su punto más bajo quede a 'height' sobre el suelo
     public Vector3 PoseOnFloor(ItemDefinition item, Vector3 floor, float lift, Quaternion rot)
