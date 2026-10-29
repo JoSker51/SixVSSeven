@@ -22,8 +22,8 @@ public class CatapultController : MonoBehaviour
 
     [Header("Giro (Q/E)")]
     [SerializeField] private bool allowYaw = true;
-    [SerializeField] private float yawSpeed = 40f;
-    [SerializeField] private float maxYaw = 35f;
+    [SerializeField] private float yawSpeed = 50f;
+    [SerializeField] private float maxYaw = 70f;            // con 4 jugadores, los castillos de los lados quedan a unos 55°
 
     [Header("Ángulo de tiro (W/S)")]
     [SerializeField] private float minAngle = 15f;
@@ -68,7 +68,7 @@ public class CatapultController : MonoBehaviour
         startPos = transform.position;
         startRot = transform.rotation;
         Angle = startAngle;
-        Power01 = 0.5f;
+        Power01 = 0f;
         if (armPivot) armPivot.localRotation = Quaternion.Euler(armRestAngle, 0f, 0f);
         RefreshVisuals();
     }
@@ -87,6 +87,12 @@ public class CatapultController : MonoBehaviour
 
     public void SetActive(bool active)
     {
+        // Cada turno empieza con la potencia en 0 (no la del tiro anterior)
+        if (active && !IsActive)
+        {
+            Power01 = 0f;
+            if (armPivot && !firing) armPivot.localRotation = Quaternion.Euler(armRestAngle, 0f, 0f);
+        }
         IsActive = active;
         IsCharging = false;
         spaceArmed = false;

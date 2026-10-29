@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6864805082735240035
+--- !u!114 &-7448303871496590425
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -28,7 +28,7 @@ MonoBehaviour:
   saturation:
     m_OverrideState: 1
     m_Value: 16
---- !u!114 &-5507074765355489988
+--- !u!114 &-6515980693041331979
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -91,11 +91,11 @@ MonoBehaviour:
   m_Name: AeroVolume
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
   components:
-  - {fileID: -5507074765355489988}
-  - {fileID: -6864805082735240035}
-  - {fileID: 5973739447734773797}
-  - {fileID: 507009840135349126}
---- !u!114 &507009840135349126
+  - {fileID: -6515980693041331979}
+  - {fileID: -7448303871496590425}
+  - {fileID: 6934097256395608031}
+  - {fileID: 1220995099305930759}
+--- !u!114 &1220995099305930759
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -135,7 +135,7 @@ MonoBehaviour:
   maxNits:
     m_OverrideState: 1
     m_Value: 1000
---- !u!114 &5973739447734773797
+--- !u!114 &6934097256395608031
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
