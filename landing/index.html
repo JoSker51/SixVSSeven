@@ -808,7 +808,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         <button type="button" aria-pressed="false" data-src="img/vuelo.jpg" data-cap="La pelota vuela rápido y revienta todas las burbujas que toca en el camino." data-alt="La pelota en el aire camino a las burbujas."><img src="img/vuelo.jpg" width="1920" height="1080" loading="lazy" alt="Pelota en el aire"></button>
         <button type="button" aria-pressed="false" data-src="img/resumen.jpg" data-cap="Al terminar el tiro, un resumen te dice cuántas monedas ganaste y por qué." data-alt="Resumen del tiro con las monedas ganadas."><img src="img/resumen.jpg" width="1920" height="1080" loading="lazy" alt="Resumen del tiro"></button>
         <button type="button" aria-pressed="false" data-src="img/tienda.jpg" data-cap="La tienda: 3 ofertas al azar, cada una con su variante y su precio." data-alt="Panel de la tienda con tres ofertas, sus íconos, variantes y precios."><img src="img/tienda.jpg" width="1920" height="1080" loading="lazy" alt="Tienda"></button>
-        <button type="button" aria-pressed="false" data-src="img/colocacion.jpg" data-cap="Colocación: el objeto se ve de vidrio celeste si el lugar sirve. Gíralo, inclínalo y súbelo como quieras." data-alt="Vista desde arriba en la fase de colocación, con un objeto de vidrio en vista previa y el inventario abajo."><img src="img/colocacion.jpg" width="1920" height="1080" loading="lazy" alt="Colocación de objetos"></button>
+        <button type="button" aria-pressed="false" data-src="img/colocacion.jpg" data-cap="Colocación: los objetos se apilan para armar torres, puentes y rampas, y la vista es libre para mirar desde donde quieras." data-alt="Vista libre a ras del suelo en la fase de colocación: una torre de cubos verdes, un puente con una rampa encima y una esfera sobre otra torre."><img src="img/colocacion.jpg" width="1920" height="1080" loading="lazy" alt="Colocación de objetos"></button>
         <button type="button" aria-pressed="false" data-src="img/mapa.jpg" data-cap="Hasta 4 jugadores, cada uno con su color, su castillo y su parte del mapa." data-alt="Vista general de la arena circular con cuatro castillos de colores, burbujas y objetos colocados."><img src="img/mapa.jpg" width="1920" height="1080" loading="lazy" alt="Vista general de la arena"></button>
         <button type="button" aria-pressed="false" data-src="img/victoria.jpg" data-cap="El primero en llegar a la meta gana la partida." data-alt="Pantalla de victoria con burbujas: Gana el Jugador 1."><img src="img/victoria.jpg" width="1920" height="1080" loading="lazy" alt="Pantalla de victoria"></button>
       </div>
@@ -997,15 +997,17 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <ul class="steps">
             <li><span>Hazlo en tu fase de colocación. Verás el objeto de vidrio: celeste si el lugar sirve, rosa si no.</span></li>
             <li><kbd>Q</kbd><kbd>E</kbd><span>Girar · <kbd>R</kbd><kbd>F</kbd> inclinar · <kbd>Z</kbd><kbd>X</kbd> ladear</span></li>
-            <li><kbd>Rueda</kbd><span>Sube o baja el objeto para dejarlo en el aire.</span></li>
-            <li><kbd>Clic izq.</kbd><span>Confirma. No se puede encimar con burbujas, castillos, catapultas ni otros objetos.</span></li>
+            <li><span><b>Se apila:</b> el objeto cae hasta el suelo o encima de otro objeto. Arma torres, puentes y rampas que crecen con la partida.</span></li>
+            <li><kbd>Shift</kbd><kbd>Rueda</kbd><span>Lo sube para dejarlo flotando.</span></li>
+            <li><kbd>Clic izq.</kbd><span>Confirma. Puede tocar a otros objetos, pero no atravesarlos ni encimarse con burbujas, castillos o catapultas.</span></li>
+            <li><kbd>Clic der.</kbd><span>Arrastrar gira la vista; <kbd>WASD</kbd> la mueve, la <kbd>Rueda</kbd> acerca y <kbd>C</kbd> la centra.</span></li>
           </ul>
         </div>
         <div class="pane">
           <h3>Retirar</h3>
           <ul class="steps">
             <li><kbd>Clic</kbd><span>Sobre cualquier objeto de la arena, tuyo o de un rival: ves cuánto cuesta y confirmas.</span></li>
-            <li><span>Retirar cuesta más que comprar, y el objeto no vuelve a tu inventario.</span></li>
+            <li><span>Retirar cuesta más que comprar, y el objeto no vuelve a tu inventario. Lo que tenía encima se cae.</span></li>
             <li><span>Los objetos se quedan en la arena entre turnos hasta que alguien los retire.</span></li>
           </ul>
         </div>
@@ -1028,7 +1030,9 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         <div><kbd>Esc</kbd> Pausa</div>
         <div><kbd>Enter</kbd> Pasar a la siguiente fase</div>
         <div><kbd>T</kbd> Abrir la tienda</div>
-        <div><kbd>Rueda</kbd> Subir o bajar el objeto al colocarlo</div>
+        <div><kbd>Clic der.</kbd> + arrastrar: girar la vista al comprar y colocar</div>
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Mover la vista · <kbd>Rueda</kbd> acercar</div>
+        <div><kbd>Shift</kbd><kbd>Rueda</kbd> Subir o bajar el objeto al colocarlo</div>
       </div>
     </div>
     <footer>
