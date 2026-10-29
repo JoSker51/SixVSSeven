@@ -57,7 +57,7 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 | Girar | `Q` / `E` | Hasta 70° a cada lado: alcanza los castillos de los lados |
 | Ángulo | `W` / `S` | Entre 15° y 75° |
 | Cargar y disparar | Mantener y soltar `Espacio` | Cada turno empieza en 0; la potencia sube y baja mientras lo mantienes |
-| Otros | `C` cámara general · `Esc` pausa | |
+| Otros | `C` cámara general · `Esc` pausa | En Compra y Colocación la cámara es libre (ver sección 10) |
 
 ## 4. La pelota
 
@@ -166,18 +166,23 @@ monedas del tiro = máx(0, R)
 - Lo que compras queda en tu **inventario** (barra de abajo en la fase de Colocación) hasta que lo colocas.
 - **Colocar:**
   1. Elige un objeto y aparece una vista previa de vidrio que sigue al mouse. Es **celeste** si el lugar sirve y **rosa** si no.
-  2. Gíralo y colócalo como quieras: `Q`/`E` girar, `R`/`F` inclinar, `Z`/`X` ladear, ruedita (o `RePág`/`AvPág`) para subir o bajar.
-  3. **Clic** para confirmar. **Clic derecho** o `Esc` cancela, y el objeto sigue en tu inventario.
+  2. La vista previa **cae** hasta apoyarse en el suelo o **encima de otro objeto**: así se arman torres, puentes y rampas sobre paredes que se van complicando con la partida.
+  3. Gíralo y colócalo como quieras: `Q`/`E` girar, `R`/`F` inclinar, `Z`/`X` ladear, `Shift` + ruedita (o `RePág`/`AvPág`) para subirlo y dejarlo flotando.
+  4. **Clic** para confirmar. **Clic derecho** (sin arrastrar) o `Esc` cancela, y el objeto sigue en tu inventario.
+- **Vista libre** mientras compras y colocas: clic derecho + arrastrar gira la cámara, `WASD` (o arrastrar con la ruedita apretada) la mueve, la ruedita acerca o aleja y `C` vuelve a la vista de arriba. Cada turno empieza desde arriba.
 - No se puede colocar:
   - fuera del círculo ni atravesando la pared,
   - atravesando el suelo,
   - encima de una burbuja (ni pegado a una),
-  - encimado con otro objeto, un castillo o una catapulta.
+  - atravesando otro objeto (tocarlo sí se puede: apoyado encima o pegado al lado),
+  - encimado con un castillo o una catapulta,
+  - más alto que **16 m** contando todo lo apilado debajo (`stackMaxHeight`).
 - Los objetos colocados **se quedan en la arena** entre turnos y recuerdan **quién los puso**.
 - **Retirar:**
   1. En tu fase de Colocación, haz clic sobre **cualquier** objeto de la arena, tuyo o de un rival.
   2. Se muestra qué es, quién lo puso y cuánto cuesta. Hay que **confirmar** para pagar.
   3. Si no te alcanzan las monedas, no se retira. Al confirmar, el objeto desaparece y **no vuelve al inventario**.
+  4. Lo que estaba **apoyado encima cae** hasta lo que quede debajo (una torre baja entera). Lo que se dejó flotando a propósito se queda donde estaba.
 
 ## 11. Victoria
 
