@@ -41,6 +41,8 @@ public class CatapultController : MonoBehaviour
     [SerializeField] private GameObject activeMarker;
     [SerializeField] private GameObject loadedRock;
     [SerializeField] private LineRenderer trajectory;
+    [SerializeField] private LineRenderer trajectoryOutline;   // borde oscuro: así la guía se ve sobre el pasto y el cielo
+    [SerializeField] private Transform trajectoryTip;          // punto del color del jugador al final del tramo que se muestra
     [SerializeField, Range(0f, 1f)] private float trajectoryFraction = 0.5f;   // parte del arco que se muestra
     [SerializeField] private float armRestAngle = -110f;
     [SerializeField] private float armFireAngle = 20f;
@@ -61,6 +63,7 @@ public class CatapultController : MonoBehaviour
     private bool spaceArmed;
 
     private const int TrajectoryPoints = 40;
+    private readonly Vector3[] points = new Vector3[TrajectoryPoints];
 
     private void Awake()
     {
@@ -80,8 +83,16 @@ public class CatapultController : MonoBehaviour
         playerColor = color;
         if (trajectory)
         {
-            trajectory.startColor = new Color(1f, 1f, 1f, 0.95f);
-            trajectory.endColor = new Color(color.r, color.g, color.b, 0f);
+            trajectory.startColor = Color.Lerp(Color.white, color, 0.15f);
+            Color end = Color.Lerp(Color.white, color, 0.55f);
+            trajectory.endColor = new Color(end.r, end.g, end.b, 0.9f);
+        }
+        if (trajectoryTip)
+        {
+            var block = new MaterialPropertyBlock();
+            block.SetColor("_Color", Color.Lerp(color, Color.white, 0.25f));
+            foreach (var r in trajectoryTip.GetComponentsInChildren<Renderer>(true))
+                if (r.name == "Punta") r.SetPropertyBlock(block);
         }
     }
 
@@ -203,12 +214,19 @@ public class CatapultController : MonoBehaviour
         float tGround = disc > 0f ? (-b - Mathf.Sqrt(disc)) / (2f * a) : 3f;
         float tMax = Mathf.Max(0.1f, tGround * trajectoryFraction);
 
-        trajectory.positionCount = TrajectoryPoints;
         for (int i = 0; i < TrajectoryPoints; i++)
         {
             float t = tMax * i / (TrajectoryPoints - 1);
-            trajectory.SetPosition(i, p0 + v0 * t + 0.5f * g * t * t);
+            points[i] = p0 + v0 * t + 0.5f * g * t * t;
         }
+        trajectory.positionCount = TrajectoryPoints;
+        trajectory.SetPositions(points);
+        if (trajectoryOutline)
+        {
+            trajectoryOutline.positionCount = TrajectoryPoints;
+            trajectoryOutline.SetPositions(points);
+        }
+        if (trajectoryTip) trajectoryTip.position = points[TrajectoryPoints - 1];
     }
 
     private void RefreshVisuals()
@@ -216,6 +234,8 @@ public class CatapultController : MonoBehaviour
         if (activeMarker) activeMarker.SetActive(IsActive);
         if (loadedRock) loadedRock.SetActive(IsActive);
         if (trajectory) trajectory.enabled = IsActive;
+        if (trajectoryOutline) trajectoryOutline.enabled = IsActive;
+        if (trajectoryTip) trajectoryTip.gameObject.SetActive(IsActive);
         if (IsActive) UpdateTrajectory();
     }
 

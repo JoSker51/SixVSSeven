@@ -37,7 +37,8 @@ public static partial class CatapultasSceneBuilder
     private static GameBalance balance;
     private static VolumeProfile volumeProfile;
     private static Material groundMat, outerGrassMat, sandMat, waterMat, marbleMat, railMat, aquaMat, woodMat, darkWoodMat,
-                            rockMat, trunkMat, lineMat, bubbleMat, skyMat, dividerMat, sectionMat;
+                            rockMat, trunkMat, lineMat, bubbleMat, skyMat, dividerMat, sectionMat,
+                            guideSolidMat, guideBorderMat;
     private static Material[] leafMats, playerMats, markerMats;
     private static Mesh floorMesh, wallMesh, wallColliderMesh, railMesh, hubMesh, islandMesh;
 
@@ -51,7 +52,7 @@ public static partial class CatapultasSceneBuilder
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
         BuildAll();
         EditorSceneManager.OpenScene(MenuScenePath);
-        EditorUtility.DisplayDialog("Catapultas", "Escenas creadas:\n• " + MenuScenePath + "\n• " + GameScenePath + "\n\nAbre MenuPrincipal y dale a Play.", "OK");
+        EditorUtility.DisplayDialog("Fresh Kingdom Showdown", "Escenas creadas:\n• " + MenuScenePath + "\n• " + GameScenePath + "\n\nAbre MenuPrincipal y dale a Play.", "OK");
     }
 
     // Nombre anterior, por si alguien lo llama desde línea de comandos
@@ -353,12 +354,12 @@ public static partial class CatapultasSceneBuilder
         Set(title.gameObject.AddComponent<UIFloat>(), ("amplitude", new Vector2(0f, 7f)), ("speed", 0.25f));
         AeroUI.Img(title, "Resplandor", skin.glow, new Color(1f, 1f, 1f, 0.75f)).rectTransform
             .At(new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(1300f, 420f));
-        var titleText = AeroUI.Label(title, "Texto", "Catapultas", 168, Color.white, AeroWeight.Bold);
+        var titleText = AeroUI.Label(title, "Texto", "Fresh Kingdom", 150, Color.white, AeroWeight.Bold);
         titleText.rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -6f), new Vector2(1400f, 200f));
         AeroUI.Gradient(titleText, Color.white, new Color(0.42f, 0.8f, 1f));
         AeroUI.Effect<Outline>(titleText, Navy, new Vector2(3.5f, -3.5f));
         AeroUI.Effect<Shadow>(titleText, new Color(0.02f, 0.15f, 0.3f, 0.35f), new Vector2(0f, -8f));
-        var sub = AeroUI.Label(title, "Subtitulo", "y castillos", 54, new Color(0.1f, 0.4f, 0.66f), AeroWeight.Regular);
+        var sub = AeroUI.Label(title, "Subtitulo", "Showdown", 60, new Color(0.1f, 0.4f, 0.66f), AeroWeight.Regular);
         sub.rectTransform.At(new Vector2(0.5f, 1f), new Vector2(0f, -200f), new Vector2(900f, 70f));
         AeroUI.Effect<Outline>(sub, new Color(1f, 1f, 1f, 0.85f), new Vector2(1.5f, -1.5f));
 
@@ -414,7 +415,7 @@ public static partial class CatapultasSceneBuilder
         ((RectTransform)back.transform).At(new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(320f, 90f));
 
         // Pie de página
-        var version = AeroUI.Label(root, "Version", "Demo · v0.3", 24, Color.white, AeroWeight.Light, TextAnchor.LowerRight);
+        var version = AeroUI.Label(root, "Version", "Demo · v0.4", 24, Color.white, AeroWeight.Light, TextAnchor.LowerRight);
         version.rectTransform.At(new Vector2(1f, 0f), new Vector2(-30f, 22f), new Vector2(400f, 40f));
         AeroUI.Effect<Outline>(version, new Color(0.02f, 0.18f, 0.32f, 0.55f), new Vector2(1.2f, -1.2f));
         var hint = AeroUI.Label(root, "Ayuda", "Mouse, o flechas + Enter", 24, Color.white, AeroWeight.Regular, TextAnchor.LowerLeft);
@@ -885,19 +886,41 @@ public static partial class CatapultasSceneBuilder
         var marker = Prim(PrimitiveType.Sphere, "Indicador turno", root, new Vector3(0f, 5.2f, 0f), Vector3.one * 0.45f, markerMats[0], false);
         marker.AddComponent<MarkerSpin>();
 
+        // Guía de tiro: línea blanca sobre un borde azul oscuro (se ve sobre el pasto y el cielo) y un punto al final
         var line = new GameObject("Trayectoria").AddComponent<LineRenderer>();
         line.transform.SetParent(root, false);
-        line.sharedMaterial = lineMat;
+        line.sharedMaterial = guideSolidMat;
         line.useWorldSpace = true;
-        line.widthCurve = AnimationCurve.Linear(0f, 0.2f, 1f, 0.05f);
-        line.numCapVertices = 4;
+        line.widthCurve = AnimationCurve.Linear(0f, 0.3f, 1f, 0.2f);
+        line.numCapVertices = 6;
         line.shadowCastingMode = ShadowCastingMode.Off;
-        line.startColor = new Color(1f, 1f, 1f, 0.95f);
-        line.endColor = new Color(1f, 1f, 1f, 0f);
+        line.sortingOrder = 2;
+        line.startColor = Color.white;
+        line.endColor = new Color(1f, 1f, 1f, 0.9f);
+        var outline = new GameObject("Trayectoria (borde)").AddComponent<LineRenderer>();
+        outline.transform.SetParent(root, false);
+        outline.sharedMaterial = guideSolidMat;
+        outline.useWorldSpace = true;
+        outline.widthCurve = AnimationCurve.Linear(0f, 0.56f, 1f, 0.4f);
+        outline.numCapVertices = 6;
+        outline.shadowCastingMode = ShadowCastingMode.Off;
+        outline.sortingOrder = 1;
+        outline.startColor = new Color(0.02f, 0.16f, 0.32f, 0.7f);
+        outline.endColor = new Color(0.02f, 0.16f, 0.32f, 0.6f);
+        // Punto al final del tramo que se muestra: se ve igual desde cualquier lado (una flecha, vista desde atrás, queda de canto)
+        var tip = new GameObject("Punta de la guia").transform;
+        tip.SetParent(root, false);
+        foreach (var (name, size, order, mat) in new[] { ("Borde", 0.95f, 1, guideBorderMat), ("Punta", 0.62f, 2, guideSolidMat) })   // la punta toma el color del jugador
+        {
+            var part = Prim(PrimitiveType.Sphere, name, tip, Vector3.zero, Vector3.one * size, mat, false);
+            var r = part.GetComponent<MeshRenderer>();
+            r.shadowCastingMode = ShadowCastingMode.Off;
+            r.sortingOrder = order;
+        }
 
         var ctrl = root.gameObject.AddComponent<CatapultController>();
         Set(ctrl, ("launchPoint", launch), ("rockPrefab", Load<GameObject>(RockPrefabPath).GetComponent<Rock>()), ("armPivot", pivot),
-                  ("activeMarker", marker), ("loadedRock", loaded), ("trajectory", line));
+                  ("activeMarker", marker), ("loadedRock", loaded), ("trajectory", line), ("trajectoryOutline", outline), ("trajectoryTip", tip));
         var paint = root.gameObject.AddComponent<PlayerPaint>();
         Set(paint, ("colorParts", new[] { baseR }), ("glowParts", new[] { marker.GetComponent<Renderer>() }));
         SavePrefab(root.gameObject, CatapultPrefabPath);
@@ -954,6 +977,9 @@ public static partial class CatapultasSceneBuilder
 
         sectionMat = Transparent(Unlit("Seccion", new Color(1f, 1f, 1f, 0.2f)));
         lineMat = SaveMat("Linea", new Material(Shader.Find("Sprites/Default")));
+        guideSolidMat = SaveMat("GuiaSolida", new Material(Shader.Find("Sprites/Default")));
+        guideBorderMat = SaveMat("GuiaBorde", new Material(Shader.Find("Sprites/Default")));
+        guideBorderMat.color = new Color(0.02f, 0.16f, 0.32f, 0.6f);
         bubbleMat = SaveMat("Burbuja", new Material(Shader.Find("Sprites/Default")));
         bubbleMat.mainTexture = skin.bubble.texture;
         skyMat = SaveMat("Cielo", new Material(Shader.Find("Skybox/Panoramic")));

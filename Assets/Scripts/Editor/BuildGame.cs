@@ -4,13 +4,13 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-// Crea el juego para Windows: una carpeta con "Catapultas y Castillos.exe" que se abre con doble clic.
+// Crea el juego para Windows: una carpeta con "Fresh Kingdom Showdown.exe" que se abre con doble clic.
 // Menú: Catapultas → Crear ejecutable (Windows). Queda en Builds/Windows (git no lo sube).
 // Desde la línea de comandos: Unity.exe -batchmode -projectPath <proyecto> -executeMethod BuildGame.BuildWindows
 public static class BuildGame
 {
     public const string Folder = "Builds/Windows";
-    public const string ExeName = "Catapultas y Castillos.exe";
+    public const string ExeName = "Fresh Kingdom Showdown.exe";
     private const string IconPath = "Assets/Arte/Icono.png";
     private static readonly string[] Scenes = { "Assets/Scenes/MenuPrincipal.unity", "Assets/Scenes/Catapultas.unity" };
 
@@ -48,7 +48,7 @@ public static class BuildGame
 
     private static void ApplyPlayerSettings()
     {
-        PlayerSettings.productName = "Catapultas y Castillos";
+        PlayerSettings.productName = "Fresh Kingdom Showdown";
         PlayerSettings.companyName = "SixVSSeven";
         PlayerSettings.bundleVersion = "0.4";
         PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;   // pantalla completa; Alt+Enter cambia a ventana
