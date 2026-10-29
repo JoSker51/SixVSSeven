@@ -54,9 +54,9 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 | Acción | Tecla | Detalle |
 |---|---|---|
 | Moverse | `A` / `D` | Hasta 6 unidades a cada lado |
-| Girar | `Q` / `E` | Hasta 35° a cada lado |
+| Girar | `Q` / `E` | Hasta 70° a cada lado: alcanza los castillos de los lados |
 | Ángulo | `W` / `S` | Entre 15° y 75° |
-| Cargar y disparar | Mantener y soltar `Espacio` | La potencia sube y baja mientras lo mantienes |
+| Cargar y disparar | Mantener y soltar `Espacio` | Cada turno empieza en 0; la potencia sube y baja mientras lo mantienes |
 | Otros | `C` cámara general · `Esc` pausa | |
 
 ## 4. La pelota
@@ -91,6 +91,7 @@ monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 
 - Sobre cada castillo flota una burbuja más grande, del color de su dueño.
 - Si la revienta un **rival**, le quita **3 monedas** al dueño y se las queda. El tope es de 10 por tiro.
+- Se puede robar a **cualquier rival**, no solo al de enfrente: girando la catapulta se llega a los castillos de los lados (con 4 jugadores quedan a unos 55°).
 - El dueño **nunca baja de 0**: se roba como mucho lo que tiene.
 - La pelota del **dueño** pasa a través de su propia burbuja sin reventarla.
 - El robo **no cuenta como burbuja** para los positivos, negativos y aros, y el aro no lo duplica.
@@ -203,7 +204,7 @@ monedas del tiro = máx(0, R)
 - [ ] **Números:** probar partidas completas y ajustar precios, costos de retirada y valores de burbujas en `GameBalance.asset`. Los precios iniciales se pensaron con esas ~3 monedas por turno: un normal cuesta 1 turno, un positivo unos 3, el aro unos 5 y retirar de 3 a 6.
 - [ ] **Cantidad de burbujas por sección** (hoy 4): ¿más con 2 jugadores?
 - [ ] **Límite de objetos en la arena:** hoy no hay; con 4 jugadores se puede llenar.
-- [ ] **Girar con Q/E:** se agregó porque sin girar no se llega a los lados. ¿Se queda?
+- [x] **Girar con Q/E:** se queda, ahora hasta 70° para poder robar a los castillos de los lados.
 
 ## Estado en el prototipo de Unity
 
