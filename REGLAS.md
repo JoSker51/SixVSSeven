@@ -1,4 +1,4 @@
-# Reglas del juego: Catapultas y burbujas
+# Reglas del juego: Fresh Kingdom Showdown
 
 Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jugador tiene un **castillo**, una **catapulta**, un **color** y su **sección** del mapa. En tu turno compras objetos, los colocas en la arena y lanzas una pelota para **reventar burbujas**: cada burbuja da monedas, y los objetos que toque la pelota pueden sumar, restar o duplicar lo que ganes.
 
