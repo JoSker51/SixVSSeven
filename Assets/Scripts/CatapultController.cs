@@ -22,8 +22,8 @@ public class CatapultController : MonoBehaviour
 
     [Header("Giro (Q/E)")]
     [SerializeField] private bool allowYaw = true;
-    [SerializeField] private float yawSpeed = 40f;
-    [SerializeField] private float maxYaw = 35f;
+    [SerializeField] private float yawSpeed = 50f;
+    [SerializeField] private float maxYaw = 70f;            // con 4 jugadores, los castillos de los lados quedan a unos 55°
 
     [Header("Ángulo de tiro (W/S)")]
     [SerializeField] private float minAngle = 15f;
@@ -41,6 +41,8 @@ public class CatapultController : MonoBehaviour
     [SerializeField] private GameObject activeMarker;
     [SerializeField] private GameObject loadedRock;
     [SerializeField] private LineRenderer trajectory;
+    [SerializeField] private LineRenderer trajectoryOutline;   // borde oscuro: así la guía se ve sobre el pasto y el cielo
+    [SerializeField] private Transform trajectoryTip;          // punto del color del jugador al final del tramo que se muestra
     [SerializeField, Range(0f, 1f)] private float trajectoryFraction = 0.5f;   // parte del arco que se muestra
     [SerializeField] private float armRestAngle = -110f;
     [SerializeField] private float armFireAngle = 20f;
@@ -61,6 +63,7 @@ public class CatapultController : MonoBehaviour
     private bool spaceArmed;
 
     private const int TrajectoryPoints = 40;
+    private readonly Vector3[] points = new Vector3[TrajectoryPoints];
 
     private void Awake()
     {
@@ -68,13 +71,39 @@ public class CatapultController : MonoBehaviour
         startPos = transform.position;
         startRot = transform.rotation;
         Angle = startAngle;
-        Power01 = 0.5f;
+        Power01 = 0f;
         if (armPivot) armPivot.localRotation = Quaternion.Euler(armRestAngle, 0f, 0f);
         RefreshVisuals();
     }
 
+    // La llama MatchSetup al crear la catapulta de cada jugador
+    public void Setup(int player, Color color)
+    {
+        playerId = player;
+        playerColor = color;
+        if (trajectory)
+        {
+            trajectory.startColor = Color.Lerp(Color.white, color, 0.15f);
+            Color end = Color.Lerp(Color.white, color, 0.55f);
+            trajectory.endColor = new Color(end.r, end.g, end.b, 0.9f);
+        }
+        if (trajectoryTip)
+        {
+            var block = new MaterialPropertyBlock();
+            block.SetColor("_Color", Color.Lerp(color, Color.white, 0.25f));
+            foreach (var r in trajectoryTip.GetComponentsInChildren<Renderer>(true))
+                if (r.name == "Punta") r.SetPropertyBlock(block);
+        }
+    }
+
     public void SetActive(bool active)
     {
+        // Cada turno empieza con la potencia en 0 (no la del tiro anterior)
+        if (active && !IsActive)
+        {
+            Power01 = 0f;
+            if (armPivot && !firing) armPivot.localRotation = Quaternion.Euler(armRestAngle, 0f, 0f);
+        }
         IsActive = active;
         IsCharging = false;
         spaceArmed = false;
@@ -128,7 +157,9 @@ public class CatapultController : MonoBehaviour
     }
 
     public Vector3 LaunchDirection => transform.rotation * Quaternion.Euler(-Angle, 0f, 0f) * Vector3.forward;
-    public float LaunchSpeed => Mathf.Lerp(minPower, maxPower, Power01);
+    // La velocidad sube con projectileSpeed y la gravedad del tiro con su cuadrado: mismas distancias, vuelo más rápido
+    public float LaunchSpeed => Mathf.Lerp(minPower, maxPower, Power01) * GameBalance.Current.projectileSpeed;
+    public static Vector3 ShotGravity => Physics.gravity * GameBalance.Current.ProjectileGravityScale;
     private Vector3 LaunchOrigin => launchPoint ? launchPoint.position : transform.position + Vector3.up * 2f;
 
     private IEnumerator FireRoutine()
@@ -149,7 +180,7 @@ public class CatapultController : MonoBehaviour
         var trail = rock.GetComponent<TrailRenderer>();
         if (trail) { trail.startColor = Color.Lerp(playerColor, Color.white, 0.5f); trail.endColor = new Color(playerColor.r, playerColor.g, playerColor.b, 0f); }
 
-        rock.Launch(LaunchDirection, LaunchSpeed, playerId);
+        rock.Launch(LaunchDirection, LaunchSpeed, playerId, GameBalance.Current.ProjectileGravityScale);
         AeroAudio.Play(Sfx.Launch);
         Fired?.Invoke(this, rock);
 
@@ -175,7 +206,7 @@ public class CatapultController : MonoBehaviour
         // Arco balístico simple (sin rozamiento) para ayudar a apuntar
         Vector3 p0 = LaunchOrigin;
         Vector3 v0 = LaunchDirection * LaunchSpeed;
-        Vector3 g = Physics.gravity;
+        Vector3 g = ShotGravity;   // la misma gravedad que usa la pelota
 
         // Tiempo hasta tocar y = 0
         float a = 0.5f * g.y, b = v0.y, c = p0.y;
@@ -183,12 +214,19 @@ public class CatapultController : MonoBehaviour
         float tGround = disc > 0f ? (-b - Mathf.Sqrt(disc)) / (2f * a) : 3f;
         float tMax = Mathf.Max(0.1f, tGround * trajectoryFraction);
 
-        trajectory.positionCount = TrajectoryPoints;
         for (int i = 0; i < TrajectoryPoints; i++)
         {
             float t = tMax * i / (TrajectoryPoints - 1);
-            trajectory.SetPosition(i, p0 + v0 * t + 0.5f * g * t * t);
+            points[i] = p0 + v0 * t + 0.5f * g * t * t;
         }
+        trajectory.positionCount = TrajectoryPoints;
+        trajectory.SetPositions(points);
+        if (trajectoryOutline)
+        {
+            trajectoryOutline.positionCount = TrajectoryPoints;
+            trajectoryOutline.SetPositions(points);
+        }
+        if (trajectoryTip) trajectoryTip.position = points[TrajectoryPoints - 1];
     }
 
     private void RefreshVisuals()
@@ -196,6 +234,8 @@ public class CatapultController : MonoBehaviour
         if (activeMarker) activeMarker.SetActive(IsActive);
         if (loadedRock) loadedRock.SetActive(IsActive);
         if (trajectory) trajectory.enabled = IsActive;
+        if (trajectoryOutline) trajectoryOutline.enabled = IsActive;
+        if (trajectoryTip) trajectoryTip.gameObject.SetActive(IsActive);
         if (IsActive) UpdateTrajectory();
     }
 
