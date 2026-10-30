@@ -77,6 +77,22 @@ public class Rock : MonoBehaviour
         var shot = ShotTracker.Active;
         var obj = collision.collider.GetComponentInParent<ArenaObject>();
         if (obj != null && shot != null && shot.Rock == this) obj.OnRockHit(shot);
+        if (obj != null) ChaoticBounce(collision);
+    }
+
+    // Rebote en un objeto: sale un poco más rápido y desviado al azar, para que el tiro sea más caótico
+    private void ChaoticBounce(Collision collision)
+    {
+        var bal = GameBalance.Current;
+        Vector3 v = rb.linearVelocity;
+        float speed = v.magnitude;
+        if (speed < 2f || collision.contactCount == 0) return;   // rodando encima de un objeto: no se empuja
+
+        Vector3 n = collision.GetContact(0).normal;
+        if (Vector3.Dot(n, v) < 0f) n = -n;                       // la normal que apunta hacia donde ya sale la pelota
+        Vector3 dir = Vector3.Slerp(v / speed, UnityEngine.Random.onUnitSphere, bal.bounceScatter).normalized;
+        if (Vector3.Dot(dir, n) < 0f) dir = Vector3.Reflect(dir, n);   // nunca hacia dentro del objeto
+        rb.linearVelocity = dir * Mathf.Min(speed * bal.bounceBoost, Mathf.Max(speed, bal.maxBounceSpeed));
     }
 
     private void StartTimer()

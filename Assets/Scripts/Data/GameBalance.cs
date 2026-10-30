@@ -58,14 +58,14 @@ public class GameBalance : ScriptableObject
     public float catapultKeepOut = 4.5f;
 
     [Header("Burbujas")]
-    public int bubblesPerSection = 4;
+    public int bubblesPerSection = 8;
     public Vector2 bubbleRadius = new Vector2(0.55f, 1.1f);
     public Vector2 bubbleHeight = new Vector2(1.3f, 5.5f);
-    public float bubbleMinGap = 1.6f;         // espacio libre mínimo entre dos burbujas
+    public float bubbleMinGap = 1.1f;         // espacio libre mínimo entre dos burbujas
     public float bubbleWallMargin = 1.5f;
     public float bubbleCenterMargin = 2f;
     public float bubbleObjectClearance = 0.6f;
-    public int bubbleMaxAttempts = 80;
+    public int bubbleMaxAttempts = 150;
     [Tooltip("Monedas = máx(1, redondear(base × tamaño × (1 + cercanía al centro)))")]
     public int bubbleBaseValue = 2;
     public float bubbleReferenceRadius = 0.8f;
@@ -97,8 +97,14 @@ public class GameBalance : ScriptableObject
     public float heightStep = 0.25f;
 
     [Header("Física de los objetos")]
-    public float objectBounciness = 0.45f;
-    public float objectFriction = 0.3f;
+    public float objectBounciness = 0.8f;
+    public float objectFriction = 0.15f;
+    [Tooltip("Al chocar con un objeto la pelota sale con esta velocidad × la que traía (1 = sin empujón)")]
+    public float bounceBoost = 1.15f;
+    [Tooltip("Cuánto se desvía al azar al rebotar en un objeto: 0 = rebote normal, 1 = cualquier dirección")]
+    [Range(0f, 1f)] public float bounceScatter = 0.3f;
+    [Tooltip("Tope de velocidad tras un rebote, para que no se acelere sin fin")]
+    public float maxBounceSpeed = 26f;
 
     [Header("Catálogo (la pool de la tienda)")]
     public List<ItemDefinition> items = new List<ItemDefinition>();

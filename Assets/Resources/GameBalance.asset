@@ -22,14 +22,14 @@ MonoBehaviour:
   catapultRingRadius: 14.5
   castleKeepOut: 5.4
   catapultKeepOut: 4.5
-  bubblesPerSection: 4
+  bubblesPerSection: 8
   bubbleRadius: {x: 0.55, y: 1.1}
   bubbleHeight: {x: 1.3, y: 5.5}
-  bubbleMinGap: 1.6
+  bubbleMinGap: 1.1
   bubbleWallMargin: 1.5
   bubbleCenterMargin: 2
   bubbleObjectClearance: 0.6
-  bubbleMaxAttempts: 80
+  bubbleMaxAttempts: 150
   bubbleBaseValue: 2
   bubbleReferenceRadius: 0.8
   castleBubbleRadius: 1.3
@@ -47,8 +47,11 @@ MonoBehaviour:
   placementClearance: 0.15
   rotationStep: 15
   heightStep: 0.25
-  objectBounciness: 0.45
-  objectFriction: 0.3
+  objectBounciness: 0.8
+  objectFriction: 0.15
+  bounceBoost: 1.15
+  bounceScatter: 0.3
+  maxBounceSpeed: 26
   items:
   - id: cube_normal
     kind: 0
