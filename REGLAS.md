@@ -33,7 +33,7 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 
 - Antes de jugar se elige cuántos participan: **2, 3 o 4**. La cantidad queda fija; para cambiarla hay que volver al menú y empezar otra partida.
 - Los jugadores se reparten alrededor de la arena (a 180°, 120° o 90°). Cada uno tiene su color: **Coral, Sol, Violeta y Magenta**. Son colores distintos de los de la interfaz, que usa azules, verdes y vidrio.
-- La arena se divide en una **sección por jugador**, frente a su castillo. Cada sección tiene la **misma cantidad de burbujas** (8 por defecto).
+- La arena se divide en una **sección por jugador**, frente a su castillo. Cada sección tiene la **misma cantidad de burbujas** (16 por defecto).
 - Cada jugador empieza con **5 monedas**, para que la tienda sirva desde el primer turno.
 
 ## 2. El turno
@@ -208,7 +208,7 @@ monedas del tiro = máx(0, R)
 
 - [ ] **Ritmo de la partida:** en pruebas automáticas, un tiro bien apuntado revienta 1 burbuja y da unas **3 monedas** (promedio de 3,0 a 3,4 en 48 tiros). Con meta 100 son unos 30 turnos por jugador, y una persona apunta peor que la prueba. Ahora la meta se elige al empezar (50 a 5000) y los aros apilados pueden dar tiros enormes. Falta probar qué meta se siente bien con y sin aros, y si conviene subir el valor base de las burbujas de 2 a **3** (`bubbleBaseValue`).
 - [ ] **Números:** probar partidas completas y ajustar precios, costos de retirada y valores de burbujas en `GameBalance.asset`. Los precios iniciales se pensaron con esas ~3 monedas por turno: un normal cuesta 1 turno, un positivo unos 3, el aro unos 5 y retirar de 3 a 6.
-- [x] **Cantidad de burbujas por sección:** subió de 4 a **8**, porque jugando costaba mucho atinarles.
+- [x] **Cantidad de burbujas por sección:** subió de 4 a **16**, porque jugando costaba mucho atinarles.
 - [ ] **Límite de objetos en la arena:** hoy no hay; con 4 jugadores se puede llenar.
 - [x] **Girar con Q/E:** se queda, ahora hasta 70° para poder robar a los castillos de los lados.
 
