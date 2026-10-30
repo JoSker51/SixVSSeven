@@ -58,14 +58,14 @@ public class GameBalance : ScriptableObject
     public float catapultKeepOut = 4.5f;
 
     [Header("Burbujas")]
-    public int bubblesPerSection = 8;
+    public int bubblesPerSection = 16;
     public Vector2 bubbleRadius = new Vector2(0.55f, 1.1f);
     public Vector2 bubbleHeight = new Vector2(1.3f, 5.5f);
-    public float bubbleMinGap = 1.1f;         // espacio libre mínimo entre dos burbujas
+    public float bubbleMinGap = 0.8f;         // espacio libre mínimo entre dos burbujas
     public float bubbleWallMargin = 1.5f;
     public float bubbleCenterMargin = 2f;
     public float bubbleObjectClearance = 0.6f;
-    public int bubbleMaxAttempts = 150;
+    public int bubbleMaxAttempts = 250;
     [Tooltip("Monedas = máx(1, redondear(base × tamaño × (1 + cercanía al centro)))")]
     public int bubbleBaseValue = 2;
     public float bubbleReferenceRadius = 0.8f;
