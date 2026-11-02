@@ -2,7 +2,7 @@
 <html lang="es">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Catapultas y Castillos</title>
+<title>Fresh Kingdom Showdown</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -120,6 +120,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.15)); z-index: -1;
 }
 .gel.blue { background: linear-gradient(to bottom, #8fd0ff 0%, #4ea3ea 50%, #2f86da 100%); }
+.gel.itch { background: linear-gradient(to bottom, #ff9a9a 0%, #fa5c5c 50%, #d63a42 100%); border-color: rgba(120, 20, 30, 0.5); }
 .gel.green { background: linear-gradient(to bottom, #b4f08c 0%, #62c93a 50%, #3fa821 100%); border-color: rgba(30, 90, 20, 0.55); }
 .gel svg { width: 1.6em; height: 1.6em; filter: drop-shadow(0 1px 1px rgba(4, 38, 77, 0.5)); }
 .gel small { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.92; }
@@ -163,6 +164,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .titlebar i.close { width: 42px; background: linear-gradient(to bottom, #f6b2a0, #d4452b 55%, #c23a22); }
 .aero-window img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid rgba(10, 61, 102, 0.4); }
 
+/* Tráiler: una ventana como la del menú, pero derecha y con el video */
+.trailer { margin-top: 64px; }
+.trailer .aero-window { transform: none; max-width: 1100px; }
+.trailer video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border-radius: 3px; border: 1px solid rgba(10, 61, 102, 0.4); background: var(--navy); }
+
 /* Galería de capturas */
 .gallery { margin-top: 64px; }
 .shot-main { margin: 0; border-radius: 18px; overflow: hidden; border: 3px solid var(--glass-edge); box-shadow: 0 20px 50px rgba(4, 38, 77, 0.4); background: var(--navy); }
@@ -184,6 +190,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   background: linear-gradient(to bottom, #2a475e, #171a21); color: var(--white); font-weight: 700; font-size: 1.15rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 10px rgba(0, 0, 0, 0.25);
 }
+.logo-tile.itch { background: linear-gradient(to bottom, #ff7b7b, #e0444b); }
 .logo-tile.win { background: linear-gradient(to bottom, #3aa0ff, #0063c7); }
 .logo-tile svg { width: 1.7em; height: 1.7em; }
 .spec { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 0.95rem; }
@@ -604,9 +611,10 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
   <nav class="wrap nav" aria-label="Principal">
     <a class="brand" href="#inicio">
       <svg class="orb" viewBox="0 0 30 30" aria-hidden="true"><defs><radialGradient id="o1" cx="35%" cy="30%" r="70%"><stop offset="0" stop-color="#e8f7ff"/><stop offset=".45" stop-color="#4ea3ea"/><stop offset="1" stop-color="#1557a8"/></radialGradient></defs><circle cx="15" cy="15" r="14" fill="url(#o1)" stroke="#fff" stroke-opacity=".7"/><ellipse cx="15" cy="9" rx="8" ry="4.5" fill="#fff" fill-opacity=".7"/></svg>
-      <span>Catapultas y Castillos</span>
+      <span>Fresh Kingdom Showdown</span>
     </a>
     <ul>
+      <li><a href="#trailer">Tráiler</a></li>
       <li><a href="#como-se-juega">Cómo se juega</a></li>
       <li><a href="#capturas">Capturas</a></li>
       <li><a href="#objetos">Objetos</a></li>
@@ -652,12 +660,16 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
     <div class="hero-grid">
       <div>
         <span class="eyebrow">Próximamente · PC</span>
-        <h1>Catapultas <b>y Castillos</b></h1>
+        <h1>Fresh Kingdom <b>Showdown</b></h1>
         <p class="lede">Lanza la pelota por turnos en una arena circular, revienta burbujas para ganar monedas y coloca objetos que cambian cada tiro. De 2 a 4 jugadores: gana el primero en llegar a la meta, que eligen al empezar.</p>
         <div class="cta-row">
           <span class="gel blue" role="note">
             <svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg>
             <span><small>Próximamente en</small>Steam</span>
+          </span>
+          <span class="gel itch" role="note">
+            <svg viewBox="0 0 64 56" aria-hidden="true"><use href="#ic-itch"/></svg>
+            <span><small>Próximamente en</small>itch.io</span>
           </span>
           <a class="gel green" href="#objetos"><span>Ver los objetos en 3D</span></a>
         </div>
@@ -665,11 +677,11 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 
       <div class="window-stack">
         <figure class="aero-window">
-          <div class="titlebar"><span>Catapultas y castillos</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i class="close" aria-hidden="true"></i></div>
-          <img src="img/menu.jpg" width="1920" height="1080" alt="Menú principal del juego: el título Catapultas y castillos sobre la arena circular, con los botones Jugar, Opciones y Salir.">
+          <div class="titlebar"><span>Fresh Kingdom Showdown</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i class="close" aria-hidden="true"></i></div>
+          <img src="img/menu.jpg" width="1920" height="1080" alt="Menú principal del juego: el título Fresh Kingdom Showdown sobre la arena circular, con los botones Jugar, Opciones y Salir.">
         </figure>
         <div class="toast" role="note">
-          <div class="toast-bar"><span>Catapultas y castillos</span><i aria-hidden="true">✕</i></div>
+          <div class="toast-bar"><span>Fresh Kingdom Showdown</span><i aria-hidden="true">✕</i></div>
           <div class="toast-body">
             <svg class="buddies" viewBox="0 0 64 56" aria-hidden="true"><use href="#ic-buddies"/></svg>
             <p><b>Jugador 2</b> acaba de iniciar sesión.<br>¡Te reta a una partida!</p>
@@ -682,11 +694,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
       <h2 id="plataforma-titulo">Lanzamiento</h2>
       <div class="logos">
         <span class="logo-tile"><svg viewBox="0 0 496 512" aria-hidden="true"><use href="#ic-steam"/></svg> Steam</span>
+        <span class="logo-tile itch"><svg viewBox="0 0 64 56" aria-hidden="true"><use href="#ic-itch"/></svg> itch.io</span>
         <span class="logo-tile win"><svg viewBox="0 0 88 88" aria-hidden="true"><use href="#ic-windows"/></svg> Windows PC</span>
       </div>
       <dl class="spec">
         <div><dt>Plataforma</dt><dd>PC (Windows)</dd></div>
-        <div><dt>Tienda</dt><dd>Steam</dd></div>
+        <div><dt>Tiendas</dt><dd>Steam e itch.io</dd></div>
         <div><dt>Jugadores</dt><dd>De 2 a 4 en la misma pantalla</dd></div>
         <div><dt>Fecha</dt><dd>Por anunciar</dd></div>
       </dl>
@@ -697,6 +710,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 <!-- Logos de plataforma -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="ic-steam" viewBox="0 0 496 512"><path fill="currentColor" d="M496 256c0 137-111.2 248-248.4 248-113.8 0-209.6-76.3-239-180.4l95.2 39.3c6.4 32.1 34.9 56.4 68.9 56.4 39.2 0 71.9-32.4 70.2-73.5l84.5-60.2c52.1 1.3 95.8-40.9 95.8-93.5 0-51.6-42-93.5-93.7-93.5s-93.7 42-93.7 93.5v1.2L176.6 279c-15.5-.9-30.7 3.4-43.5 12.1L0 236.1C10.2 108.4 117.1 8 247.6 8 384.8 8 496 119 496 256zM155.7 384.3l-30.5-12.6a52.79 52.79 0 0 0 27.2 25.8c26.9 11.2 57.8-1.6 69-28.4 5.4-13 5.5-27.3.1-40.3-5.4-13-15.5-23.2-28.5-28.6-12.9-5.4-26.7-5.2-38.9-.6l31.5 13c19.8 8.2 29.2 30.9 20.9 50.7-8.3 19.9-31 29.2-50.8 21zm173.8-129.9c-34.4 0-62.4-28-62.4-62.3s28-62.3 62.4-62.3 62.4 28 62.4 62.3-27.9 62.3-62.4 62.3zm.1-15.6c25.9 0 46.9-21 46.9-46.8 0-25.9-21-46.8-46.9-46.8s-46.9 21-46.9 46.8c.1 25.8 21.1 46.8 46.9 46.8z"/></symbol>
+  <symbol id="ic-itch" viewBox="0 0 64 56"><path fill="currentColor" d="M8 0h48l8 12v4a8 8 0 0 1-16 0 8 8 0 0 1-16 0 8 8 0 0 1-16 0 8 8 0 0 1-16 0v-4zM4 24a12 12 0 0 0 12-2 12 12 0 0 0 16 0 12 12 0 0 0 16 0 12 12 0 0 0 12 2v26a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6zm16 10a5 6 0 1 0 0 12 5 6 0 1 0 0-12zm24 0a5 6 0 1 0 0 12 5 6 0 1 0 0-12z"/></symbol>
   <symbol id="ic-windows" viewBox="0 0 88 88"><path fill="currentColor" d="M0 12.4 35.7 7.5v34.5H0zm40-5.6L87.3 0v41.8H40zM0 45.7h35.7v34.6L0 75.3zm40 .4h47.3V88L40 81.3z"/></symbol>
 </svg>
 
@@ -746,6 +760,20 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
     <div class="float" style="top: 84%; --s: 130px; --r: -6deg; animation-delay: -0.5s"><svg viewBox="0 0 130 110"><use href="#ic-aro"/></svg></div>
   </div>
   <div class="wrap">
+    <section id="trailer" class="trailer" aria-labelledby="t-trailer">
+      <div class="section-head">
+        <h2 id="t-trailer">Mira el <b>tráiler</b></h2>
+        <p>Un minuto de partida real: compra, construye, dispara, roba y multiplica con los aros.</p>
+      </div>
+      <figure class="aero-window">
+        <div class="titlebar"><span>Fresh Kingdom Showdown · Tráiler</span><i aria-hidden="true"></i><i aria-hidden="true"></i><i class="close" aria-hidden="true"></i></div>
+        <video controls preload="none" playsinline poster="video/trailer-poster.jpg" width="1600" height="900">
+          <source src="video/trailer.mp4" type="video/mp4">
+          Tu navegador no puede reproducir el video. <a href="video/trailer.mp4">Descárgalo aquí</a>.
+        </video>
+      </figure>
+    </section>
+
     <section id="como-se-juega" aria-labelledby="t-juego">
       <div class="xp-win" aria-hidden="true">
         <div class="xp-title"><svg viewBox="0 0 16 16"><path d="M3 4 H13 L12 15 H4 Z" fill="#cfe4f7" stroke="#2a5b8c"/><path d="M2 3 H14" stroke="#2a5b8c" stroke-width="1.5"/><path d="M6 6 L6.5 13 M10 6 L9.5 13" stroke="#6aa86a" stroke-width="1.2"/></svg><span>Recycle Bin</span><b>_</b><b>□</b><b class="x">✕</b></div>
@@ -808,7 +836,7 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         <button type="button" aria-pressed="false" data-src="img/vuelo.jpg" data-cap="La pelota vuela rápido y revienta todas las burbujas que toca en el camino." data-alt="La pelota en el aire camino a las burbujas."><img src="img/vuelo.jpg" width="1920" height="1080" loading="lazy" alt="Pelota en el aire"></button>
         <button type="button" aria-pressed="false" data-src="img/resumen.jpg" data-cap="Al terminar el tiro, un resumen te dice cuántas monedas ganaste y por qué." data-alt="Resumen del tiro con las monedas ganadas."><img src="img/resumen.jpg" width="1920" height="1080" loading="lazy" alt="Resumen del tiro"></button>
         <button type="button" aria-pressed="false" data-src="img/tienda.jpg" data-cap="La tienda: 3 ofertas al azar, cada una con su variante y su precio." data-alt="Panel de la tienda con tres ofertas, sus íconos, variantes y precios."><img src="img/tienda.jpg" width="1920" height="1080" loading="lazy" alt="Tienda"></button>
-        <button type="button" aria-pressed="false" data-src="img/colocacion.jpg" data-cap="Colocación: el objeto se ve de vidrio celeste si el lugar sirve. Gíralo, inclínalo y súbelo como quieras." data-alt="Vista desde arriba en la fase de colocación, con un objeto de vidrio en vista previa y el inventario abajo."><img src="img/colocacion.jpg" width="1920" height="1080" loading="lazy" alt="Colocación de objetos"></button>
+        <button type="button" aria-pressed="false" data-src="img/colocacion.jpg" data-cap="Colocación: los objetos se apilan para armar torres, puentes y rampas, y la vista es libre para mirar desde donde quieras." data-alt="Vista libre a ras del suelo en la fase de colocación: una torre de cubos verdes, un puente con una rampa encima y una esfera sobre otra torre."><img src="img/colocacion.jpg" width="1920" height="1080" loading="lazy" alt="Colocación de objetos"></button>
         <button type="button" aria-pressed="false" data-src="img/mapa.jpg" data-cap="Hasta 4 jugadores, cada uno con su color, su castillo y su parte del mapa." data-alt="Vista general de la arena circular con cuatro castillos de colores, burbujas y objetos colocados."><img src="img/mapa.jpg" width="1920" height="1080" loading="lazy" alt="Vista general de la arena"></button>
         <button type="button" aria-pressed="false" data-src="img/victoria.jpg" data-cap="El primero en llegar a la meta gana la partida." data-alt="Pantalla de victoria con burbujas: Gana el Jugador 1."><img src="img/victoria.jpg" width="1920" height="1080" loading="lazy" alt="Pantalla de victoria"></button>
       </div>
@@ -816,12 +844,12 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
 
     <section id="objetos" class="items-block" aria-labelledby="t-objetos">
       <div class="xp-win tilt-left" aria-hidden="true">
-        <div class="xp-title"><svg viewBox="0 0 16 16"><path d="M1 4 H6 L7.5 5.5 H15 V14 H1 Z" fill="#ffd96b" stroke="#b8860b"/></svg><span>C:\Juegos\Catapultas</span><b>_</b><b>□</b><b class="x">✕</b></div>
+        <div class="xp-title"><svg viewBox="0 0 16 16"><path d="M1 4 H6 L7.5 5.5 H15 V14 H1 Z" fill="#ffd96b" stroke="#b8860b"/></svg><span>C:\Juegos\Fresh Kingdom</span><b>_</b><b>□</b><b class="x">✕</b></div>
         <div class="xp-menu"><span>Archivo</span><span>Edición</span><span>Ver</span><span>Favoritos</span></div>
         <div class="xp-body xp-files">
           <div><svg viewBox="0 0 34 34"><path d="M2 8 H13 L16 11 H32 V30 H2 Z" fill="#ffd96b" stroke="#b8860b"/><path d="M2 13 H32" stroke="#fff" stroke-opacity=".7"/></svg>Rocas</div>
           <div><svg viewBox="0 0 34 34"><path d="M7 2 H22 L28 8 V32 H7 Z" fill="#fff" stroke="#6b7d8f"/><path d="M22 2 V8 H28" fill="#e3edf5" stroke="#6b7d8f"/><path d="M11 14 H24 M11 18 H24 M11 22 H20" stroke="#4a6b8a"/></svg>reglas.txt</div>
-          <div><svg viewBox="0 0 34 34"><rect x="3" y="5" width="28" height="22" rx="3" fill="#3f9ae6" stroke="#1557a8"/><rect x="3" y="5" width="28" height="6" rx="3" fill="#8fd0ff"/><circle cx="17" cy="19" r="5" fill="#ffd21a" stroke="#c99a00"/></svg>Catapultas.exe</div>
+          <div><svg viewBox="0 0 34 34"><rect x="3" y="5" width="28" height="22" rx="3" fill="#3f9ae6" stroke="#1557a8"/><rect x="3" y="5" width="28" height="6" rx="3" fill="#8fd0ff"/><circle cx="17" cy="19" r="5" fill="#ffd21a" stroke="#c99a00"/></svg>FreshKingdom.exe</div>
           <div><svg viewBox="0 0 34 34"><rect x="3" y="6" width="28" height="22" fill="#fff" stroke="#6b7d8f"/><rect x="5" y="8" width="24" height="14" fill="#6fc2ff"/><path d="M5 22 L13 14 L19 19 L23 16 L29 22 Z" fill="#5fd23c"/></svg>isla.bmp</div>
           <div><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="#e9fbff" stroke="#9fb4c6"/><circle cx="17" cy="17" r="14" fill="none" stroke="#ffc8f0" stroke-width="4" stroke-dasharray="10 12" opacity=".7"/><circle cx="17" cy="17" r="3" fill="#fff" stroke="#9fb4c6"/></svg>Música (D:)</div>
           <div><svg viewBox="0 0 34 34"><circle cx="17" cy="17" r="13" fill="#ffc928" stroke="#d98a00" stroke-width="2"/><circle cx="17" cy="17" r="8" fill="none" stroke="#d98a00"/><ellipse cx="13" cy="12" rx="4" ry="2.5" fill="#fff" opacity=".7"/></svg>monedas.sav</div>
@@ -997,15 +1025,17 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
           <ul class="steps">
             <li><span>Hazlo en tu fase de colocación. Verás el objeto de vidrio: celeste si el lugar sirve, rosa si no.</span></li>
             <li><kbd>Q</kbd><kbd>E</kbd><span>Girar · <kbd>R</kbd><kbd>F</kbd> inclinar · <kbd>Z</kbd><kbd>X</kbd> ladear</span></li>
-            <li><kbd>Rueda</kbd><span>Sube o baja el objeto para dejarlo en el aire.</span></li>
-            <li><kbd>Clic izq.</kbd><span>Confirma. No se puede encimar con burbujas, castillos, catapultas ni otros objetos.</span></li>
+            <li><span><b>Se apila:</b> el objeto cae hasta el suelo o encima de otro objeto. Arma torres, puentes y rampas que crecen con la partida.</span></li>
+            <li><kbd>Shift</kbd><kbd>Rueda</kbd><span>Lo sube para dejarlo flotando.</span></li>
+            <li><kbd>Clic izq.</kbd><span>Confirma. Puede tocar a otros objetos, pero no atravesarlos ni encimarse con burbujas, castillos o catapultas.</span></li>
+            <li><kbd>Clic der.</kbd><span>Arrastrar gira la vista; <kbd>WASD</kbd> la mueve, la <kbd>Rueda</kbd> acerca y <kbd>C</kbd> la centra.</span></li>
           </ul>
         </div>
         <div class="pane">
           <h3>Retirar</h3>
           <ul class="steps">
             <li><kbd>Clic</kbd><span>Sobre cualquier objeto de la arena, tuyo o de un rival: ves cuánto cuesta y confirmas.</span></li>
-            <li><span>Retirar cuesta más que comprar, y el objeto no vuelve a tu inventario.</span></li>
+            <li><span>Retirar cuesta más que comprar, y el objeto no vuelve a tu inventario. Lo que tenía encima se cae.</span></li>
             <li><span>Los objetos se quedan en la arena entre turnos hasta que alguien los retire.</span></li>
           </ul>
         </div>
@@ -1028,11 +1058,13 @@ canvas.gl3d { position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; poi
         <div><kbd>Esc</kbd> Pausa</div>
         <div><kbd>Enter</kbd> Pasar a la siguiente fase</div>
         <div><kbd>T</kbd> Abrir la tienda</div>
-        <div><kbd>Rueda</kbd> Subir o bajar el objeto al colocarlo</div>
+        <div><kbd>Clic der.</kbd> + arrastrar: girar la vista al comprar y colocar</div>
+        <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Mover la vista · <kbd>Rueda</kbd> acercar</div>
+        <div><kbd>Shift</kbd><kbd>Rueda</kbd> Subir o bajar el objeto al colocarlo</div>
       </div>
     </div>
     <footer>
-      <p>Catapultas y Castillos · Proyecto universitario en desarrollo para PC.</p>
+      <p>Fresh Kingdom Showdown · Proyecto universitario en desarrollo para PC.</p>
       <p>Steam y el logo de Steam son marcas de Valve Corporation. Windows es una marca de Microsoft.</p>
     </footer>
   </div>
