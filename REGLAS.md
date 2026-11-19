@@ -38,6 +38,14 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 - La arena se divide en una **sección por jugador**, frente a su castillo. Cada sección tiene la **misma cantidad de burbujas** (16 por defecto).
 - Cada jugador empieza con **5 monedas**, para que la tienda sirva desde el primer turno.
 
+### Tu Aero
+
+- Después de elegir jugadores y meta, cada jugador **personaliza su Aero**: el personaje de SixvsSeven, con cabeza de burbuja sin cara, cuerpo de gota y manos y pies flotantes.
+- Se elige **nombre**, color de la cabeza y del cuerpo, **alto y ancho**, **sombrero** (gorro, gorra, copa, corona, fiesta, aro burbuja), **bufanda** (lisa, a rayas, moño, corbata, collar), **gafas** (redondas, de sol, visor aero, 3D, corazón, monóculo) y **extras** (audífonos, flor, pin SvS, varita de burbujas, alas, capa; se pueden poner varios). **Sorpréndeme** arma uno al azar.
+- El Aero es solo de apariencia: no cambia el juego. Aparece en el marcador (en lugar del orbe de color), junto a su catapulta en la arena (salta al empezar su turno y al ganar monedas) y en la pantalla de victoria. Su nombre sale en el marcador, el cartel del turno y la victoria; si se deja vacío, se llama "Jugador N".
+- El color del jugador (castillo, catapulta, sección) sigue siendo Coral, Sol, Violeta o Magenta, sin importar los colores del Aero.
+- Los Aeros se guardan en la computadora para la próxima partida.
+
 ## 2. El turno
 
 | Fase | Qué se puede hacer |
@@ -243,4 +251,5 @@ monedas del tiro = máx(0, R)
 | Fases del turno, tienda, inventario y colocación | ✅ Hecho |
 | Variantes, aro multiplicador y retirada | ✅ Hecho |
 | Materiales (goma, turbo, bumper), combos, temblor y cámara lenta | ✅ Hecho |
+| Aeros personalizables (menú, marcador, arena y victoria) | ✅ Hecho |
 | Equilibrio fino de la economía | ⏳ Pendiente (partidas de prueba del grupo) |
