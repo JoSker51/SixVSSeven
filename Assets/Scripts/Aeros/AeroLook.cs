@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Cómo se ve el Aero de un jugador: el personaje de SixvsSeven del canal Aeros de la presentación.
-// Cabeza de burbuja sin cara, cuerpo de gota, manos y pies flotantes; se viste con sombrero, bufanda, gafas y accesorios.
+// Cómo se ve el Aero de un jugador: un ícono 2D al estilo de los muñequitos de Messenger (cabeza y hombros brillantes),
+// sin cara: se viste con sombrero, bufanda, gafas y accesorios, y se le puede dibujar la cara a mano alzada.
 // Las opciones y paletas son las mismas que en la presentación (mii.js), para que los Aeros se reconozcan.
 [Serializable]
 public class AeroLook
 {
     public string name = "";
-    public string body = "#2ea8ff";   // color del cuerpo, manos y pies
+    public string body = "#2ea8ff";   // color del cuerpo (hombros)
     public string head = "#2ea8ff";
     public float w = 1f;              // ancho (0,78 a 1,3)
     public float h = 1f;              // altura (0,8 a 1,25)
@@ -19,6 +19,7 @@ public class AeroLook
     public string scarfColor = "#19a6d8";
     public string glasses = "none";
     public List<string> acc = new List<string>();
+    public string draw;               // la cara dibujada a mano: PNG de 256 × 256 en base64 (vacío = sin dibujo)
 
     public static readonly string[] BodyColors = { "#2ea8ff", "#33cbe0", "#5fd23c", "#ffc21a", "#ff8a3d", "#ff5e57", "#f047a0", "#9c6bff", "#b8c6d3", "#3a4a5c" };
     public static readonly string[] ClothColors = { "#e8333a", "#ff8a3d", "#ffd23f", "#5fd23c", "#19a6d8", "#2f5fd8", "#9c6bff", "#f047a0", "#ffffff", "#2b2f3a" };

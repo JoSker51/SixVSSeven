@@ -56,7 +56,7 @@ public class GameHUD : MonoBehaviour
     private struct PendingPopup { public Vector3 pos; public string text; public Color color; }
     private static readonly List<PendingPopup> pending = new List<PendingPopup>();
 
-    private class Row { public Text coins; public RectTransform fill; public Image highlight; public AeroPortrait aero; public int shown = int.MinValue; public float pulse; }
+    private class Row { public Text coins; public RectTransform fill; public Image highlight; public AeroIconView aero; public int shown = int.MinValue; public float pulse; }
     private class BubbleLabel { public RectTransform rt; public Text text; public int shown = -1; }
     private class FloatingText { public RectTransform rt; public CanvasGroup group; public Vector3 world; public float start; }
     private class Step { public TurnPhase phase; public Text text; public Image dot; }
@@ -99,6 +99,7 @@ public class GameHUD : MonoBehaviour
 
         if (GameManager.Instance != null) GameManager.Instance.PlayerWon += OnPlayerWon;
         if (turnManager != null) turnManager.ShotResolved += OnShotResolved;
+        if (turnManager != null) turnManager.TurnStarted += p => { if (p >= 0 && p < rows.Count) rows[p].aero.Hop(); };   // su Aero salta al empezar su turno
 
         Wire(pauseButton, TogglePause);
         Wire(resumeButton, TogglePause);
@@ -166,9 +167,9 @@ public class GameHUD : MonoBehaviour
             var row = AeroUI.Node($"Jugador {i + 1}", board).At(new Vector2(0.5f, 1f), new Vector2(0f, -58f - rowH * i), new Vector2(board.sizeDelta.x - 26f, rowH - 8f));
             var hl = AeroUI.Img(row, "Resaltado", skin.fill, new Color(c.r, c.g, c.b, 0f), skin.fill.rect.height / (rowH - 8f));
             hl.rectTransform.Stretch();
-            // El Aero del jugador, en una burbuja de su color (en lugar del orbe de color)
-            var bubble = AeroUI.Node("Aero", row).At(new Vector2(0f, 0.5f), new Vector2(4f, 0f), new Vector2(60f, 60f));
-            var aero = AeroPortrait.Bubble(bubble, skin, AeroRoster.Get(i), c, AeroPortrait.Framing.Bust, 128);
+            // El ícono del Aero del jugador (en lugar del orbe de color)
+            var holder = AeroUI.Node("Aero", row).At(new Vector2(0f, 0.5f), new Vector2(2f, 2f), new Vector2(64f, 64f));
+            var aero = AeroIconView.Create(holder, AeroRoster.Get(i), 128);
             string colorName = skin.playerColorNames != null && i < skin.playerColorNames.Length ? skin.playerColorNames[i] : "";
             string name = AeroRoster.DisplayName(i);
             AeroUI.Label(row, "Nombre", name.Length > 9 ? name : $"{name}  <size=20>{colorName}</size>", 28, skin.navy, AeroWeight.Bold, TextAnchor.MiddleLeft)
@@ -455,9 +456,9 @@ public class GameHUD : MonoBehaviour
 
     private void OnPlayerWon(int player) => StartCoroutine(ShowVictory(player));
 
-    private AeroPortrait winnerAero;
+    private AeroIconView winnerAero;
 
-    private static IEnumerator Cheer(AeroPortrait aero)
+    private static IEnumerator Cheer(AeroIconView aero)
     {
         while (aero)
         {
@@ -477,8 +478,9 @@ public class GameHUD : MonoBehaviour
         // El Aero ganador asoma encima del cartel y salta de alegría
         if (winnerAero == null)
         {
-            var holder = AeroUI.Node("Aero ganador", victoryTitle.transform.parent).At(new Vector2(0.5f, 1f), new Vector2(0f, 190f), new Vector2(280f, 280f));
-            winnerAero = AeroPortrait.Bubble(holder, skin, AeroRoster.Get(player), skin.PlayerColor(player), AeroPortrait.Framing.Body, 384);
+            var holder = AeroUI.Node("Aero ganador", victoryTitle.transform.parent).At(new Vector2(0.5f, 1f), new Vector2(0f, 300f), new Vector2(300f, 300f));
+            AeroUI.Img(holder, "Resplandor", skin.glow, Color.Lerp(skin.PlayerColor(player), Color.white, 0.4f)).rectTransform.Stretch(-60f);
+            winnerAero = AeroIconView.Create(holder, AeroRoster.Get(player), 384);
             StartCoroutine(Cheer(winnerAero));
         }
         var grad = victoryTitle.GetComponent<UIGradient>();

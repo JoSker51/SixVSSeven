@@ -6,29 +6,37 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 #endif
 
-// "Personaliza tu Aero": después de Nueva partida, cada jugador arma su Aero (como el canal Aeros de la presentación).
-// Pestañas Cuerpo, Sombrero, Bufanda, Gafas y Extras; nombre; Sorpréndeme. Se arma solo en Awake con AeroUI.
-// MainMenu lo abre con Open(); al terminar guarda los Aeros (AeroRoster) y avisa con onDone.
+// "Personaliza tu Aero": después de Nueva partida, cada jugador arma su Aero (ícono 2D estilo Messenger, como el canal
+// Aeros de la presentación). Pestañas Cuerpo, Sombrero, Bufanda, Gafas, Extras y Dibujar (zoom a la cabeza para pintarle
+// la cara a mano alzada); nombre; Sorpréndeme. Se arma solo con AeroUI. MainMenu lo abre con Open(); al terminar guarda
+// los Aeros (AeroRoster) y avisa con onDone.
 public class AeroCustomizer : MonoBehaviour
 {
     [SerializeField] private AeroSkin skin;
     [SerializeField] private UIFadePanel panel;
     [SerializeField] private CanvasGroup hideWhileOpen;   // el título del menú: se esconde para dar espacio
 
-    private enum Tab { Body, Hat, Scarf, Glasses, Extras }
+    private enum Tab { Body, Hat, Scarf, Glasses, Extras, Draw }
+
+    static readonly string[] InkColors = { "#0a3d66", "#ffffff", "#e8333a", "#ff8a3d", "#ffd23f", "#5fd23c", "#19a6d8", "#9c6bff", "#f047a0", "#2b2f3a" };
+    const float Zoom = 1.12f;   // cuánto más grande que la cabeza se ve el zoom de Dibujar
 
     private readonly List<AeroLook> looks = new List<AeroLook>();
-    private readonly List<(Button button, Image bg, Text title, Text name, AeroPortrait portrait)> chips = new List<(Button, Image, Text, Text, AeroPortrait)>();
-    private readonly List<(Button b, Image img, Text label, Tab tab)> tabButtons = new List<(Button, Image, Text, Tab)>();
+    private readonly List<(Button button, Image bg, Text title, Text name, AeroIconView icon)> chips = new List<(Button, Image, Text, Text, AeroIconView)>();
+    private readonly List<(Image img, Text label, Tab tab)> tabButtons = new List<(Image, Text, Tab)>();
     private readonly List<GameObject> tabContent = new List<GameObject>();
     private readonly List<Action> refreshers = new List<Action>();   // repintan qué opción está elegida
 
     private RectTransform content;
-    private AeroPortrait big;
+    private Image stageBg;
+    private AeroIconView big;
+    private GameObject drawStage;
+    private RawImage zoomImage;
+    private Texture2D zoomTex;
+    private AeroFacePainter painter;
     private InputField nameField;
     private Text header, nextText;
     private Image headerPill;
-    private Button nextButton, backButton, randomButton;
     private int count, current;
     private Tab tab = Tab.Body;
     private Action onDone, onBack;
@@ -37,6 +45,7 @@ public class AeroCustomizer : MonoBehaviour
     public bool Visible => panel && panel.Visible;
 
     private Color Navy => skin.navy;
+    private AeroLook Cur => looks[current];
 
     public void Open(int players, Action done, Action back)
     {
@@ -48,10 +57,11 @@ public class AeroCustomizer : MonoBehaviour
         for (int i = 0; i < chips.Count; i++)
         {
             chips[i].button.gameObject.SetActive(i < count);
-            chips[i].portrait.SetLook(looks[i]);
+            chips[i].icon.SetLook(looks[i]);
         }
+        SetTab(Tab.Body);
         Select(0);
-        if (hideWhileOpen) { hideWhileOpen.alpha = 0f; }
+        if (hideWhileOpen) hideWhileOpen.alpha = 0f;
         panel.Show();
     }
 
@@ -72,8 +82,6 @@ public class AeroCustomizer : MonoBehaviour
         if (esc && !nameField.isFocused) GoBack();
     }
 
-    private AeroLook Cur => looks[current];
-
     private void Select(int player)
     {
         current = Mathf.Clamp(player, 0, count - 1);
@@ -83,34 +91,34 @@ public class AeroCustomizer : MonoBehaviour
         header.text = $"Jugador {current + 1}  ·  {colorName}";
         header.color = skin.TextOn(current);
         headerPill.sprite = skin.PlayerButton(current);
-        big.SetBackground(Color.Lerp(pc, Color.white, 0.62f));
+        stageBg.color = Color.Lerp(pc, Color.white, 0.72f);
         nextText.text = current < count - 1 ? $"Jugador {current + 2}  ▸" : "¡A jugar!  ▸";
         for (int i = 0; i < chips.Count; i++)
         {
             bool on = i == current;
             chips[i].bg.sprite = on ? skin.PlayerButton(i) : skin.glassPanel;
-            chips[i].bg.color = Color.white;
             chips[i].title.color = on ? skin.TextOn(i) : Navy;
             chips[i].name.color = on ? skin.TextOn(i) : new Color(Navy.r, Navy.g, Navy.b, 0.75f);
         }
+        if (tab == Tab.Draw) EnterDraw();
         Changed(false);
-        big.Hop();
     }
 
-    // Algo del Aero cambió: se ve en el retrato grande y en su ficha
+    // Algo del Aero cambió: se ve en el ícono grande y en su ficha
     private void Changed(bool hop = true)
     {
         big.SetLook(Cur);
-        chips[current].portrait.SetLook(Cur);
+        chips[current].icon.SetLook(Cur);
         chips[current].name.text = string.IsNullOrWhiteSpace(Cur.name) ? "Sin nombre" : Cur.name;
         foreach (var r in refreshers) r();
+        if (tab == Tab.Draw) RenderZoom();
         if (hop) big.Hop();
     }
 
     private void Next()
     {
         AeroAudio.Play(Sfx.Click);
-        if (current < count - 1) { Select(current + 1); return; }
+        if (current < count - 1) { Select(current + 1); big.Hop(); return; }
         for (int i = 0; i < count; i++) AeroRoster.Set(i, looks[i]);
         AeroRoster.Save();
         Close();
@@ -129,9 +137,10 @@ public class AeroCustomizer : MonoBehaviour
     private void Surprise()
     {
         AeroAudio.Play(Sfx.Buy);
-        string keepName = Cur.name;
+        var keep = Cur;
         looks[current] = AeroLook.Random();
-        looks[current].name = keepName;
+        looks[current].name = keep.name;
+        looks[current].draw = keep.draw;   // la cara dibujada no se pierde
         Changed();
     }
 
@@ -139,12 +148,38 @@ public class AeroCustomizer : MonoBehaviour
     {
         tab = t;
         for (int i = 0; i < tabContent.Count; i++) tabContent[i].SetActive(i == (int)t);
-        foreach (var (b, img, label, tt) in tabButtons)
+        foreach (var (img, label, tt) in tabButtons)
         {
             bool on = tt == t;
             img.sprite = on ? skin.buttonBlue : skin.buttonSilver;
             label.color = on ? Color.white : Navy;
         }
+        bool draw = t == Tab.Draw;
+        big.gameObject.SetActive(!draw);
+        drawStage.SetActive(draw);
+        if (draw) EnterDraw();
+    }
+
+    // Dibujar: zoom a la cabeza sin sombrero ni gafas, y el lienzo justo encima
+    private void EnterDraw()
+    {
+        painter.Load(Cur.draw);
+        RenderZoom();
+    }
+
+    private void RenderZoom()
+    {
+        Rect head = AeroIconRenderer.HeadBox(Cur);
+        Rect view = new Rect(head.center.x - head.width * Zoom / 2f, head.center.y - head.height * Zoom / 2f, head.width * Zoom, head.height * Zoom);
+        zoomTex = AeroIconRenderer.Render(Cur, 512, zoomTex, view, bare: true, withDrawing: false);
+        zoomImage.texture = zoomTex;
+    }
+
+    private void OnStroke()
+    {
+        Cur.draw = painter.Save();
+        chips[current].icon.SetLook(Cur);
+        big.SetLook(Cur);
     }
 
     // ---------------- Construcción de la interfaz ----------------
@@ -177,26 +212,32 @@ public class AeroCustomizer : MonoBehaviour
             b.targetGraphic = bg;
             b.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); Select(p); });
             bg.gameObject.AddComponent<AeroButtonFX>();
-            var holder = AeroUI.Node("Burbuja", bg.transform).At(new Vector2(0f, 0.5f), new Vector2(14f, 0f), new Vector2(108f, 108f));
-            var portrait = AeroPortrait.Bubble(holder, skin, AeroRoster.Get(i), skin.PlayerColor(i));
+            var holder = AeroUI.Node("Icono", bg.transform).At(new Vector2(0f, 0.5f), new Vector2(10f, 4f), new Vector2(120f, 120f));
+            var icon = AeroIconView.Create(holder, AeroRoster.Get(i), 160);
             var t = AeroUI.Label(bg.transform, "Titulo", $"Jugador {i + 1}", 30, Navy, AeroWeight.Bold, TextAnchor.MiddleLeft);
             t.rectTransform.At(new Vector2(0f, 0.5f), new Vector2(136f, 20f), new Vector2(190f, 40f));
             var n = AeroUI.Label(bg.transform, "Nombre", "", 24, Navy, AeroWeight.Regular, TextAnchor.MiddleLeft);
             n.rectTransform.At(new Vector2(0f, 0.5f), new Vector2(136f, -22f), new Vector2(190f, 34f));
-            chips.Add((b, bg, t, n, portrait));
+            chips.Add((b, bg, t, n, icon));
         }
 
-        // Retrato grande (centro) y nombre
+        // Ícono grande (centro), zoom para dibujar y nombre
         var stage = AeroUI.Img(frame, "Escenario", skin.glassPanel, Color.white, 1.4f);
         stage.rectTransform.At(new Vector2(0f, 1f), new Vector2(400f, -124f), new Vector2(540f, 640f));
-        var stageInner = AeroUI.Node("Ventana", stage.transform).Stretch(14f);
-        var stageMask = stageInner.gameObject.AddComponent<Image>();
-        stageMask.sprite = skin.glassPanel; stageMask.type = Image.Type.Sliced; stageMask.pixelsPerUnitMultiplier = 1.6f;
-        stageInner.gameObject.AddComponent<Mask>().showMaskGraphic = false;
-        big = AeroPortrait.Create(stageInner, AeroRoster.Get(0), new Color(0.85f, 0.95f, 1f), AeroPortrait.Framing.Body, 640);
-        var bigRt = (RectTransform)big.transform;
-        bigRt.anchorMin = bigRt.anchorMax = new Vector2(0.5f, 0.5f);
-        bigRt.sizeDelta = new Vector2(612f, 612f);   // cuadrado: el escenario es un poco más alto y recorta los costados
+        stageBg = AeroUI.Img(stage.transform, "Fondo", skin.glassPanel, new Color(0.85f, 0.95f, 1f), 1.6f);
+        stageBg.rectTransform.Stretch(14f);
+        AeroUI.Img(stage.transform, "Resplandor", skin.glow, new Color(1f, 1f, 1f, 0.8f)).rectTransform.At(new Vector2(0.5f, 0.5f), new Vector2(0f, 30f), new Vector2(520f, 520f));
+        var bigHolder = AeroUI.Node("Aero", stage.transform).At(new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(500f, 500f));
+        big = AeroIconView.Create(bigHolder, AeroRoster.Get(0), 512);
+
+        var drawRoot = AeroUI.Node("Dibujar", stage.transform).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f, 500f));
+        drawStage = drawRoot.gameObject;
+        zoomImage = AeroUI.Node("Zoom", drawRoot).Stretch().gameObject.AddComponent<RawImage>();
+        zoomImage.raycastTarget = false;
+        var canvasArea = AeroUI.Node("Cara", drawRoot).At(new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(500f / Zoom, 500f / Zoom));
+        painter = AeroFacePainter.Create(canvasArea);
+        painter.StrokeEnded += OnStroke;
+        drawStage.SetActive(false);
 
         AeroUI.Label(frame, "Etiqueta nombre", "Nombre", 28, Navy, AeroWeight.Bold, TextAnchor.MiddleLeft)
             .rectTransform.At(new Vector2(0f, 1f), new Vector2(404f, -778f), new Vector2(160f, 44f));
@@ -205,14 +246,14 @@ public class AeroCustomizer : MonoBehaviour
         // Pestañas y opciones (derecha)
         var side = AeroUI.Img(frame, "Opciones", skin.glassPanel, new Color(1f, 1f, 1f, 0.8f), 1.4f);
         side.rectTransform.At(new Vector2(0f, 1f), new Vector2(980f, -124f), new Vector2(800f, 720f));
-        var tabsDef = new[] { (Tab.Body, "Cuerpo"), (Tab.Hat, "Sombrero"), (Tab.Scarf, "Bufanda"), (Tab.Glasses, "Gafas"), (Tab.Extras, "Extras") };
+        var tabsDef = new[] { (Tab.Body, "Cuerpo"), (Tab.Hat, "Sombrero"), (Tab.Scarf, "Bufanda"), (Tab.Glasses, "Gafas"), (Tab.Extras, "Extras"), (Tab.Draw, "Dibujar") };
         for (int i = 0; i < tabsDef.Length; i++)
         {
             var (tt, label) = tabsDef[i];
-            var b = AeroUI.Button(side.transform, label, label, skin.buttonSilver, new Vector2(146f, 62f), Navy, 26);
-            ((RectTransform)b.transform).At(new Vector2(0f, 1f), new Vector2(20f + i * 153f, -20f), new Vector2(146f, 62f));
+            var b = AeroUI.Button(side.transform, label, label, skin.buttonSilver, new Vector2(124f, 60f), Navy, 23);
+            ((RectTransform)b.transform).At(new Vector2(0f, 1f), new Vector2(18f + i * 128f, -20f), new Vector2(124f, 60f));
             b.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); SetTab(tt); });
-            tabButtons.Add((b, (Image)b.targetGraphic, b.GetComponentInChildren<Text>(), tt));
+            tabButtons.Add(((Image)b.targetGraphic, b.GetComponentInChildren<Text>(), tt));
         }
         content = AeroUI.Node("Contenido", side.transform);
         content.anchorMin = Vector2.zero; content.anchorMax = Vector2.one;
@@ -223,19 +264,19 @@ public class AeroCustomizer : MonoBehaviour
         tabContent.Add(BuildChoiceTab("Bufandas", AeroLook.Scarves, l => l.scarf, (l, v) => l.scarf = v, AeroLook.ClothColors, l => l.scarfColor, (l, v) => l.scarfColor = v));
         tabContent.Add(BuildChoiceTab("Gafas", AeroLook.Glasses, l => l.glasses, (l, v) => l.glasses = v, null, null, null));
         tabContent.Add(BuildExtrasTab());
-        SetTab(Tab.Body);
+        tabContent.Add(BuildDrawTab());
 
         // Botones de abajo
-        backButton = AeroUI.Button(frame, "Volver", "◂  Volver", skin.buttonSilver, new Vector2(300f, 90f), Navy, 38);
-        ((RectTransform)backButton.transform).At(new Vector2(0f, 0f), new Vector2(40f, 34f), new Vector2(300f, 90f));
-        backButton.onClick.AddListener(GoBack);
-        randomButton = AeroUI.Button(frame, "Sorprendeme", "Sorpréndeme", skin.buttonBlue, new Vector2(360f, 90f), Color.white, 38);
-        ((RectTransform)randomButton.transform).At(new Vector2(0.5f, 0f), new Vector2(160f, 34f), new Vector2(360f, 90f));
-        randomButton.onClick.AddListener(Surprise);
-        nextButton = AeroUI.Button(frame, "Siguiente", "Jugador 2  ▸", skin.buttonGreen, new Vector2(400f, 90f), Color.white, 38);
-        ((RectTransform)nextButton.transform).At(new Vector2(1f, 0f), new Vector2(-40f, 34f), new Vector2(400f, 90f));
-        nextButton.onClick.AddListener(Next);
-        nextText = nextButton.GetComponentInChildren<Text>();
+        var back = AeroUI.Button(frame, "Volver", "◂  Volver", skin.buttonSilver, new Vector2(300f, 90f), Navy, 38);
+        ((RectTransform)back.transform).At(new Vector2(0f, 0f), new Vector2(40f, 34f), new Vector2(300f, 90f));
+        back.onClick.AddListener(GoBack);
+        var random = AeroUI.Button(frame, "Sorprendeme", "Sorpréndeme", skin.buttonBlue, new Vector2(360f, 90f), Color.white, 38);
+        ((RectTransform)random.transform).At(new Vector2(0.5f, 0f), new Vector2(160f, 34f), new Vector2(360f, 90f));
+        random.onClick.AddListener(Surprise);
+        var next = AeroUI.Button(frame, "Siguiente", "Jugador 2  ▸", skin.buttonGreen, new Vector2(400f, 90f), Color.white, 38);
+        ((RectTransform)next.transform).At(new Vector2(1f, 0f), new Vector2(-40f, 34f), new Vector2(400f, 90f));
+        next.onClick.AddListener(Next);
+        nextText = next.GetComponentInChildren<Text>();
     }
 
     private InputField NameField(RectTransform frame)
@@ -265,22 +306,29 @@ public class AeroCustomizer : MonoBehaviour
         return page;
     }
 
-    private static Text Heading(RectTransform page, string text, float y, Color navy) =>
-        AeroUI.Label(page, text, text, 28, navy, AeroWeight.Bold, TextAnchor.MiddleLeft).rectTransform
-            .At(new Vector2(0f, 1f), new Vector2(4f, y), new Vector2(700f, 40f)).GetComponent<Text>();
+    private void Heading(RectTransform page, string text, float y) =>
+        AeroUI.Label(page, text, text, 28, Navy, AeroWeight.Bold, TextAnchor.MiddleLeft).rectTransform
+            .At(new Vector2(0f, 1f), new Vector2(4f, y), new Vector2(700f, 40f));
+
+    private Text Note(RectTransform page, string text, float y)
+    {
+        var t = AeroUI.Label(page, "Nota", text, 22, new Color(Navy.r, Navy.g, Navy.b, 0.75f), AeroWeight.Light, TextAnchor.UpperLeft);
+        t.rectTransform.At(new Vector2(0f, 1f), new Vector2(4f, y), new Vector2(740f, 80f));
+        t.horizontalOverflow = HorizontalWrapMode.Wrap;
+        return t;
+    }
 
     private GameObject BuildBodyTab()
     {
         var page = Page("Cuerpo");
-        Heading(page, "Color de la cabeza", -6f, Navy);
+        Heading(page, "Color de la cabeza", -6f);
         Swatches(page, -52f, AeroLook.BodyColors, l => l.head, (l, v) => l.head = v);
-        Heading(page, "Color del cuerpo, manos y pies", -142f, Navy);
+        Heading(page, "Color del cuerpo", -142f);
         Swatches(page, -188f, AeroLook.BodyColors, l => l.body, (l, v) => l.body = v);
-        Heading(page, "Forma", -278f, Navy);
+        Heading(page, "Forma", -278f);
         ShapeSlider(page, "Altura", -330f, AeroLook.MinH, AeroLook.MaxH, l => l.h, (l, v) => l.h = v);
         ShapeSlider(page, "Ancho", -400f, AeroLook.MinW, AeroLook.MaxW, l => l.w, (l, v) => l.w = v);
-        AeroUI.Label(page, "Nota", "Los Aeros no tienen cara: su personalidad se la pones tú con los colores y la ropa.", 22, new Color(Navy.r, Navy.g, Navy.b, 0.75f), AeroWeight.Light, TextAnchor.UpperLeft)
-            .rectTransform.At(new Vector2(0f, 1f), new Vector2(4f, -470f), new Vector2(740f, 60f)).GetComponent<Text>().horizontalOverflow = HorizontalWrapMode.Wrap;
+        Note(page, "Los Aeros no tienen cara: su personalidad se la pones tú con los colores, la ropa y lo que le dibujes en la pestaña Dibujar.", -470f);
         return page.gameObject;
     }
 
@@ -300,7 +348,7 @@ public class AeroCustomizer : MonoBehaviour
         if (colors != null)
         {
             float y = -((options.Length + 2) / 3) * 86f - 20f;
-            Heading(page, "Color", y, Navy);
+            Heading(page, "Color", y);
             Swatches(page, y - 46f, colors, getColor, setColor);
         }
         return page.gameObject;
@@ -309,7 +357,7 @@ public class AeroCustomizer : MonoBehaviour
     private GameObject BuildExtrasTab()
     {
         var page = Page("Extras");
-        Heading(page, "Puedes ponerle varios", -6f, Navy);
+        Heading(page, "Puedes ponerle varios", -6f);
         var opts = AeroLook.Accessories;
         for (int i = 0; i < opts.Length; i++)
         {
@@ -325,6 +373,51 @@ public class AeroCustomizer : MonoBehaviour
             var img = (Image)b.targetGraphic; var txt = b.GetComponentInChildren<Text>();
             refreshers.Add(() => { bool on = Cur.Has(id); img.sprite = on ? skin.buttonGreen : skin.buttonSilver; txt.color = on ? Color.white : Navy; });
         }
+        return page.gameObject;
+    }
+
+    private GameObject BuildDrawTab()
+    {
+        var page = Page("Dibujar");
+        Note(page, "Dibuja con el mouse dentro del círculo: una cara, unas mejillas, un antifaz, lo que quieras. Los sombreros y gafas vuelven al salir de aquí.", -4f);
+        Heading(page, "Lápiz", -96f);
+        var inkRings = new List<(Image ring, string hex)>();
+        for (int i = 0; i < InkColors.Length; i++)
+        {
+            string hex = InkColors[i];
+            var orb = AeroUI.Orb(page, hex, skin, AeroLook.ParseColor(hex, Color.white), 58f);
+            orb.rectTransform.At(new Vector2(0f, 1f), new Vector2(4f + i * 72f, -142f), new Vector2(58f, 58f));
+            orb.raycastTarget = true;
+            var b = orb.gameObject.AddComponent<Button>();
+            b.targetGraphic = orb;
+            b.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); painter.color = AeroLook.ParseColor(hex, Color.black); painter.erase = false; foreach (var r in refreshers) r(); });
+            orb.gameObject.AddComponent<AeroButtonFX>();
+            var ring = AeroUI.Img(orb.transform, "Elegido", skin.bubble, Navy);
+            ring.rectTransform.Stretch(-8f);
+            refreshers.Add(() => ring.enabled = !painter.erase && (Color)painter.color == AeroLook.ParseColor(hex, Color.black));
+        }
+        Heading(page, "Grosor", -232f);
+        var sizes = new[] { (4, "Fino"), (7, "Normal"), (12, "Grueso"), (20, "Brocha") };
+        for (int i = 0; i < sizes.Length; i++)
+        {
+            var (size, label) = sizes[i];
+            var b = AeroUI.Button(page, label, label, skin.buttonSilver, new Vector2(176f, 64f), Navy, 26);
+            ((RectTransform)b.transform).At(new Vector2(0f, 1f), new Vector2(i * 186f, -278f), new Vector2(176f, 64f));
+            b.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); painter.brush = size; painter.erase = false; foreach (var r in refreshers) r(); });
+            var img = (Image)b.targetGraphic; var txt = b.GetComponentInChildren<Text>();
+            refreshers.Add(() => { bool on = !painter.erase && painter.brush == size; img.sprite = on ? skin.buttonBlue : skin.buttonSilver; txt.color = on ? Color.white : Navy; });
+        }
+        var eraser = AeroUI.Button(page, "Borrador", "Borrador", skin.buttonSilver, new Vector2(236f, 72f), Navy, 28);
+        ((RectTransform)eraser.transform).At(new Vector2(0f, 1f), new Vector2(0f, -376f), new Vector2(236f, 72f));
+        eraser.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); painter.erase = !painter.erase; foreach (var r in refreshers) r(); });
+        var eImg = (Image)eraser.targetGraphic; var eTxt = eraser.GetComponentInChildren<Text>();
+        refreshers.Add(() => { eImg.sprite = painter.erase ? skin.buttonBlue : skin.buttonSilver; eTxt.color = painter.erase ? Color.white : Navy; });
+        var undo = AeroUI.Button(page, "Deshacer", "Deshacer", skin.buttonSilver, new Vector2(236f, 72f), Navy, 28);
+        ((RectTransform)undo.transform).At(new Vector2(0f, 1f), new Vector2(248f, -376f), new Vector2(236f, 72f));
+        undo.onClick.AddListener(() => { AeroAudio.Play(Sfx.Click); painter.Undo(); });
+        var clear = AeroUI.Button(page, "Borrar todo", "Borrar todo", skin.buttonSilver, new Vector2(236f, 72f), Navy, 28);
+        ((RectTransform)clear.transform).At(new Vector2(0f, 1f), new Vector2(496f, -376f), new Vector2(236f, 72f));
+        clear.onClick.AddListener(() => { AeroAudio.Play(Sfx.Error); painter.Clear(); });
         return page.gameObject;
     }
 
@@ -353,13 +446,17 @@ public class AeroCustomizer : MonoBehaviour
         var s = AeroUI.Slider(page, label + " (barra)", new Vector2(560f, 46f), skin, new Color(0.35f, 0.75f, 1f), Color.white);
         ((RectTransform)s.transform).At(new Vector2(0f, 1f), new Vector2(150f, y - 2f), new Vector2(560f, 46f));
         s.minValue = min; s.maxValue = max;
-        bool updating = false;
-        s.onValueChanged.AddListener(v => { if (updating) return; set(Cur, v); big.SetLook(Cur); chips[current].portrait.SetLook(Cur); });
-        refreshers.Add(() => { updating = true; s.SetValueWithoutNotify(get(Cur)); updating = false; });
+        s.onValueChanged.AddListener(v => { set(Cur, v); big.SetLook(Cur); chips[current].icon.SetLook(Cur); });
+        refreshers.Add(() => s.SetValueWithoutNotify(get(Cur)));
     }
 
     private void Awake()
     {
         if (!panel) panel = GetComponent<UIFadePanel>();
+    }
+
+    private void OnDestroy()
+    {
+        if (zoomTex) Destroy(zoomTex);
     }
 }

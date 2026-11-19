@@ -45,7 +45,6 @@ public class PlayerState
     public CatapultController Catapult;
     public UnityEngine.Transform Castle;
     public Bubble CastleBubble;
-    public AeroFigure Aero;
     public readonly Inventory Inventory = new Inventory();
 
     public string Name => AeroRoster.DisplayName(Id);
