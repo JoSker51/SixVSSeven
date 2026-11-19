@@ -19,10 +19,12 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 | Burbuja de castillo | Flota sobre cada castillo. Si la revienta un rival, le roba 3 monedas al dueño |
 | Turno | Compra → Colocación → Lanzamiento → Resolución → Fin |
 | Tienda | 3 ofertas al azar. Actualizar cuesta 1 moneda, **una vez por turno** |
-| Objetos | 7 tipos. Seis tienen variante normal, positiva y negativa; el aro multiplicador es especial |
+| Objetos | 7 tipos. Seis vienen en **goma**, **turbo** o **bumper** (cambian el rebote) o en positivo y negativo (cambian monedas); el aro multiplicador es especial |
+| Materiales | Goma: rebota más fuerte · Turbo: acelera la pelota · Bumper: la empuja hacia afuera como un pinball |
 | Positivo | +2 monedas si la pelota lo toca y revientas al menos una burbuja en ese tiro |
 | Negativo | −2 monedas en las mismas condiciones |
 | Aro multiplicador | Cada pasada por un aro duplica las monedas de burbujas, y se apilan: ×2, ×4, ×8… |
+| Combo | Cada burbuja después de la primera en el mismo tiro suma **+1** moneda |
 | Retirar objetos | Cualquier objeto, pagando su costo de retirada. No vuelve al inventario |
 | Persistencia | Los objetos colocados se quedan en la arena hasta que alguien los retire |
 | Victoria | Llegar a la meta de monedas elegida al empezar (50 a 5000) |
@@ -62,8 +64,10 @@ Juego por turnos para **2, 3 o 4 jugadores** en una **arena circular**. Cada jug
 ## 4. La pelota
 
 - Revienta las burbujas que toca y **sigue de largo**, así que un tiro puede reventar varias.
+- Vuela **rápido** (la catapulta compensa: llega a las mismas distancias que antes, pero en menos tiempo).
 - Rebota en la pared, los castillos, las catapultas y los objetos colocados.
-- Los **objetos** la hacen rebotar fuerte y de forma **caótica**: sale un poco más rápida que como llegó y desviada al azar, así que dos tiros iguales pueden terminar en lugares distintos.
+- Cómo sale de un objeto depende de su **material** (ver sección 7). Los positivos y negativos son lisos: rebote fuerte y algo **caótico**, sale un poco más rápida y desviada al azar.
+- Al chocar un material la pelota echa chispas de su color, suena distinto y su **estela** pasa a ser de ese color.
 - No puede salir de la arena: la pared tiene una barrera invisible alta.
 - Desaparece **2 segundos después de tocar el suelo**, o si se queda quieta encima de algo, se atasca (15 s) o cae fuera del mapa. Entonces se pasa a la Resolución.
 
@@ -111,10 +115,21 @@ monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 | Aro multiplicador | Anillo dorado (especial) |
 
 - Todos tienen **colisión física real**: desvían la pelota según su forma.
-- Las seis formas geométricas vienen en tres variantes, que se distinguen a la vista:
-  - **Normal** (perla brillante): solo desvía la pelota, no da ni quita monedas.
-  - **Positivo** (verde esmeralda, con un "+" flotando): **+2 monedas** si la pelota lo toca **y** revientas al menos una burbuja en ese tiro.
-  - **Negativo** (obsidiana oscura, con un "−" flotando): **−2 monedas** con las mismas condiciones.
+- Las seis formas geométricas vienen así:
+  - **De material** (los "normales"): no dan ni quitan monedas, pero cambian cómo sale la pelota. Hay tres materiales (abajo).
+  - **Positivo** (verde esmeralda, con un "+" flotando, liso): **+2 monedas** si la pelota lo toca **y** revientas al menos una burbuja en ese tiro.
+  - **Negativo** (obsidiana oscura, con un "−" flotando, liso): **−2 monedas** con las mismas condiciones.
+
+### Materiales
+
+| Material | Cómo se ve | Qué le hace a la pelota |
+|---|---|---|
+| **Goma** | Gelatina rosa translúcida, con una pelotita que salta encima | Rebota con mucha más fuerza: sale a **1,4×** la velocidad con la que llegó, casi sin desviarse |
+| **Turbo** | Rayas naranjas y oscuras, con una doble flecha » encima | La **acelera**: sale a **1,8×** (mínimo 26 m/s) en la dirección del rebote, un poco hacia arriba |
+| **Bumper** | Cromo brillante, con un aro celeste encima | La **empuja hacia afuera** siempre a la misma velocidad (24 m/s), algo hacia arriba, como en el pinball. Se infla al golpear |
+
+- Ninguna pelota pasa de **40 m/s** tras un rebote.
+- Los materiales se combinan con la forma: una **rampa turbo** la lanza lejísimos, una **pared de goma** devuelve los tiros con fuerza, una **esfera bumper** en el centro es puro caos.
 - Golpear varias veces el mismo objeto cuenta **una sola vez** por tiro. Golpear objetos distintos suma el efecto de cada uno.
 - Los objetos afectan los tiros de **todos** los jugadores, no solo los de quien los colocó.
 
@@ -130,7 +145,8 @@ monedas  = máx(1, redondear(2 × tamaño × (1 + cercanía)))
 Todo se calcula en un solo lugar (`RewardCalculator`), en la fase de Resolución:
 
 ```
-B = suma de los valores de las burbujas reventadas
+B = suma de los valores de las burbujas reventadas + combo
+combo = (burbujas reventadas − 1) · 1   (+1 por cada burbuja después de la primera)
 P = positivos distintos tocados        N = negativos distintos tocados
 k = pasadas por aros                   (solo si B > 0)
 E = 2·P − 2·N                          (solo si B > 0)
@@ -141,6 +157,8 @@ monedas del tiro = máx(0, R)
 - Un negativo reduce lo que ganas **en ese tiro**, pero **nunca te quita monedas que ya tenías**.
 - Ejemplo: revientas burbujas de 3 y 4 (B = 7), pasas por un aro y tocas un positivo: 2·7 + 2 = **16 monedas**.
 - Ejemplo apilado: la misma B = 7 pasando 3 veces por aros: 8·7 = **56 monedas**.
+- Ejemplo con combo: revientas 4 burbujas que valen 2, 3, 3 y 4 (12) → combo +3, B = 15; con un aro: **30 monedas**.
+- Al reventar varias seguidas sale **"¡Combo ×N!"** y el sonido sube de tono. En el combo ×4, ×7 y ×10 hay un instante de **cámara lenta**, igual que al pasar por un aro o robar en un castillo.
 
 ## 9. Tienda
 
@@ -153,13 +171,14 @@ monedas del tiro = máx(0, R)
 
 ### Precios iniciales
 
-| Objeto | Normal | Positivo | Negativo | Retirar (N / P / Neg) |
-|---|---|---|---|---|
-| Cubo, Rampa, Cilindro, Esfera, Pirámide | 3 | 8 | 6 | 8 / 12 / 10 |
-| Pared | 4 | 9 | 7 | 9 / 13 / 11 |
-| Aro multiplicador | — | — | — | Precio **15**, retirar **18** |
+| Objeto | Goma | Turbo / Bumper | Positivo | Negativo | Retirar (Goma / Turbo y Bumper / P / Neg) |
+|---|---|---|---|---|---|
+| Cubo, Rampa, Cilindro, Esfera, Pirámide | 4 | 5 | 8 | 6 | 9 / 10 / 12 / 10 |
+| Pared | 5 | 6 | 9 | 7 | 10 / 11 / 13 / 11 |
+| Aro multiplicador | — | — | — | — | Precio **15**, retirar **18** |
 
-- Los normales son baratos. Las variantes valen más porque cambian monedas. El aro es lo más caro.
+- Los de material son baratos. Positivos y negativos valen más porque cambian monedas. El aro es lo más caro.
+- Cada forma sale en 3 materiales, así que cada uno tiene la mitad de probabilidad de aparecer en la tienda (`shopWeight` 0,5): entre los tres salen un poco más que los normales de antes.
 - Retirar cuesta bastante más que comprar, para que colocar sea una decisión estratégica.
 
 ## 10. Inventario, colocación y retirada
@@ -210,6 +229,9 @@ monedas del tiro = máx(0, R)
 - [ ] **Números:** probar partidas completas y ajustar precios, costos de retirada y valores de burbujas en `GameBalance.asset`. Los precios iniciales se pensaron con esas ~3 monedas por turno: un normal cuesta 1 turno, un positivo unos 3, el aro unos 5 y retirar de 3 a 6.
 - [x] **Cantidad de burbujas por sección:** subió de 4 a **16**, porque jugando costaba mucho atinarles.
 - [ ] **Límite de objetos en la arena:** hoy no hay; con 4 jugadores se puede llenar.
+- [x] **Ritmo:** la pelota va más rápido (`projectileSpeed` 1,7) y hay materiales, combos, temblor y cámara lenta.
+- [ ] **Más materiales:** por ahora goma, turbo y bumper. Ideas para después: hielo (resbala sin frenar), esponja (frena la pelota, defensivo), trampolín (lanza hacia arriba).
+- [ ] **Fuerza de los materiales:** probar en partidas y ajustar en `GameBalance.asset` (sección Materiales).
 - [x] **Girar con Q/E:** se queda, ahora hasta 70° para poder robar a los castillos de los lados.
 
 ## Estado en el prototipo de Unity
@@ -220,4 +242,5 @@ monedas del tiro = máx(0, R)
 | 2, 3 y 4 jugadores (menú *Nueva partida*) | ✅ Hecho |
 | Fases del turno, tienda, inventario y colocación | ✅ Hecho |
 | Variantes, aro multiplicador y retirada | ✅ Hecho |
+| Materiales (goma, turbo, bumper), combos, temblor y cámara lenta | ✅ Hecho |
 | Equilibrio fino de la economía | ⏳ Pendiente (partidas de prueba del grupo) |
