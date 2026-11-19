@@ -15,6 +15,10 @@ public class Rock : MonoBehaviour
     [SerializeField] private float settleTime = 1.5f;
     [SerializeField] private string groundTag = "Ground";
 
+    [Header("Efectos")]
+    [SerializeField] private ParticleSystem impactFx;      // chispas al chocar un material (se tiñen con su color)
+    [SerializeField] private float materialCooldown = 0.08f;   // el mismo objeto no vuelve a empujar en este tiempo
+
     public int OwnerId { get; private set; }
     public Rigidbody Body => rb;
     public float Radius { get; private set; } = 0.35f;
@@ -30,10 +34,14 @@ public class Rock : MonoBehaviour
     private float gravityScale = 1f;
     private Vector3 lastPosition;
     private bool hasLastPosition;
+    private TrailRenderer trail;
+    private ArenaObject lastHitObject;
+    private float lastHitTime = -1f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        trail = GetComponent<TrailRenderer>();
         spawnTime = Time.time;
         if (TryGetComponent(out SphereCollider sphere))
             Radius = sphere.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
@@ -77,22 +85,39 @@ public class Rock : MonoBehaviour
         var shot = ShotTracker.Active;
         var obj = collision.collider.GetComponentInParent<ArenaObject>();
         if (obj != null && shot != null && shot.Rock == this) obj.OnRockHit(shot);
-        if (obj != null) ChaoticBounce(collision);
+        if (obj != null) HitMaterial(obj, collision);
     }
 
-    // Rebote en un objeto: sale un poco más rápido y desviado al azar, para que el tiro sea más caótico
-    private void ChaoticBounce(Collision collision)
+    // El material del objeto decide cómo sale la pelota (BallMaterials). Los golpes con material se notan:
+    // chispas de su color, su sonido, un temblor de cámara y la estela pasa a ser de ese color.
+    private void HitMaterial(ArenaObject obj, Collision collision)
     {
-        var bal = GameBalance.Current;
-        Vector3 v = rb.linearVelocity;
-        float speed = v.magnitude;
-        if (speed < 2f || collision.contactCount == 0) return;   // rodando encima de un objeto: no se empuja
+        if (obj == lastHitObject && Time.time - lastHitTime < materialCooldown) return;
+        lastHitObject = obj;
+        lastHitTime = Time.time;
 
-        Vector3 n = collision.GetContact(0).normal;
-        if (Vector3.Dot(n, v) < 0f) n = -n;                       // la normal que apunta hacia donde ya sale la pelota
-        Vector3 dir = Vector3.Slerp(v / speed, UnityEngine.Random.onUnitSphere, bal.bounceScatter).normalized;
-        if (Vector3.Dot(dir, n) < 0f) dir = Vector3.Reflect(dir, n);   // nunca hacia dentro del objeto
-        rb.linearVelocity = dir * Mathf.Min(speed * bal.bounceBoost, Mathf.Max(speed, bal.maxBounceSpeed));
+        var bal = GameBalance.Current;
+        if (!BallMaterials.Apply(rb, obj, collision, bal)) return;
+
+        Color c = BallMaterials.Tint(obj.Material);
+        TintTrail(c);
+        AeroAudio.Play(BallMaterials.Sound(obj.Material), 0.9f, UnityEngine.Random.Range(0.94f, 1.08f));
+        Juice.Shake(bal.shakeOnMaterialHit);
+        if (impactFx && collision.contactCount > 0)
+        {
+            var fx = Instantiate(impactFx, collision.GetContact(0).point, Quaternion.LookRotation(collision.GetContact(0).normal));
+            var main = fx.main;
+            main.startColor = new ParticleSystem.MinMaxGradient(c, Color.Lerp(c, Color.white, 0.6f));
+            fx.Play();
+        }
+    }
+
+    public void TintTrail(Color c)
+    {
+        if (!trail) return;
+        trail.startColor = Color.Lerp(c, Color.white, 0.25f);
+        trail.endColor = new Color(c.r, c.g, c.b, 0f);
+        trail.widthMultiplier = 1.35f;
     }
 
     private void StartTimer()

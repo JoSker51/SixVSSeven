@@ -320,7 +320,8 @@ public class GameHUD : MonoBehaviour
         var sb = new StringBuilder();
         if (r.BubbleCount > 0)
         {
-            sb.Append($"Burbujas: <b>{r.BubbleCount}</b>  →  +{r.B}");
+            sb.Append($"Burbujas: <b>{r.BubbleCount}</b>  →  +{r.B - r.Combo}");
+            if (r.Combo > 0) sb.Append($"\n¡Combo ×{r.BubbleCount}!  →  +{r.Combo}");
             long ringed = System.Math.Min(r.Multiplier * r.B, RewardCalculator.MaxReward);
             if (r.RingPasses == 1) sb.Append($"\nAro ×{r.Multiplier}  →  +{ringed}");
             else if (r.RingPasses > 1) sb.Append($"\nAros: {r.RingPasses} pasadas ×{r.Multiplier}  →  +{ringed}");

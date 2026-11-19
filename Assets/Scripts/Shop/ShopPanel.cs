@@ -112,7 +112,7 @@ public class ShopPanel : MonoBehaviour
             card.icon.sprite = item.icon;
             card.title.text = item.displayName;
             card.badge.gameObject.SetActive(true);
-            StyleBadge(card, item.variant);
+            StyleBadge(card, item);
             card.description.text = item.description;
             card.price.text = $"<b>{item.price}</b> monedas";
             card.buy.interactable = state == ShopResult.Ok;
@@ -135,10 +135,24 @@ public class ShopPanel : MonoBehaviour
                 : $"Actualizar ofertas  ({Shop.RefreshCost} moneda)";
     }
 
-    private void StyleBadge(Card card, ItemVariant variant)
+    private void StyleBadge(Card card, ItemDefinition item)
     {
         var bal = GameBalance.Current;
-        switch (variant)
+        if (item.material != ItemMaterial.Plain)
+        {
+            // Los materiales llevan una etiqueta de su color con lo que hacen
+            card.badge.sprite = skin.buttonSilver;
+            card.badge.color = Color.Lerp(BallMaterials.Tint(item.material), Color.white, 0.15f);
+            card.badgeText.text = item.material switch
+            {
+                ItemMaterial.Rubber => "Goma  ·  rebota",
+                ItemMaterial.Turbo => "Turbo  ·  acelera",
+                _ => "Bumper  ·  empuja",
+            };
+            card.badgeText.color = skin.navy;
+            return;
+        }
+        switch (item.variant)
         {
             case ItemVariant.Positive:
                 card.badge.sprite = skin.buttonGreen; card.badge.color = Color.white;

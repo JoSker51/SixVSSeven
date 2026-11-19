@@ -49,8 +49,11 @@ public class CameraRig : MonoBehaviour
         if (turnManager) turnManager.TurnStarted += _ => freeReady = false;
     }
 
+    private Vector3 appliedShake;
+
     private void LateUpdate()
     {
+        transform.position -= appliedShake;   // el temblor del frame anterior no entra en el suavizado
         var phase = turnManager ? turnManager.Phase : TurnPhase.Aiming;
         if (TogglePressed() && phase == TurnPhase.Aiming) overview = !overview;
 
@@ -100,6 +103,8 @@ public class CameraRig : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, targetPos, k);
         lookPoint = Vector3.Lerp(lookPoint, targetLook, Mathf.Clamp01(k * 1.5f));
         transform.rotation = Quaternion.LookRotation(lookPoint - transform.position);
+        appliedShake = FreeView ? Vector3.zero : Juice.ShakeOffset;
+        transform.position += appliedShake;
     }
 
     // ---------------- Vista libre ----------------

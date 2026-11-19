@@ -106,16 +106,36 @@ public class Bubble : MonoBehaviour
         if (shot == null || shot.Rock != rock) return;
         if (!shot.RegisterBubble(this)) return;           // cada burbuja cuenta una sola vez
 
-        Pop();
-        if (IsCastle) GameHUD.Popup(transform.position, "¡Robo!", new Color(1f, 0.45f, 0.6f));
-        else GameHUD.Popup(transform.position, "+" + Value, new Color(1f, 0.82f, 0.2f));
+        var bal = GameBalance.Current;
+        int combo = IsCastle ? 0 : shot.Bubbles.Count;
+        Pop(combo);
+        if (IsCastle)
+        {
+            GameHUD.Popup(transform.position, "¡Robo!", new Color(1f, 0.45f, 0.6f));
+            Juice.Shake(bal.shakeOnBigMoment);
+            Juice.SlowMotion();
+            return;
+        }
+        GameHUD.Popup(transform.position, "+" + Value, new Color(1f, 0.82f, 0.2f));
+        Juice.Shake(bal.shakeOnPop * Mathf.Min(combo, 4));
+        if (combo >= 2)
+        {
+            // Cada burbuja seguida sube el combo, el tono del "pop" y el color del texto
+            Color c = Color.Lerp(new Color(0.4f, 0.95f, 1f), new Color(1f, 0.35f, 0.75f), Mathf.Clamp01((combo - 2) / 6f));
+            GameHUD.Popup(transform.position + Vector3.up * (Radius + 0.9f), $"¡Combo ×{combo}!", c);
+            if (System.Array.IndexOf(bal.slowMotionCombos, combo) >= 0 && shot.SlowMotionCombos.Add(combo))
+            {
+                Juice.Shake(bal.shakeOnBigMoment);
+                Juice.SlowMotion();
+            }
+        }
     }
 
-    private void Pop()
+    private void Pop(int combo = 0)
     {
         Popped = true;
         col.enabled = false;
-        AeroAudio.Play(Sfx.Pop);
+        AeroAudio.Play(Sfx.Pop, 1f, 1f + 0.07f * Mathf.Clamp(combo - 1, 0, 10));   // el combo suena cada vez más agudo
         if (popEffect) Instantiate(popEffect, transform.position, Quaternion.identity).transform.localScale = Vector3.one * Mathf.Max(1f, Radius);
         StartCoroutine(PopAnimation());
     }

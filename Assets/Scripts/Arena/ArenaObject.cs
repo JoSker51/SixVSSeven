@@ -15,6 +15,7 @@ public class ArenaObject : MonoBehaviour
     public string ItemId => itemId;
     public ItemKind Kind => Definition != null ? Definition.kind : ItemKind.Cube;
     public ItemVariant Variant => Definition != null ? Definition.variant : ItemVariant.Normal;
+    public ItemMaterial Material => Definition != null ? Definition.material : ItemMaterial.Plain;
     public int OwnerId { get; private set; } = -1;
     public bool IsPlaced { get; private set; }
     public float RingInnerRadius => ringInnerRadius;
@@ -65,6 +66,34 @@ public class ArenaObject : MonoBehaviour
         Physics.SyncTransforms();
     }
 
+    // Bumper: se infla un instante cuando empuja la pelota, como los de pinball
+    public void Punch()
+    {
+        if (punching) return;
+        StartCoroutine(PunchRoutine());
+    }
+
+    private bool punching;
+
+    private System.Collections.IEnumerator PunchRoutine()
+    {
+        punching = true;
+        var shape = transform.Find("Forma");
+        if (shape)
+        {
+            Vector3 baseScale = shape.localScale;
+            const float duration = 0.22f;
+            for (float t = 0f; t < duration; t += Time.deltaTime)
+            {
+                float k = Mathf.Sin(t / duration * Mathf.PI) * (1f - t / duration);
+                shape.localScale = baseScale * (1f + 0.22f * k);
+                yield return null;
+            }
+            shape.localScale = baseScale;
+        }
+        punching = false;
+    }
+
     // Lo llama la pelota en OnCollisionEnter
     public void OnRockHit(ShotRecord shot)
     {
@@ -102,7 +131,10 @@ public class ArenaObject : MonoBehaviour
             {
                 int passes = shot.RegisterRingPass(this);
                 GameHUD.Popup(transform.position, $"×{RewardCalculator.Multiplier(passes, GameBalance.Current)}", new Color(1f, 0.85f, 0.3f));
-                AeroAudio.Play(Sfx.Ring);
+                AeroAudio.Play(Sfx.Ring, 1f, 1f + 0.08f * (passes - 1));
+                shot.Rock.TintTrail(new Color(1f, 0.85f, 0.3f));
+                Juice.Shake(GameBalance.Current.shakeOnBigMoment);
+                Juice.SlowMotion();
             }
             ringSide = side;
             lastCrossInside = false;

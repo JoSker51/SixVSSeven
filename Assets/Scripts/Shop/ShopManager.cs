@@ -123,7 +123,8 @@ public class ShopManager : MonoBehaviour
         return s;
     }
 
-    // Sorteo sin repetir; si la pool tiene menos objetos distintos que lugares, los que sobran quedan vacíos
+    // Sorteo sin repetir, según la probabilidad de cada objeto (shopWeight);
+    // si la pool tiene menos objetos distintos que lugares, los que sobran quedan vacíos
     private void Roll(PlayerShop s)
     {
         var pool = new List<ItemDefinition>(Bal.ShopPool);
@@ -131,7 +132,15 @@ public class ShopManager : MonoBehaviour
         {
             s.sold[i] = false;
             if (pool.Count == 0) { s.offers[i] = null; continue; }
-            int k = rng.Next(pool.Count);
+            float total = 0f;
+            foreach (var it in pool) total += Mathf.Max(0.01f, it.shopWeight);
+            float pick = (float)rng.NextDouble() * total;
+            int k = 0;
+            for (; k < pool.Count - 1; k++)
+            {
+                pick -= Mathf.Max(0.01f, pool[k].shopWeight);
+                if (pick < 0f) break;
+            }
             s.offers[i] = pool[k];
             pool.RemoveAt(k);
         }

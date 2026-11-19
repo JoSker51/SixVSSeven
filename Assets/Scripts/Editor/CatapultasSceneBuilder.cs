@@ -24,6 +24,7 @@ public static partial class CatapultasSceneBuilder
     private const string RockPrefabPath = PrefabFolder + "/Rock.prefab";
     private const string BubblePrefabPath = PrefabFolder + "/Burbuja.prefab";
     private const string PopFxPrefabPath = PrefabFolder + "/BurbujaRevienta.prefab";
+    private const string ImpactFxPrefabPath = PrefabFolder + "/ImpactoMaterial.prefab";
     private const string CastlePrefabPath = PrefabFolder + "/Castillo.prefab";
     private const string CatapultPrefabPath = PrefabFolder + "/Catapulta.prefab";
     private const string VolumePath = "Assets/Settings/AeroVolume.asset";
@@ -720,8 +721,9 @@ public static partial class CatapultasSceneBuilder
 
     private static void CreatePrefabs()
     {
-        CreateRockPrefab();
         CreatePopEffectPrefab();
+        CreateImpactEffectPrefab();
+        CreateRockPrefab();
         CreateBubblePrefab();
         CreateCastlePrefab();
         CreateCatapultPrefab();
@@ -739,7 +741,7 @@ public static partial class CatapultasSceneBuilder
         rb.angularDamping = 0.8f;
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
-        go.AddComponent<Rock>();
+        Set(go.AddComponent<Rock>(), ("impactFx", Load<ParticleSystem>(ImpactFxPrefabPath)));
 
         var trail = go.AddComponent<TrailRenderer>();
         trail.sharedMaterial = lineMat;
@@ -783,6 +785,47 @@ public static partial class CatapultasSceneBuilder
         r.shadowCastingMode = ShadowCastingMode.Off;
         r.receiveShadows = false;
         SavePrefab(go, PopFxPrefabPath);
+    }
+
+    // Chispas al chocar un material: burbujitas que salen rápido del punto de impacto (la pelota les pone el color)
+    private static void CreateImpactEffectPrefab()
+    {
+        var go = new GameObject("ImpactoMaterial");
+        var ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        var main = ps.main;
+        main.playOnAwake = false;
+        main.loop = false;
+        main.duration = 0.5f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.25f, 0.55f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(4f, 10f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.1f, 0.32f);
+        main.startColor = Color.white;
+        main.gravityModifier = 0.6f;
+        main.maxParticles = 50;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.stopAction = ParticleSystemStopAction.Destroy;
+        var emission = ps.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 26) });
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;   // sale hacia afuera de la cara golpeada
+        shape.angle = 55f;
+        shape.radius = 0.15f;
+        var col = ps.colorOverLifetime;
+        col.enabled = true;
+        var g = new Gradient();
+        g.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                  new[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(1f, 0.5f), new GradientAlphaKey(0f, 1f) });
+        col.color = new ParticleSystem.MinMaxGradient(g);
+        var size = ps.sizeOverLifetime;
+        size.enabled = true;
+        size.size = new ParticleSystem.MinMaxCurve(1f, AnimationCurve.Linear(0f, 1f, 1f, 0.3f));
+        var r = go.GetComponent<ParticleSystemRenderer>();
+        r.sharedMaterial = bubbleMat;
+        r.shadowCastingMode = ShadowCastingMode.Off;
+        r.receiveShadows = false;
+        SavePrefab(go, ImpactFxPrefabPath);
     }
 
     // Burbuja objetivo: trigger esférico + sprite de burbuja que siempre mira a la cámara

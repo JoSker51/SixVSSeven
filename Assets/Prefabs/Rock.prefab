@@ -160,6 +160,8 @@ MonoBehaviour:
   settleSpeed: 0.3
   settleTime: 1.5
   groundTag: Ground
+  impactFx: {fileID: 6748634887640877094, guid: 546ae5b6174369b44997861ba131fa1a, type: 3}
+  materialCooldown: 0.08
 --- !u!96 &1786350118407209169
 TrailRenderer:
   serializedVersion: 4

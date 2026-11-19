@@ -7,7 +7,8 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 // Parte del constructor de escenas para la tienda y los objetos colocables:
-//  - 19 prefabs (cubo, pared, rampa, cilindro, esfera y pirámide en normal/positivo/negativo, y el aro multiplicador)
+//  - 31 prefabs: cubo, pared, rampa, cilindro, esfera y pirámide en goma/turbo/bumper (los normales) y en
+//    positivo/negativo (lisos), y el aro multiplicador
 //  - sus íconos (se renderizan los modelos reales a PNG)
 //  - el catálogo con precios en GameBalance (si un precio ya existe en el asset, se respeta)
 //  - la interfaz: tienda, inventario, botones de fase y confirmación de retirada
@@ -18,6 +19,17 @@ public static partial class CatapultasSceneBuilder
 
     private static Material normalMat, positiveMat, negativeMat, ringMat, plusMat, minusMat, ghostValidMat, ghostInvalidMat, haloMat;
     private static PhysicsMaterial bouncyMaterial;
+    private static readonly Dictionary<ItemMaterial, (Material look, Material marker, PhysicsMaterial physics)> materialKit =
+        new Dictionary<ItemMaterial, (Material, Material, PhysicsMaterial)>();
+    private static Mesh bumperMarkerMesh;
+
+    // Los normales vienen en un material: (material, nombre, cuánto más cuestan comprar y retirar que el liso, qué hace)
+    private static readonly (ItemMaterial material, string suffix, int extraPrice, int extraRemoval, string effect)[] Materials =
+    {
+        (ItemMaterial.Rubber, " de goma", 1, 1, "La pelota rebota mucho más fuerte."),
+        (ItemMaterial.Turbo, " turbo", 2, 2, "La pelota sale acelerada."),
+        (ItemMaterial.Bumper, " bumper", 2, 2, "La empuja lejos, como un pinball."),
+    };
     private static Mesh rampMesh;
 
     // Formas: nombre, descripción y precios iniciales (normal, positivo, negativo) y costo de retirada (normal, pos, neg)
@@ -47,9 +59,11 @@ public static partial class CatapultasSceneBuilder
         EnsureFolder("Assets/Arte", "Iconos");
         SetupItemMaterials();
         var torus = SaveMesh(ProceduralMesh.Torus(RingMajor, RingMinor, 64, 16, "AroObjeto"), "AroObjeto");
+        bumperMarkerMesh = SaveMesh(ProceduralMesh.Torus(0.34f, 0.09f, 32, 10, "AroBumper"), "AroBumper");
         var pyramid = SaveMesh(ProceduralMesh.Pyramid(2.4f, 2.1f), "Piramide");
         rampMesh = SaveMesh(ProceduralMesh.Ramp(RampWidth, RampLength, RampHeight), "Rampa");
         RemoveOldLidAssets();
+        RemoveOldPlainNormals();
 
         var bal = balance;
         var b = GameBalance.Current;   // valores de efectos (por si alguien cambió +2/−2/×2)
@@ -58,22 +72,33 @@ public static partial class CatapultasSceneBuilder
         var items = new List<ItemDefinition>();
 
         foreach (var s in Shapes)
-            foreach (var v in new[] { ItemVariant.Normal, ItemVariant.Positive, ItemVariant.Negative })
+        {
+            // Normales: uno por material
+            foreach (var m in Materials)
+            {
+                string id = $"{s.kind}_{m.material}".ToLowerInvariant();
+                var prefab = BuildItemPrefab(id, s.kind, ItemVariant.Normal, m.material, torus, pyramid);
+                var item = MakeItem(oldItems, id, s.kind, ItemVariant.Normal, s.name + m.suffix, $"{s.description} {m.effect}",
+                                    s.normal + m.extraPrice, s.removeNormal + m.extraRemoval, prefab);
+                item.material = m.material;
+                if (!oldItems.ContainsKey(id)) item.shopWeight = 0.5f;
+                items.Add(item);
+            }
+            // Positivos y negativos: lisos
+            foreach (var v in new[] { ItemVariant.Positive, ItemVariant.Negative })
             {
                 string id = $"{s.kind}_{v}".ToLowerInvariant();
-                var prefab = BuildItemPrefab(id, s.kind, v, torus, pyramid);
-                string effect = v switch
-                {
-                    ItemVariant.Positive => $" +{b.positiveBonus} si lo toca y revientas burbujas.",   // corto: cabe en la tarjeta
-                    ItemVariant.Negative => $" −{b.negativePenalty} si lo toca y revientas burbujas.",
-                    _ => " No da ni quita monedas.",
-                };
-                int price = v == ItemVariant.Positive ? s.positive : v == ItemVariant.Negative ? s.negative : s.normal;
-                int removal = v == ItemVariant.Positive ? s.removePositive : v == ItemVariant.Negative ? s.removeNegative : s.removeNormal;
+                var prefab = BuildItemPrefab(id, s.kind, v, ItemMaterial.Plain, torus, pyramid);
+                string effect = v == ItemVariant.Positive
+                    ? $" +{b.positiveBonus} si lo toca y revientas burbujas."   // corto: cabe en la tarjeta
+                    : $" −{b.negativePenalty} si lo toca y revientas burbujas.";
+                int price = v == ItemVariant.Positive ? s.positive : s.negative;
+                int removal = v == ItemVariant.Positive ? s.removePositive : s.removeNegative;
                 items.Add(MakeItem(oldItems, id, s.kind, v, s.name, s.description + effect, price, removal, prefab));
             }
+        }
 
-        var ring = BuildItemPrefab("ring_special", ItemKind.Ring, ItemVariant.Special, torus, pyramid);
+        var ring = BuildItemPrefab("ring_special", ItemKind.Ring, ItemVariant.Special, ItemMaterial.Plain, torus, pyramid);
         items.Add(MakeItem(oldItems, "ring_special", ItemKind.Ring, ItemVariant.Special, "Aro multiplicador",
             $"Cada pasada por un aro multiplica las monedas de burbujas ×{b.ringMultiplier}: se apilan (×4, ×8...).",
             RingPrice, RingRemoval, ring));
@@ -93,15 +118,17 @@ public static partial class CatapultasSceneBuilder
             item.price = o.price;
             item.removalCost = o.removalCost;
             item.inShop = o.inShop;
+            item.shopWeight = o.shopWeight;
         }
         item.prefab = prefab;
         return item;
     }
 
-    private static GameObject BuildItemPrefab(string id, ItemKind kind, ItemVariant variant, Mesh torus, Mesh pyramid)
+    private static GameObject BuildItemPrefab(string id, ItemKind kind, ItemVariant variant, ItemMaterial material, Mesh torus, Mesh pyramid)
     {
         var root = new GameObject(id);
-        Material mat = variant switch
+        bool hasKit = materialKit.TryGetValue(material, out var kit);
+        Material mat = hasKit ? kit.look : variant switch
         {
             ItemVariant.Positive => positiveMat,
             ItemVariant.Negative => negativeMat,
@@ -132,7 +159,8 @@ public static partial class CatapultasSceneBuilder
             default:
                 shape = Prim(PrimitiveType.Cube, "Forma", root.transform, new Vector3(0f, 0.95f, 0f), Vector3.one * 1.9f, mat); top = 1.9f; break;
         }
-        foreach (var c in shape.GetComponents<Collider>()) c.sharedMaterial = bouncyMaterial;
+        foreach (var c in shape.GetComponents<Collider>()) c.sharedMaterial = hasKit ? kit.physics : bouncyMaterial;
+        if (hasKit) AddMaterialMarker(root.transform, material, kit.marker, top);
 
         // Símbolo que flota encima: "+" en los positivos, "−" en los negativos (sin colisión)
         if (variant == ItemVariant.Positive || variant == ItemVariant.Negative)
@@ -152,6 +180,87 @@ public static partial class CatapultasSceneBuilder
         PrefabUtility.SaveAsPrefabAsset(root, path);
         Object.DestroyImmediate(root);
         return Load<GameObject>(path);
+    }
+
+    // Símbolo del material que flota encima (sin colisión): pelotita de goma que salta, doble flecha turbo, aro bumper
+    private static void AddMaterialMarker(Transform root, ItemMaterial material, Material mat, float top)
+    {
+        var symbol = new GameObject("Simbolo").transform;
+        symbol.SetParent(root, false);
+        symbol.localPosition = Vector3.up * (top + 0.7f);
+        var spin = symbol.gameObject.AddComponent<MarkerSpin>();
+        switch (material)
+        {
+            case ItemMaterial.Rubber:
+                Prim(PrimitiveType.Sphere, "Pelotita", symbol, Vector3.zero, Vector3.one * 0.42f, mat, false);
+                Set(spin, ("bobHeight", 0.35f), ("bobSpeed", 7f));
+                break;
+            case ItemMaterial.Turbo:
+                for (int k = 0; k < 2; k++)   // dos flechas seguidas, como »
+                {
+                    float x = -0.16f + k * 0.3f;
+                    Prim(PrimitiveType.Cube, "Barra", symbol, new Vector3(x, 0.11f, 0f), new Vector3(0.34f, 0.1f, 0.1f), mat, false, Quaternion.Euler(0f, 0f, -40f));
+                    Prim(PrimitiveType.Cube, "Barra", symbol, new Vector3(x, -0.11f, 0f), new Vector3(0.34f, 0.1f, 0.1f), mat, false, Quaternion.Euler(0f, 0f, 40f));
+                }
+                Set(spin, ("spinSpeed", 220f));
+                break;
+            case ItemMaterial.Bumper:
+                var ringGo = MeshObject("Aro", symbol, bumperMarkerMesh, mat, false);
+                ringGo.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                Set(spin, ("spinSpeed", 160f));
+                break;
+        }
+    }
+
+    // Los normales lisos (cube_normal...) pasaron a tener material: se borran sus prefabs e íconos viejos
+    private static void RemoveOldPlainNormals()
+    {
+        foreach (var s in Shapes)
+        {
+            string id = $"{s.kind}_normal".ToLowerInvariant();
+            AssetDatabase.DeleteAsset($"{ItemFolder}/{id}.prefab");
+            AssetDatabase.DeleteAsset($"{IconFolder}/{id}.png");
+        }
+    }
+
+    // Rayas diagonales blancas y oscuras: el color naranja del material las tiñe
+    private static Texture2D StripeTexture()
+    {
+        const string path = MatFolder + "/RayasTurbo.asset";
+        var tex = Load<Texture2D>(path);
+        if (tex != null) return tex;
+        const int size = 128;
+        tex = new Texture2D(size, size, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear, name = "RayasTurbo" };
+        var px = new Color[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float u = ((x + y) % 64) / 64f;   // dos rayas por cuadro
+                float edge = Mathf.Clamp01((u - 0.46f) / 0.06f) * (1f - Mathf.Clamp01((u - 0.94f) / 0.06f));   // borde suave entre rayas
+                px[y * size + x] = Color.Lerp(Color.white, new Color(0.22f, 0.12f, 0.1f), edge);
+            }
+        tex.SetPixels(px);
+        tex.Apply(true);
+        AssetDatabase.CreateAsset(tex, path);
+        return tex;
+    }
+
+    private static PhysicsMaterial PhysicsAsset(string name, float bounciness, float friction)
+    {
+        string path = MatFolder + $"/{name}.asset";
+        var pm = Load<PhysicsMaterial>(path);
+        if (pm == null)
+        {
+            pm = new PhysicsMaterial(name);
+            AssetDatabase.CreateAsset(pm, path);
+        }
+        pm.bounciness = bounciness;
+        pm.dynamicFriction = friction;
+        pm.staticFriction = friction;
+        pm.bounceCombine = PhysicsMaterialCombine.Maximum;
+        pm.frictionCombine = PhysicsMaterialCombine.Minimum;
+        EditorUtility.SetDirty(pm);
+        return pm;
     }
 
     // La rampa reemplazó a la tapa: se borran sus prefabs e íconos si quedaron de antes
@@ -195,6 +304,25 @@ public static partial class CatapultasSceneBuilder
         bouncyMaterial.staticFriction = balance.objectFriction;
         bouncyMaterial.bounceCombine = PhysicsMaterialCombine.Maximum;
         EditorUtility.SetDirty(bouncyMaterial);
+
+        // Materiales: cómo se ven, su símbolo y su física (el empujón extra lo da BallMaterials en código)
+        // Goma: gelatina translúcida (así no se confunde con el castillo magenta)
+        materialKit[ItemMaterial.Rubber] = (
+            Transparent(Lit("MaterialGoma", new Color(1f, 0.45f, 0.75f, 0.82f), 0.98f, 0f, new Color(0.22f, 0.02f, 0.12f))),
+            Lit("SimboloGoma", new Color(1f, 0.6f, 0.82f), 0.95f, 0f, new Color(1.2f, 0.3f, 0.7f)),
+            PhysicsAsset("FisicaGoma", 1f, 0.1f));
+        // Turbo: rayas de advertencia naranjas y oscuras (así no se confunde con el castillo amarillo)
+        var turboLook = Lit("MaterialTurbo", new Color(1f, 0.52f, 0.1f), 0.9f, 0.2f, new Color(0.3f, 0.08f, 0f));
+        turboLook.SetTexture("_BaseMap", StripeTexture());
+        turboLook.SetTextureScale("_BaseMap", new Vector2(2f, 2f));
+        materialKit[ItemMaterial.Turbo] = (
+            turboLook,
+            Lit("SimboloTurbo", new Color(1f, 0.85f, 0.3f), 0.9f, 0f, new Color(1.6f, 0.8f, 0.1f)),
+            PhysicsAsset("FisicaTurbo", 0.6f, 0f));
+        materialKit[ItemMaterial.Bumper] = (
+            Lit("MaterialBumper", new Color(0.92f, 0.95f, 1f), 0.93f, 1f, new Color(0.03f, 0.16f, 0.24f)),
+            Lit("SimboloBumper", new Color(0.55f, 0.95f, 1f), 0.9f, 0f, new Color(0.3f, 1.3f, 1.6f)),
+            PhysicsAsset("FisicaBumper", 0.9f, 0.1f));
     }
 
     // Íconos de la tienda con los modelos reales. Se renderiza sobre negro y sobre blanco

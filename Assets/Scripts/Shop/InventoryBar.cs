@@ -64,7 +64,7 @@ public class InventoryBar : MonoBehaviour
             var frame = AeroUI.Img(slotsRoot, item.id, skin.glassPanel, Color.white, 2.2f);
             frame.raycastTarget = true;
             frame.rectTransform.At(new Vector2(0.5f, 0.5f), new Vector2(x0 + i * (size + gap), 0f), new Vector2(size, size));
-            AeroUI.Img(frame.transform, "Resplandor", skin.glow, VariantGlow(item.variant)).rectTransform.Stretch(-8f);
+            AeroUI.Img(frame.transform, "Resplandor", skin.glow, Glow(item)).rectTransform.Stretch(-8f);
             var icon = AeroUI.Img(frame.transform, "Icono", item.icon, Color.white);
             icon.preserveAspect = true;
             icon.rectTransform.Stretch(10f);
@@ -96,6 +96,13 @@ public class InventoryBar : MonoBehaviour
         else if (pc.RemovalTarget != null) infoText.text = "Confirma o cancela la retirada";
         else if (!string.IsNullOrEmpty(pc.LastMessage)) infoText.text = pc.LastMessage;
         else infoText.text = slots.Count > 0 ? "Elige un objeto para colocarlo, o haz clic en uno de la arena para retirarlo" : "Haz clic en un objeto de la arena para retirarlo, o lanza";
+    }
+
+    private static Color Glow(ItemDefinition item)
+    {
+        if (item.material == ItemMaterial.Plain) return VariantGlow(item.variant);
+        Color c = BallMaterials.Tint(item.material);
+        return new Color(c.r, c.g, c.b, 0.75f);
     }
 
     private static Color VariantGlow(ItemVariant v) => v switch

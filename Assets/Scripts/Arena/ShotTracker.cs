@@ -14,6 +14,7 @@ public class ShotRecord
     public readonly HashSet<ArenaObject> Positives = new HashSet<ArenaObject>();
     public readonly HashSet<ArenaObject> Negatives = new HashSet<ArenaObject>();
     public readonly List<ArenaObject> RingPasses = new List<ArenaObject>();   // una entrada por pasada (el mismo aro puede repetirse)
+    public readonly HashSet<int> SlowMotionCombos = new HashSet<int>();      // combos que ya pusieron la cámara lenta en este tiro
 
     public int BaseReward
     {
@@ -78,7 +79,8 @@ public static class ShotTracker
 public struct ShotReward
 {
     public int BubbleCount;   // burbujas normales reventadas
-    public int B;             // recompensa base de esas burbujas
+    public int Combo;         // monedas extra por reventar varias en el mismo tiro
+    public int B;             // recompensa base de esas burbujas (con el combo incluido)
     public int P;             // bonificaciones positivas activadas
     public int N;             // penalizaciones negativas activadas
     public int RingPasses;    // pasadas por aros que cuentan (0 si no hubo burbujas)
@@ -91,6 +93,7 @@ public struct ShotReward
 
 // El único lugar donde se calculan las monedas de un tiro (sección 10.5 del documento de diseño):
 //   E = 2P - 2N ;  M = 2^k (k = pasadas por aros) ;  R = M·B + E ;  final = máx(0, R)
+//   B = valor de las burbujas + combo (cada burbuja después de la primera suma comboBonusPerBubble)
 // Positivos, negativos y aros solo cuentan si en ese tiro se reventó al menos una burbuja.
 // Los aros se apilan: cada pasada vuelve a duplicar B (1 pasada ×2, 2 ×4, 3 ×8...), aunque sea el mismo aro.
 public static class RewardCalculator
@@ -105,13 +108,17 @@ public static class RewardCalculator
         return System.Math.Min(m, MaxReward);
     }
 
+    public static int ComboBonus(int bubbleCount, GameBalance bal) => Mathf.Max(0, bubbleCount - 1) * Mathf.Max(0, bal.comboBonusPerBubble);
+
     public static ShotReward Compute(int bubbleCount, int baseReward, int positives, int negatives, int ringPasses, GameBalance bal)
     {
         bool any = bubbleCount > 0;
+        int combo = ComboBonus(bubbleCount, bal);
         var r = new ShotReward
         {
             BubbleCount = bubbleCount,
-            B = any ? baseReward : 0,
+            Combo = combo,
+            B = any ? baseReward + combo : 0,
             P = any ? positives : 0,
             N = any ? negatives : 0,
             RingPasses = any ? ringPasses : 0,
