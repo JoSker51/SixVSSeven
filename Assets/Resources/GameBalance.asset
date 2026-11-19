@@ -1,0 +1,442 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00a2aaac7d5eee44789927941a715c4b, type: 3}
+  m_Name: GameBalance
+  m_EditorClassIdentifier: Assembly-CSharp::GameBalance
+  startingCoins: 5
+  defaultWinCoins: 100
+  winCoinChoices: 320000006400000096000000c80000002c01000090010000f4010000ee020000e8030000dc050000d0070000c4090000b80b0000a00f000088130000i
+  randomSeed: 0
+  projectileSpeed: 1.7
+  arenaRadius: 27
+  castleRingRadius: 21
+  catapultRingRadius: 14.5
+  castleKeepOut: 5.4
+  catapultKeepOut: 4.5
+  bubblesPerSection: 16
+  bubbleRadius: {x: 0.55, y: 1.1}
+  bubbleHeight: {x: 1.3, y: 5.5}
+  bubbleMinGap: 0.8
+  bubbleWallMargin: 1.5
+  bubbleCenterMargin: 2
+  bubbleObjectClearance: 0.6
+  bubbleMaxAttempts: 250
+  bubbleBaseValue: 2
+  bubbleReferenceRadius: 0.8
+  castleBubbleRadius: 1.3
+  castleBubbleHeight: 6.4
+  stealAmount: 3
+  maxStealPerShot: 10
+  positiveBonus: 2
+  negativePenalty: 2
+  ringMultiplier: 2
+  shopOffers: 3
+  refreshCost: 1
+  refreshesPerTurn: 1
+  placementMaxHeight: 6
+  stackMaxHeight: 16
+  placementClearance: 0.15
+  rotationStep: 15
+  heightStep: 0.25
+  objectBounciness: 0.8
+  objectFriction: 0.15
+  bounceBoost: 1.15
+  bounceScatter: 0.3
+  maxBounceSpeed: 40
+  rubberBoost: 1.4
+  rubberScatter: 0.1
+  turboBoost: 1.8
+  turboMinSpeed: 26
+  turboLift: 0.15
+  bumperSpeed: 24
+  bumperUp: 0.35
+  bumperKeepTangent: 0.35
+  comboBonusPerBubble: 1
+  shakeOnMaterialHit: 0.18
+  shakeOnPop: 0.06
+  shakeOnBigMoment: 0.35
+  slowMotionScale: 0.3
+  slowMotionSeconds: 0.5
+  slowMotionCombos: 04000000070000000a000000i
+  items:
+  - id: cube_rubber
+    kind: 0
+    variant: 0
+    material: 1
+    displayName: Cubo de goma
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. La pelota rebota mucho m\xE1s fuerte."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 8815013667175688941, guid: dc356ecb638377144832aa1050fe8ad4, type: 3}
+    icon: {fileID: 21300000, guid: 280594de67b39ab4abf6746f76728ebb, type: 3}
+  - id: cube_turbo
+    kind: 0
+    variant: 0
+    material: 2
+    displayName: Cubo turbo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. La pelota sale acelerada."
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 4876022360523778496, guid: 76b0c9d2a2a4b134a824de92861cc965, type: 3}
+    icon: {fileID: 21300000, guid: a4f3cbff5103a4f40a8f4cc14a329747, type: 3}
+  - id: cube_bumper
+    kind: 0
+    variant: 0
+    material: 3
+    displayName: Cubo bumper
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. La empuja lejos, como un pinball."
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 655690802493656873, guid: 838396f2fc93db84f993565d543e7fb6, type: 3}
+    icon: {fileID: 21300000, guid: a8fbb19fef10f2349a5dab34cbb06c1d, type: 3}
+  - id: cube_positive
+    kind: 0
+    variant: 1
+    material: 0
+    displayName: Cubo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. +2 si lo toca y revientas burbujas."
+    price: 8
+    removalCost: 12
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 2788871339642436027, guid: 8b8878532a132db4f92c2e61dc5100df, type: 3}
+    icon: {fileID: 21300000, guid: 6a5579ce6857f58489de61dde7f96780, type: 3}
+  - id: cube_negative
+    kind: 0
+    variant: 2
+    material: 0
+    displayName: Cubo
+    description: "Bloque s\xF3lido que desv\xEDa la pelota. \u22122 si lo toca y revientas burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 8173748460496144058, guid: 7988a058208bbc841b6887089182be52, type: 3}
+    icon: {fileID: 21300000, guid: 841103d61f4140346bc07d7f500eb64e, type: 3}
+  - id: wall_rubber
+    kind: 1
+    variant: 0
+    material: 1
+    displayName: Pared de goma
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. La pelota rebota mucho m\xE1s fuerte."
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 2382049481841005153, guid: ac2b8056edbb1be42b7771c265120213, type: 3}
+    icon: {fileID: 21300000, guid: 7c469f6c1b4620344b68d86c1bb0be94, type: 3}
+  - id: wall_turbo
+    kind: 1
+    variant: 0
+    material: 2
+    displayName: Pared turbo
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. La pelota sale acelerada."
+    price: 6
+    removalCost: 11
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 1197224537966398299, guid: 06afd3d4f891ea34392e3a622497ecaf, type: 3}
+    icon: {fileID: 21300000, guid: c02c0f349a7ac4342a5df8cb9be89e04, type: 3}
+  - id: wall_bumper
+    kind: 1
+    variant: 0
+    material: 3
+    displayName: Pared bumper
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. La empuja lejos, como un pinball."
+    price: 6
+    removalCost: 11
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 87960036859388171, guid: 5abab462724e3c24f932e21acb511976, type: 3}
+    icon: {fileID: 21300000, guid: acd2277130863944488446f056346f8d, type: 3}
+  - id: wall_positive
+    kind: 1
+    variant: 1
+    material: 0
+    displayName: Pared
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. +2 si lo toca y revientas burbujas."
+    price: 9
+    removalCost: 13
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 5655036803201573575, guid: 2ee9c9719172bc04aa180727a5452bce, type: 3}
+    icon: {fileID: 21300000, guid: df450d322751ba34c839a654e915d234, type: 3}
+  - id: wall_negative
+    kind: 1
+    variant: 2
+    material: 0
+    displayName: Pared
+    description: "Rect\xE1ngulo largo para bloquear o hacer rebotar tiros. \u22122 si lo toca y revientas burbujas."
+    price: 7
+    removalCost: 11
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 2129346338796420650, guid: 1d55d779c26356941a8c2ae51e2d142c, type: 3}
+    icon: {fileID: 21300000, guid: 1692aba7e7b7cf64f9d81854ae0ca9a4, type: 3}
+  - id: ramp_rubber
+    kind: 2
+    variant: 0
+    material: 1
+    displayName: Rampa de goma
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. La pelota rebota mucho m\xE1s fuerte."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 7973550838046822696, guid: 765291763275dae4c84cc7af7144b017, type: 3}
+    icon: {fileID: 21300000, guid: 7c3b1707b5a537140abdfd7c4618e3f9, type: 3}
+  - id: ramp_turbo
+    kind: 2
+    variant: 0
+    material: 2
+    displayName: Rampa turbo
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. La pelota sale acelerada."
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 8011983698019258188, guid: 2e2af2d60997adc44aa56ebb2d1243ac, type: 3}
+    icon: {fileID: 21300000, guid: 0cc479a4a6212ee48a796081aeb937a4, type: 3}
+  - id: ramp_bumper
+    kind: 2
+    variant: 0
+    material: 3
+    displayName: Rampa bumper
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. La empuja lejos, como un pinball."
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 6742459144471889895, guid: 0fe853c96d46a4a4391701d978f63ede, type: 3}
+    icon: {fileID: 21300000, guid: a1f97f48a9f919241bca17d80f05e723, type: 3}
+  - id: ramp_positive
+    kind: 2
+    variant: 1
+    material: 0
+    displayName: Rampa
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. +2 si lo toca y revientas burbujas."
+    price: 8
+    removalCost: 12
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 5829912648902111242, guid: 0a25e5fc693b7f848b2fac6c7dc64723, type: 3}
+    icon: {fileID: 21300000, guid: a6c87bb67e7992d4da4d612c61f7b9bd, type: 3}
+  - id: ramp_negative
+    kind: 2
+    variant: 2
+    material: 0
+    displayName: Rampa
+    description: "Cu\xF1a inclinada que lanza la pelota hacia arriba. \u22122 si lo toca y revientas burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 174571991218444844, guid: c67ae28905ecfb24fb70dfa6a93d3b3e, type: 3}
+    icon: {fileID: 21300000, guid: c77115fc529e3804f8b5c2ea1fa3218d, type: 3}
+  - id: cylinder_rubber
+    kind: 4
+    variant: 0
+    material: 1
+    displayName: Cilindro de goma
+    description: "Columna larga; acostada hace de rodillo. La pelota rebota mucho m\xE1s fuerte."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 2655571923389013424, guid: c1409caf210e9fc44a9e4982956cac3b, type: 3}
+    icon: {fileID: 21300000, guid: 05b90c33c18e82f4dbed4dc0a3713a3e, type: 3}
+  - id: cylinder_turbo
+    kind: 4
+    variant: 0
+    material: 2
+    displayName: Cilindro turbo
+    description: Columna larga; acostada hace de rodillo. La pelota sale acelerada.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 4608870434410471747, guid: f1208284ba4e3a84e8412f1b444cdfc9, type: 3}
+    icon: {fileID: 21300000, guid: ea569f0f992fdf84d9b1b8732e04d6d4, type: 3}
+  - id: cylinder_bumper
+    kind: 4
+    variant: 0
+    material: 3
+    displayName: Cilindro bumper
+    description: Columna larga; acostada hace de rodillo. La empuja lejos, como un pinball.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 632399172072534634, guid: 9194422de16f43547918127c7c5dd90e, type: 3}
+    icon: {fileID: 21300000, guid: fce4cf94e73bbf444a2764bff21a5d85, type: 3}
+  - id: cylinder_positive
+    kind: 4
+    variant: 1
+    material: 0
+    displayName: Cilindro
+    description: Columna larga; acostada hace de rodillo. +2 si lo toca y revientas burbujas.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 8429014840313241257, guid: a88ec320585de124391b9cdc8c58ec1e, type: 3}
+    icon: {fileID: 21300000, guid: f065d2a7eafb33449974699c7e5ae68f, type: 3}
+  - id: cylinder_negative
+    kind: 4
+    variant: 2
+    material: 0
+    displayName: Cilindro
+    description: "Columna larga; acostada hace de rodillo. \u22122 si lo toca y revientas burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 9130896025596121193, guid: e721e7343b0fdfc4183bcc6462e7a42b, type: 3}
+    icon: {fileID: 21300000, guid: 32485f9feff2bd24b8d3318b59a5142f, type: 3}
+  - id: sphere_rubber
+    kind: 5
+    variant: 0
+    material: 1
+    displayName: Esfera de goma
+    description: "Bola brillante con rebotes impredecibles. La pelota rebota mucho m\xE1s fuerte."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 6908958618055663738, guid: 06f574abf8806b049be43e6d3a0f805c, type: 3}
+    icon: {fileID: 21300000, guid: fa3068fb6d8f80d4f8c83db07ffc3286, type: 3}
+  - id: sphere_turbo
+    kind: 5
+    variant: 0
+    material: 2
+    displayName: Esfera turbo
+    description: Bola brillante con rebotes impredecibles. La pelota sale acelerada.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 5987585573075064966, guid: 71a9e62d17edb6d469020b8191e78d22, type: 3}
+    icon: {fileID: 21300000, guid: 96dc8e52510ae6e4793bdaeba1d2c0ac, type: 3}
+  - id: sphere_bumper
+    kind: 5
+    variant: 0
+    material: 3
+    displayName: Esfera bumper
+    description: Bola brillante con rebotes impredecibles. La empuja lejos, como un pinball.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 1967910728206429509, guid: 0d75344ec08bfcc4ab9c80dc00ef34ab, type: 3}
+    icon: {fileID: 21300000, guid: 269a4a6f96e4ff246a4a85c9720ff4ec, type: 3}
+  - id: sphere_positive
+    kind: 5
+    variant: 1
+    material: 0
+    displayName: Esfera
+    description: Bola brillante con rebotes impredecibles. +2 si lo toca y revientas burbujas.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 1119782574560477876, guid: 7e288e0df6466ba4c84e7263b3b0734c, type: 3}
+    icon: {fileID: 21300000, guid: 517c61b61f93b28489627a9e33c3f126, type: 3}
+  - id: sphere_negative
+    kind: 5
+    variant: 2
+    material: 0
+    displayName: Esfera
+    description: "Bola brillante con rebotes impredecibles. \u22122 si lo toca y revientas burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 4269215928895312405, guid: 790e774379411ac4f9ba892bbcd96b6f, type: 3}
+    icon: {fileID: 21300000, guid: b10954de8d48bbe469af21bbdf324f9e, type: 3}
+  - id: pyramid_rubber
+    kind: 6
+    variant: 0
+    material: 1
+    displayName: "Pir\xE1mide de goma"
+    description: "Sus caras inclinadas mandan la pelota de lado. La pelota rebota mucho m\xE1s fuerte."
+    price: 4
+    removalCost: 9
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 5157659951204802853, guid: c750d0cbed29aa74bb92d072705cc20a, type: 3}
+    icon: {fileID: 21300000, guid: 7a868750f550a634a9e4cdf83cda2cb3, type: 3}
+  - id: pyramid_turbo
+    kind: 6
+    variant: 0
+    material: 2
+    displayName: "Pir\xE1mide turbo"
+    description: Sus caras inclinadas mandan la pelota de lado. La pelota sale acelerada.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 150302199775676431, guid: 34e265004e9568b41bc778fed78a781b, type: 3}
+    icon: {fileID: 21300000, guid: 843a3d8ecb313ea4a9213cad75aa7e5f, type: 3}
+  - id: pyramid_bumper
+    kind: 6
+    variant: 0
+    material: 3
+    displayName: "Pir\xE1mide bumper"
+    description: Sus caras inclinadas mandan la pelota de lado. La empuja lejos, como un pinball.
+    price: 5
+    removalCost: 10
+    inShop: 1
+    shopWeight: 0.5
+    prefab: {fileID: 1227341054593015374, guid: e1344abeba5f3fb4490a311220af0ab4, type: 3}
+    icon: {fileID: 21300000, guid: e9ad5727c3168654fb85d1833c5b2bb5, type: 3}
+  - id: pyramid_positive
+    kind: 6
+    variant: 1
+    material: 0
+    displayName: "Pir\xE1mide"
+    description: Sus caras inclinadas mandan la pelota de lado. +2 si lo toca y revientas burbujas.
+    price: 8
+    removalCost: 12
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 6899207042279075965, guid: 9e3cc3c8d5b01c24a92620632233ac76, type: 3}
+    icon: {fileID: 21300000, guid: 13c668c5d5ea17840b2ef86fc661c52b, type: 3}
+  - id: pyramid_negative
+    kind: 6
+    variant: 2
+    material: 0
+    displayName: "Pir\xE1mide"
+    description: "Sus caras inclinadas mandan la pelota de lado. \u22122 si lo toca y revientas burbujas."
+    price: 6
+    removalCost: 10
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 6503325328713946607, guid: 61f36e7cac535a64a8567b8b27c9db8a, type: 3}
+    icon: {fileID: 21300000, guid: 8a9640b6b68eb3e439f3284d02894b1f, type: 3}
+  - id: ring_special
+    kind: 3
+    variant: 3
+    material: 0
+    displayName: Aro multiplicador
+    description: "Cada pasada por un aro multiplica las monedas de burbujas \xD72: se apilan (\xD74, \xD78...)."
+    price: 15
+    removalCost: 18
+    inShop: 1
+    shopWeight: 1
+    prefab: {fileID: 86470706614267782, guid: 23a8b848d3d4c754ab278ebef72a3b30, type: 3}
+    icon: {fileID: 21300000, guid: b75e24461271fb24d8b1c30e4b8e827c, type: 3}

@@ -28,8 +28,19 @@ public static class AeroArtGenerator
         var pill = new Vector4(80, 80, 80, 80);
         skin.buttonGreen = SaveSprite("BotonVerde", GelButton(512, 160, Hex(0xC4F77E), Hex(0x2FA51F), Hex(0x1C6E12)), 512, 160, pill);
         skin.buttonBlue = SaveSprite("BotonAzul", GelButton(512, 160, Hex(0xA8E8FF), Hex(0x1679DA), Hex(0x0B4E93)), 512, 160, pill);
-        skin.buttonOrange = SaveSprite("BotonNaranja", GelButton(512, 160, Hex(0xFFD79A), Hex(0xF17C0C), Hex(0xA34C00)), 512, 160, pill);
         skin.buttonSilver = SaveSprite("BotonPlata", GelButton(512, 160, Hex(0xFFFFFF), Hex(0xB4C6D4), Hex(0x6E8597)), 512, 160, pill);
+        skin.buttonGold = SaveSprite("BotonOro", GelButton(512, 160, Hex(0xFFF1B8), Hex(0xE9A92A), Hex(0x9A6A0C)), 512, 160, pill);
+
+        // Paleta de jugadores: coral, sol, violeta y magenta (fuera de los azules y verdes de la interfaz)
+        skin.playerColors = new[] { Hex(0xFF5E57), Hex(0xFFC21A), Hex(0x9B6BFF), Hex(0xF0489E) };
+        skin.playerColorNames = new[] { "Coral", "Sol", "Violeta", "Magenta" };
+        skin.playerButtons = new[]
+        {
+            SaveSprite("JugadorCoral", GelButton(512, 160, Hex(0xFFB8AE), Hex(0xE8413B), Hex(0xA3231F)), 512, 160, pill),
+            SaveSprite("JugadorSol", GelButton(512, 160, Hex(0xFFF0A0), Hex(0xF5A800), Hex(0xA86F00)), 512, 160, pill),
+            SaveSprite("JugadorVioleta", GelButton(512, 160, Hex(0xDCCBFF), Hex(0x7A45F0), Hex(0x4E23A8)), 512, 160, pill),
+            SaveSprite("JugadorMagenta", GelButton(512, 160, Hex(0xFFB6DA), Hex(0xDE2A80), Hex(0x94144F)), 512, 160, pill),
+        };
         skin.glassPanel = SaveSprite("Vidrio", GlassPanel(256, 256, 44f), 256, 256, new Vector4(56, 56, 56, 56));
         skin.bubble = SaveSprite("Burbuja", Bubble(256), 256, 256, Vector4.zero);
         skin.orb = SaveSprite("Orbe", Orb(128), 128, 128, Vector4.zero);
@@ -39,7 +50,6 @@ public static class AeroArtGenerator
         skin.track = SaveSprite("Riel", Track(256, 56), 256, 56, new Vector4(28, 28, 28, 28));
         skin.fill = SaveSprite("Relleno", Fill(256, 56), 256, 56, new Vector4(28, 28, 28, 28));
         skin.navy = new Color(0.04f, 0.24f, 0.4f);
-        skin.playerColors = new[] { new Color(0.17f, 0.55f, 1f), new Color(1f, 0.55f, 0.1f) };
         EditorUtility.SetDirty(skin);
 
         SaveTexture(SkyPath, Sky(2048, 1024, sunDirection.normalized), 2048, 1024, sky: true);

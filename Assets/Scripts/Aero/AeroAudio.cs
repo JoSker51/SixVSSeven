@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Sfx { Hover, Click, Launch, Score, Steal, Win }
+public enum Sfx { Hover, Click, Launch, Score, Steal, Win, Pop, Ring, Buy, Place, Error, Rubber, Turbo, Bumper }
 
 // Efectos y música ambiente generados por código (estilo burbujeante), así no hay que importar audios.
 // Se crea solo al arrancar cualquier escena y sobrevive a los cambios de escena.
@@ -12,6 +12,8 @@ public class AeroAudio : MonoBehaviour
 
     private AudioSource sfxSource;
     private AudioSource musicSource;
+    private readonly AudioSource[] pitched = new AudioSource[6];   // para sonidos con otro tono (combos, materiales)
+    private int nextPitched;
     private readonly Dictionary<Sfx, AudioClip> clips = new Dictionary<Sfx, AudioClip>();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
@@ -32,6 +34,17 @@ public class AeroAudio : MonoBehaviour
         if (a.clips.TryGetValue(sfx, out var clip)) a.sfxSource.PlayOneShot(clip, volume);
     }
 
+    // Mismo sonido con otro tono: 1 = normal, 1.5 = más agudo
+    public static void Play(Sfx sfx, float volume, float pitch)
+    {
+        var a = EnsureInstance();
+        if (!a.clips.TryGetValue(sfx, out var clip)) return;
+        var src = a.pitched[a.nextPitched];
+        a.nextPitched = (a.nextPitched + 1) % a.pitched.Length;
+        src.pitch = pitch;
+        src.PlayOneShot(clip, volume);
+    }
+
     public static void SetMusicVolume(float volume)
     {
         if (instance) instance.musicSource.volume = volume;
@@ -45,6 +58,11 @@ public class AeroAudio : MonoBehaviour
         musicSource = gameObject.AddComponent<AudioSource>();
         musicSource.playOnAwake = false;
         musicSource.loop = true;
+        for (int i = 0; i < pitched.Length; i++)
+        {
+            pitched[i] = gameObject.AddComponent<AudioSource>();
+            pitched[i].playOnAwake = false;
+        }
 
         clips[Sfx.Hover] = Clip("hover", Hover());
         clips[Sfx.Click] = Clip("click", Bloop());
@@ -52,6 +70,14 @@ public class AeroAudio : MonoBehaviour
         clips[Sfx.Score] = Clip("score", Chime(new[] { 1318.5f, 1975.5f }, 0.09f, 1.0f));
         clips[Sfx.Steal] = Clip("steal", Wah());
         clips[Sfx.Win] = Clip("win", Chime(new[] { 523.25f, 659.25f, 783.99f, 1046.5f, 1318.5f }, 0.11f, 2.0f));
+        clips[Sfx.Pop] = Clip("pop", Pop());
+        clips[Sfx.Ring] = Clip("ring", Chime(new[] { 1567.98f, 2093f, 2637f }, 0.05f, 0.9f));
+        clips[Sfx.Buy] = Clip("buy", Chime(new[] { 987.77f, 1318.5f }, 0.07f, 0.7f));
+        clips[Sfx.Place] = Clip("place", Bloop());
+        clips[Sfx.Error] = Clip("error", Buzz());
+        clips[Sfx.Rubber] = Clip("goma", Boing());
+        clips[Sfx.Turbo] = Clip("turbo", Zoom());
+        clips[Sfx.Bumper] = Clip("bumper", Bumper());
 
         musicSource.clip = Clip("musica", Music());
         GameSettings.Apply();
@@ -131,6 +157,87 @@ public class AeroAudio : MonoBehaviour
                 float w = 2f * Mathf.PI * f * t;
                 d[i] += (Mathf.Sin(w) + 0.35f * Mathf.Sin(2f * w) + 0.12f * Mathf.Sin(3.01f * w)) * env * 0.22f;
             }
+        }
+        return d;
+    }
+
+    // Burbuja que revienta: chasquido de ruido muy corto + un "plip" agudo que sube
+    private static float[] Pop()
+    {
+        var d = Buffer(0.16f);
+        var rng = new System.Random(7);
+        float phase = 0f;
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float noise = ((float)rng.NextDouble() * 2f - 1f) * Mathf.Exp(-t * 160f) * 0.5f;
+            phase += 2f * Mathf.PI * Mathf.Lerp(900f, 2200f, Mathf.Clamp01(t / 0.06f)) / Rate;
+            float plip = Mathf.Sin(phase) * (1f - Mathf.Exp(-t * 900f)) * Mathf.Exp(-t * 35f) * 0.35f;
+            d[i] = noise + plip;
+        }
+        return d;
+    }
+
+    // Goma: "boing" grave que tiembla
+    private static float[] Boing()
+    {
+        var d = Buffer(0.4f);
+        float phase = 0f;
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float f = Mathf.Lerp(260f, 150f, Mathf.Clamp01(t / 0.3f)) * (1f + 0.12f * Mathf.Sin(2f * Mathf.PI * 22f * t) * Mathf.Exp(-t * 6f));
+            phase += 2f * Mathf.PI * f / Rate;
+            float env = (1f - Mathf.Exp(-t * 600f)) * Mathf.Exp(-t * 8f);
+            d[i] = (Mathf.Sin(phase) + 0.3f * Mathf.Sin(2f * phase)) * env * 0.55f;
+        }
+        return d;
+    }
+
+    // Turbo: barrido que sube rápido con un poco de soplido
+    private static float[] Zoom()
+    {
+        var d = Buffer(0.38f);
+        var rng = new System.Random(11);
+        float phase = 0f, lp = 0f;
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float u = t / 0.38f;
+            float f = Mathf.Lerp(280f, 1500f, u * u);
+            phase += 2f * Mathf.PI * f / Rate;
+            lp += 0.25f * ((float)rng.NextDouble() * 2f - 1f - lp);
+            float env = Mathf.Clamp01(t / 0.02f) * (1f - u) * (1f - u);
+            d[i] = (Mathf.Sin(phase) * 0.35f + 0.25f * Mathf.Sign(Mathf.Sin(phase)) * 0.3f + lp * 0.5f) * env;
+        }
+        return d;
+    }
+
+    // Bumper: "ding" metálico de pinball con golpe grave
+    private static float[] Bumper()
+    {
+        var d = Buffer(0.5f);
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float env = (1f - Mathf.Exp(-t * 900f)) * Mathf.Exp(-t * 7f);
+            float ding = Mathf.Sin(2f * Mathf.PI * 1046.5f * t) + 0.6f * Mathf.Sin(2f * Mathf.PI * 1568f * t) + 0.3f * Mathf.Sin(2f * Mathf.PI * 2637f * t) * Mathf.Exp(-t * 12f);
+            float thump = Mathf.Sin(2f * Mathf.PI * Mathf.Lerp(180f, 90f, Mathf.Clamp01(t / 0.08f)) * t) * Mathf.Exp(-t * 30f);
+            d[i] = ding * env * 0.22f + thump * 0.5f;
+        }
+        return d;
+    }
+
+    // Aviso suave de "no se puede"
+    private static float[] Buzz()
+    {
+        var d = Buffer(0.22f);
+        for (int i = 0; i < d.Length; i++)
+        {
+            float t = i / (float)Rate;
+            float env = (1f - Mathf.Exp(-t * 300f)) * Mathf.Exp(-t * 9f);
+            float w = 2f * Mathf.PI * 196f * t;
+            d[i] = (Mathf.Sin(w) + 0.5f * Mathf.Sin(1.5f * w)) * env * 0.3f;
         }
         return d;
     }
