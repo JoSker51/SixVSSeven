@@ -56,7 +56,7 @@ public class GameHUD : MonoBehaviour
     private struct PendingPopup { public Vector3 pos; public string text; public Color color; }
     private static readonly List<PendingPopup> pending = new List<PendingPopup>();
 
-    private class Row { public Text coins; public RectTransform fill; public Image highlight; public int shown = int.MinValue; public float pulse; }
+    private class Row { public Text coins; public RectTransform fill; public Image highlight; public AeroPortrait aero; public int shown = int.MinValue; public float pulse; }
     private class BubbleLabel { public RectTransform rt; public Text text; public int shown = -1; }
     private class FloatingText { public RectTransform rt; public CanvasGroup group; public Vector3 world; public float start; }
     private class Step { public TurnPhase phase; public Text text; public Image dot; }
@@ -166,9 +166,12 @@ public class GameHUD : MonoBehaviour
             var row = AeroUI.Node($"Jugador {i + 1}", board).At(new Vector2(0.5f, 1f), new Vector2(0f, -58f - rowH * i), new Vector2(board.sizeDelta.x - 26f, rowH - 8f));
             var hl = AeroUI.Img(row, "Resaltado", skin.fill, new Color(c.r, c.g, c.b, 0f), skin.fill.rect.height / (rowH - 8f));
             hl.rectTransform.Stretch();
-            AeroUI.Orb(row, "Color", skin, c, 44f).rectTransform.At(new Vector2(0f, 0.5f), new Vector2(12f, 0f), new Vector2(44f, 44f));
+            // El Aero del jugador, en una burbuja de su color (en lugar del orbe de color)
+            var bubble = AeroUI.Node("Aero", row).At(new Vector2(0f, 0.5f), new Vector2(4f, 0f), new Vector2(60f, 60f));
+            var aero = AeroPortrait.Bubble(bubble, skin, AeroRoster.Get(i), c, AeroPortrait.Framing.Bust, 128);
             string colorName = skin.playerColorNames != null && i < skin.playerColorNames.Length ? skin.playerColorNames[i] : "";
-            AeroUI.Label(row, "Nombre", $"Jugador {i + 1}  <size=20>{colorName}</size>", 28, skin.navy, AeroWeight.Bold, TextAnchor.MiddleLeft)
+            string name = AeroRoster.DisplayName(i);
+            AeroUI.Label(row, "Nombre", name.Length > 9 ? name : $"{name}  <size=20>{colorName}</size>", 28, skin.navy, AeroWeight.Bold, TextAnchor.MiddleLeft)
                 .rectTransform.At(new Vector2(0f, 1f), new Vector2(68f, -4f), new Vector2(240f, 34f));
             var track = AeroUI.Img(row, "Barra", skin.track, Color.white, skin.track.rect.height / 14f);
             track.rectTransform.At(new Vector2(0f, 0f), new Vector2(68f, 11f), new Vector2(230f, 14f));
@@ -179,7 +182,7 @@ public class GameHUD : MonoBehaviour
             var coins = AeroUI.Label(row, "Monedas", "0", 40, skin.navy, AeroWeight.Bold, TextAnchor.MiddleRight);
             coins.rectTransform.At(new Vector2(1f, 0.5f), new Vector2(-18f, 0f), new Vector2(110f, 50f));
             AeroUI.Effect<Shadow>(coins, new Color(1f, 1f, 1f, 0.8f), new Vector2(0f, -2f));
-            rows.Add(new Row { coins = coins, fill = fill.rectTransform, highlight = hl });
+            rows.Add(new Row { coins = coins, fill = fill.rectTransform, highlight = hl, aero = aero });
         }
     }
 
@@ -195,7 +198,7 @@ public class GameHUD : MonoBehaviour
         {
             var r = rows[i];
             int c = gm.GetCoins(i);
-            if (c != r.shown) { r.pulse = r.shown == int.MinValue ? 0f : 1f; r.shown = c; r.coins.text = c.ToString(); r.coins.fontSize = c >= 100000 ? 26 : c >= 10000 ? 32 : 40; }   // con aros apilados caben números grandes
+            if (c != r.shown) { if (r.shown != int.MinValue && c > r.shown) r.aero.Hop(); r.pulse = r.shown == int.MinValue ? 0f : 1f; r.shown = c; r.coins.text = c.ToString(); r.coins.fontSize = c >= 100000 ? 26 : c >= 10000 ? 32 : 40; }   // con aros apilados caben números grandes
             r.pulse = Mathf.MoveTowards(r.pulse, 0f, dt * 2.5f);
             r.coins.rectTransform.localScale = Vector3.one * (1f + 0.35f * r.pulse * r.pulse);
 
@@ -263,7 +266,7 @@ public class GameHUD : MonoBehaviour
         if (player >= 0)
         {
             string what = phase == TurnPhase.Aiming && turnManager.CurrentRock != null ? "¡Pelota en el aire!" : PhaseName(phase);
-            turnText.text = $"Jugador {player + 1}  ·  {what}";
+            turnText.text = $"{AeroRoster.DisplayName(player)}  ·  {what}";
         }
 
         foreach (var s in steps)
@@ -452,12 +455,32 @@ public class GameHUD : MonoBehaviour
 
     private void OnPlayerWon(int player) => StartCoroutine(ShowVictory(player));
 
+    private AeroPortrait winnerAero;
+
+    private static IEnumerator Cheer(AeroPortrait aero)
+    {
+        while (aero)
+        {
+            aero.Hop();
+            yield return new WaitForSecondsRealtime(0.75f);
+        }
+    }
+
     private IEnumerator ShowVictory(int player)
     {
         yield return new WaitForSecondsRealtime(1.2f);
         if (paused) TogglePause();
         if (summaryPanel) summaryPanel.Hide();
-        victoryTitle.text = $"¡Gana el Jugador {player + 1}!";
+        string winner = AeroRoster.DisplayName(player);
+        victoryTitle.text = winner.StartsWith("Jugador ") ? $"¡Gana el {winner}!" : $"¡Gana {winner}!";
+        victoryTitle.fontSize = victoryTitle.text.Length > 18 ? 64 : 84;
+        // El Aero ganador asoma encima del cartel y salta de alegría
+        if (winnerAero == null)
+        {
+            var holder = AeroUI.Node("Aero ganador", victoryTitle.transform.parent).At(new Vector2(0.5f, 1f), new Vector2(0f, 190f), new Vector2(280f, 280f));
+            winnerAero = AeroPortrait.Bubble(holder, skin, AeroRoster.Get(player), skin.PlayerColor(player), AeroPortrait.Framing.Body, 384);
+            StartCoroutine(Cheer(winnerAero));
+        }
         var grad = victoryTitle.GetComponent<UIGradient>();
         if (grad) grad.SetColors(Color.white, skin.PlayerColor(player));
         victorySubtitle.text = $"Llegó a {GameManager.Instance.GetCoins(player)} monedas";

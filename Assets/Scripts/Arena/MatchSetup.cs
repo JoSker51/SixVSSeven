@@ -50,6 +50,12 @@ public class MatchSetup : MonoBehaviour
             if (catapult.TryGetComponent(out PlayerPaint paint)) paint.Apply(Pick(playerMaterials, i), Pick(markerMaterials, i));
             turnManager.Register(catapult);
 
+            // Su Aero lo acompaña al lado de la catapulta (sin colisiones: la pelota lo atraviesa)
+            var aero = AeroFigure.Create(AeroRoster.Get(i), catapult.transform, $"Aero J{i + 1}");
+            aero.transform.localPosition = new Vector3(-2.2f, 0f, -0.3f);
+            aero.transform.localRotation = Quaternion.Euler(0f, 200f, 0f);   // mira de lado, hacia la cámara de su turno
+            aero.transform.localScale = Vector3.one * 0.55f;
+
             arena.AddKeepOut(castle.transform.position, bal.castleKeepOut);
             arena.AddKeepOut(catapult.transform.position, bal.catapultKeepOut);
 
@@ -57,11 +63,18 @@ public class MatchSetup : MonoBehaviour
             castleBubble.name = $"Burbuja castillo J{i + 1}";
             bubbleField.AddCastleBubble(castleBubble, castle.transform.position + Vector3.up * bal.castleBubbleHeight, bal.castleBubbleRadius, i, color);
 
-            players.Add(new PlayerState { Id = i, Color = color, Angle = angle, Catapult = catapult, Castle = castle.transform, CastleBubble = castleBubble });
+            players.Add(new PlayerState { Id = i, Color = color, Angle = angle, Catapult = catapult, Castle = castle.transform, CastleBubble = castleBubble, Aero = aero });
         }
 
         BuildSections(n);
         Physics.SyncTransforms();
+    }
+
+    private void Start()
+    {
+        // Los Aeros saltan al empezar su turno y cuando ganan monedas
+        turnManager.TurnStarted += p => Player(p)?.Aero?.Hop();
+        turnManager.ShotResolved += (reward, rec) => { if (reward.Final + reward.Stolen > 0) Player(rec.ThrowerId)?.Aero?.Hop(); };
     }
 
     private void OnDestroy() { if (Instance == this) Instance = null; }

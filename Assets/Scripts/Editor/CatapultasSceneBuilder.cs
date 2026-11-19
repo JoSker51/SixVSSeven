@@ -352,6 +352,8 @@ public static partial class CatapultasSceneBuilder
 
         // Título
         var title = AeroUI.Node("Titulo", root).At(new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(1400f, 300f));
+        var titleGroup = title.gameObject.AddComponent<CanvasGroup>();   // se esconde mientras se personalizan los Aeros
+        titleGroup.blocksRaycasts = false;
         Set(title.gameObject.AddComponent<UIFloat>(), ("amplitude", new Vector2(0f, 7f)), ("speed", 0.25f));
         AeroUI.Img(title, "Resplandor", skin.glow, new Color(1f, 1f, 1f, 0.75f)).rectTransform
             .At(new Vector2(0.5f, 0.5f), new Vector2(0f, 10f), new Vector2(1300f, 420f));
@@ -415,6 +417,14 @@ public static partial class CatapultasSceneBuilder
         var back = AeroUI.Button(opt, "Volver", "Volver", skin.buttonBlue, new Vector2(320f, 90f), Color.white, 40);
         ((RectTransform)back.transform).At(new Vector2(0.5f, 0f), new Vector2(0f, 36f), new Vector2(320f, 90f));
 
+        // Personaliza tu Aero: lo arma AeroCustomizer al abrirse
+        var aeros = AeroUI.Node("PanelAeros", root).Stretch();
+        aeros.gameObject.AddComponent<CanvasGroup>().alpha = 0f;
+        var aerosPanel = aeros.gameObject.AddComponent<UIFadePanel>();
+        Set(aerosPanel, ("startVisible", false));
+        var customizer = aeros.gameObject.AddComponent<AeroCustomizer>();
+        Set(customizer, ("skin", skin), ("panel", aerosPanel), ("hideWhileOpen", titleGroup));
+
         // Pie de página
         var version = AeroUI.Label(root, "Version", "Demo · v0.4", 24, Color.white, AeroWeight.Light, TextAnchor.LowerRight);
         version.rectTransform.At(new Vector2(1f, 0f), new Vector2(-30f, 22f), new Vector2(400f, 40f));
@@ -434,7 +444,7 @@ public static partial class CatapultasSceneBuilder
         Set(menu,
             ("skin", skin), ("mainPanel", mainPanel), ("optionsPanel", optPanel), ("newGamePanel", ngPanel), ("fade", fadeGroup),
             ("playButton", play), ("optionsButton", options), ("quitButton", quit), ("backButton", back),
-            ("playerCountButtons", countButtons), ("playerCountPreview", preview), ("startButton", start), ("newGameBackButton", ngBack),
+            ("playerCountButtons", countButtons), ("playerCountPreview", preview), ("startButton", start), ("newGameBackButton", ngBack), ("customizer", customizer),
             ("goalSlider", goal), ("goalValue", goalValue),
             ("volumeSlider", volume), ("musicSlider", music),
             ("volumeValue", volumeValue), ("musicValue", musicValue));

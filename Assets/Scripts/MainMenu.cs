@@ -7,7 +7,8 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 #endif
 
-// Menú principal: Jugar (abre "Nueva partida": 2, 3 o 4 jugadores y la meta de monedas), Opciones (volumen y música) y Salir.
+// Menú principal: Jugar (abre "Nueva partida": 2, 3 o 4 jugadores y la meta de monedas, y después
+// "Personaliza tu Aero" para cada jugador), Opciones (volumen y música) y Salir.
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private string gameScene = "Catapultas";
@@ -32,6 +33,7 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private Text goalValue;
     [SerializeField] private Button startButton;
     [SerializeField] private Button newGameBackButton;
+    [SerializeField] private AeroCustomizer customizer;   // después de ¡Empezar!, cada jugador arma su Aero
 
     [Header("Opciones")]
     [SerializeField] private Slider volumeSlider;
@@ -142,7 +144,14 @@ public class MainMenu : MonoBehaviour
         GameSettings.LastPlayerCount = selectedPlayers;
         GameSettings.WinCoins = selectedGoal;
         GameSettings.Save();
-        StartCoroutine(LoadGame());
+        if (customizer == null) { StartCoroutine(LoadGame()); return; }
+        newGamePanel.Hide();
+        customizer.Open(selectedPlayers, () => StartCoroutine(LoadGame()), () =>
+        {
+            leaving = false;
+            newGamePanel.Show();
+            Select(startButton);
+        });
     }
 
     public void ShowOptions()

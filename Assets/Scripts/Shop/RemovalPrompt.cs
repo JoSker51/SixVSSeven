@@ -29,7 +29,7 @@ public class RemovalPrompt : MonoBehaviour
         int cost = Placement.RemovalCost(target);
         int coins = GameManager.Instance.GetCoins(p);
         title.text = $"¿Retirar {target.Definition.FullName}?";
-        string owner = target.OwnerId == p ? "Lo colocaste tú" : $"Lo colocó el Jugador {target.OwnerId + 1}";
+        string owner = target.OwnerId == p ? "Lo colocaste tú" : $"Lo colocó {AeroRoster.DisplayName(target.OwnerId)}";
         detail.text = $"{owner}.\nCuesta <b>{cost}</b> monedas (tienes {coins}).\nNo vuelve a tu inventario.";
         bool can = Placement.CanAffordRemoval;
         confirm.interactable = can;
